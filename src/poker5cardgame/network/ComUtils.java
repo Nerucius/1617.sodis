@@ -1,4 +1,4 @@
-package poker5cardgame;
+package poker5cardgame.network;
 
 import java.net.*;
 import java.io.*;
