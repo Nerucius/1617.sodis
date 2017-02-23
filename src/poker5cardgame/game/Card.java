@@ -9,6 +9,13 @@ package poker5cardgame.game;
  *
  * @author gdempegu11.alumnes
  */
-public class Card {
+public class Card implements Comparable<Card>{
+    
+    
+    @Override
+    public int compareTo(Card o) {
+        // TODO Define card ordering here
+        return 0;
+    }
     
 }

@@ -5,10 +5,20 @@
  */
 package poker5cardgame.game;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 /**
  *
  * @author gdempegu11.alumnes
  */
 public class Hand {
+    
+    List<Card> cards;
+    
+    public Hand(){
+
+    }
     
 }
