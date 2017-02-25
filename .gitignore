@@ -1,1 +1,7 @@
-/Poker5CardGame/nbproject/private/
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+*.class
