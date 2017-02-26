@@ -5,36 +5,39 @@
  */
 package poker5cardgame.game;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 /**
  *
  * @author gdempegu11.alumnes
  */
 public class Ranker {
-    
-    public enum Rank implements Comparable<Rank>{
-        // TODO Finish rank list
+
+    public enum Rank implements Comparable<Rank> {
         NONE,
         PAIR,
         DOUBLE_PAIR,
-        TRIPLE;
+        TREE_OF_A_KIND,
+        STRAIGHT,
+        FLUSH,
+        FULL_HOUSE,
+        FOUR_OF_A_KIND,
+        STRAIGHT_FLUSH,
+        FIVE_OF_A_KIND;
+        
+        /* 0 for 2, 13 for Ace */
 
-        public int compareTo(Comparable<Rank> r){
-            // TODO follow compareTo conventions
-            return 0;
+        public boolean wins(Rank other) {
+            return (this.compareTo(other) > 0);
+        }
+
+        public boolean loses(Rank otherR) {
+            return otherR.wins(this);
         }
     }
-    
-    
-    public static Rank getRank(Hand hand){
-        // TODO Implement rank calculation for a 5 - card Hand        
-        return Rank.NONE;  
-        
+
+    public static Rank getRank(Hand hand) {
+        // TODO Implement rank calculation for a 5 - card Hand
+        return Rank.NONE;
+
     }
-    
-    
+
 }

@@ -2,10 +2,13 @@ package poker5cardgame.network;
 
 public class Client {
 
-    private Thread mainThread;
-
     public Client() {
-        // TODO Init client
+    }
+    
+    public void connect(String IP, int port){
+    }
+    
+    public void close(){        
     }
 
 }

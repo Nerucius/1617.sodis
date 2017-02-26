@@ -1,24 +1,33 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame;
 
-/**
- *
- * @author gdempegu11.alumnes
- */
+import poker5cardgame.game.Ranker.Rank;
+
 public class Poker5CardGame {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
-        
-        
-        // TODO code application logic here
+        Rank handA = Rank.PAIR;
+        Rank handB = Rank.DOUBLE_PAIR;
+
+        if (handA.wins(handB)) {
+            System.out.println(handA + " Wins " + handB);
+        } else if (handA.loses(handB)) {
+            System.out.println(handB + " Wins " + handA);
+        }
+
+        // Server
+        /*
+        Server server = new Server();
+        server.bind(1337);
+        server.start();
+
+        Client client = new Client();
+        client.connect("127.0.0.1", 1212);
+        Client client2 = new Client();
+        client2.connect("127.0.0.1", 1212);    
+         */
     }
-    
+
 }
