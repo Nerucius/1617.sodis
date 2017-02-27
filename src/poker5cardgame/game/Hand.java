@@ -5,8 +5,6 @@
  */
 package poker5cardgame.game;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,10 +13,23 @@ import java.util.List;
  */
 public class Hand {
     
-    List<Card> cards;
+    // TODO @alex define methods
+    
+    private List<Card> cards;
     
     public Hand(){
-
+    }
+    
+    public void draw5FromDeck(Deck deck){
+        
+    }
+    
+    public void putCard(Card c){
+        // TODO Check max of cards
+    }
+    
+    public void discard(Card... cards){
+        // TODO Check if hand has cards
     }
     
 }

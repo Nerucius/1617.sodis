@@ -35,7 +35,7 @@ public class Ranker {
     }
 
     public static Rank getRank(Hand hand) {
-        // TODO Implement rank calculation for a 5 - card Hand
+        // TODO @sonia Implement rank calculation for a 5 - card Hand
         return Rank.NONE;
 
     }

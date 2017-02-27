@@ -1,14 +1,23 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.game;
 
-/**
- *
- * @author gdempegu11.alumnes
- */
+import java.util.List;
+
 public class Deck {
+
+    // TODO @sonia Create Deck class:
+    private List<Card> cards;
+    
+    
+    public Deck(){
+        // TODO GENERATE DECK
+    }
+    
+    public Card draw(){
+        return null;
+    }
+    
+    public void generate(){
+        // Shuffle here too
+    }
     
 }

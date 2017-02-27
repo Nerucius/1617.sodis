@@ -1,21 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.game;
 
-/**
- *
- * @author gdempegu11.alumnes
- */
 public class Card implements Comparable<Card>{
     
+    // TODO @sonia IMPLEMENT CARD CLASS, with enums or static finals
+    // Cards have codes and values.
+    
+    public static final int ACE = 13;
+    
+    public static final String DIAMONDS = "D";
+    
+    public enum Suit{
+        DIAMONDS("D");
+        
+        private String code;
+        private int value;
+        private Suit(String code){
+            this.code = code;
+        }
+        
+        @Override
+        public String toString(){
+            return "";
+        }
+    }
     
     @Override
     public int compareTo(Card o) {
         // TODO Define card ordering here
-        return 0;
+        String cardid = ACE+DIAMONDS;
+        return 0;       
     }
     
 }
