@@ -20,9 +20,10 @@ public class Poker5CardGame {
         // Server
         /*
         Server server = new Server();
-        server.bind(1337);
+        server.bind(1212);
         server.start();
 
+        
         Client client = new Client();
         client.connect("127.0.0.1", 1212);
         Client client2 = new Client();
