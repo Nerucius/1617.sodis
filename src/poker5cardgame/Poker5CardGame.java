@@ -1,5 +1,6 @@
 package poker5cardgame;
 
+import poker5cardgame.game.Game;
 import poker5cardgame.game.Ranker.Rank;
 
 public class Poker5CardGame {
@@ -16,6 +17,25 @@ public class Poker5CardGame {
         } else if (handA.loses(handB)) {
             System.out.println(handB + " Wins " + handA);
         }
+        
+        
+        Game game = new Game();
+               
+        game.apply(Game.Action.START);
+        game.apply(Game.Action.ANTE_STAKES);
+        game.apply(Game.Action.ANTE_OK);
+        game.apply(Game.Action.DEALER_HAND);
+        game.apply(Game.Action.BET);
+        game.apply(Game.Action.RAISE);
+        game.apply(Game.Action.RAISE);
+        game.apply(Game.Action.START);
+        game.apply(Game.Action.CALL);
+        game.apply(Game.Action.DRAW);
+        game.apply(Game.Action.DRAW_SERVER);
+        game.apply(Game.Action.PASS);
+        game.apply(Game.Action.PASS);
+        game.apply(Game.Action.STAKES);
+        game.apply(Game.Action.QUIT);
 
         // Server
         /*
