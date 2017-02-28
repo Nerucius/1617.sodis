@@ -1,14 +1,10 @@
 package poker5cardgame;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import poker5cardgame.game.Card;
-import poker5cardgame.game.Deck;
-import poker5cardgame.game.Game;
+import poker5cardgame.game.Card.Rank;
+import poker5cardgame.game.Card.Suit;
 import poker5cardgame.game.Hand;
 import poker5cardgame.game.HandRanker;
-import poker5cardgame.game.HandRanker.HandRank;
 
 public class Poker5CardGame {
 
@@ -17,17 +13,16 @@ public class Poker5CardGame {
      */
     public static void main(String[] args) {
         
-        try {
-            Deck deck = new Deck();
-            Hand hand = new Hand();
-            hand.draw5FromDeck(deck);
-            System.out.println("Hand = " + hand);
-            System.out.println("HandRank = " + HandRanker.getHandRank(hand));
+        Hand hand = new Hand();
+        hand.addCard(new Card(Suit.SPADES, Rank.FIVE));
+        hand.addCard(new Card(Suit.CLUBS, Rank.SIX));
+        hand.addCard(new Card(Suit.HEARTS, Rank.ACE));
+        hand.addCard(new Card(Suit.CLUBS, Rank.ACE));
+        hand.addCard(new Card(Suit.DIAMONDS, Rank.ACE));
 
-            
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+        System.out.println("Hand = " + hand);
+        System.out.println("HandRank = " + HandRanker.getHandRank(hand));
+
 
         
         /*HandRank handA = HandRank.ONE_PAIR;
