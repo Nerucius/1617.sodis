@@ -6,6 +6,8 @@ import java.util.List;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Deck;
 import poker5cardgame.game.Game;
+import poker5cardgame.game.Hand;
+import poker5cardgame.game.HandRanker;
 import poker5cardgame.game.HandRanker.HandRank;
 
 public class Poker5CardGame {
@@ -15,29 +17,21 @@ public class Poker5CardGame {
      */
     public static void main(String[] args) {
         
-        try
-        {
-        Deck deck = new Deck();
-        System.out.println("Deck = " + deck + " size: " + deck.getSize());
-        
-        List<Card> hand = new ArrayList<>();
-        for(int i = 0; i < 5; i++)
-            hand.add(deck.draw());
-        
-        System.out.println("Deck = " + deck + " size: " + deck.getSize());
-        System.out.println("Hand = "+ hand);
-        
-        Collections.sort(hand);
-        System.out.println("Hand = "+ hand);
-        }
-        catch(Exception e)
-        {
+        try {
+            Deck deck = new Deck();
+            Hand hand = new Hand();
+            hand.draw5FromDeck(deck);
+            System.out.println("Hand = " + hand);
+            System.out.println("HandRank = " + HandRanker.getHandRank(hand));
+
+            
+        } catch (Exception e) {
             System.err.println(e.getMessage());
         }
 
         
-        /*HandRank handA = HandRank.PAIR;
-        HandRank handB = HandRank.DOUBLE_PAIR;
+        /*HandRank handA = HandRank.ONE_PAIR;
+        HandRank handB = HandRank.TWO_PAIR;
 
         if (handA.wins(handB)) {
             System.out.println(handA + " Wins " + handB);

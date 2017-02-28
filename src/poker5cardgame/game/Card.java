@@ -2,8 +2,6 @@ package poker5cardgame.game;
 
 public class Card implements Comparable<Card> {
 
-    // TODO @sonia IMPLEMENT CARD CLASS, with enums or static finals
-    // Cards have codes and values.
     public enum Suit {
         CLUBS("C"),
         DIAMONDS("D"),
@@ -22,19 +20,19 @@ public class Card implements Comparable<Card> {
     }
 
     public enum Rank {
-        TWO("2", 1),
-        THREE("3", 2),
-        FOUR("4", 3),
-        FIVE("5", 4),
-        SIX("6", 5),
-        SEVEN("7", 6),
-        EIGHT("8", 7),
-        NINE("9", 8),
-        TEN("10", 9),
-        JACK("J", 10),
-        QUEEN("Q", 11),
-        KING("K", 12),
-        ACE("A", 13);
+        TWO("2", 0),
+        THREE("3", 1),
+        FOUR("4", 2),
+        FIVE("5", 3),
+        SIX("6", 4),
+        SEVEN("7", 5),
+        EIGHT("8", 6),
+        NINE("9", 7),
+        TEN("10", 8),
+        JACK("J", 9),
+        QUEEN("Q", 10),
+        KING("K", 11),
+        ACE("A", 12);
 
         private final String code;
         private final int value;
@@ -70,22 +68,22 @@ public class Card implements Comparable<Card> {
     }
 
     public String getCode() {
-        return this.rank.code + this.suit.code;
+        return this.getRank().getCode() + this.getSuit().getCode();
     }
 
     public int getValue() {
-        return this.rank.value;
+        return this.getRank().getValue();
     }
 
     @Override
     public int compareTo(Card other) {
         // TODO ASK: Is this card ordering enough?
-        return - this.rank.compareTo(other.rank);
+        return - this.getRank().compareTo(other.getRank());
     }
 
     @Override
     public String toString() {
-        return rank.code + suit.code;
+        return this.getCode();
     }
 
 }

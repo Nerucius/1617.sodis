@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Deck {
+public final class Deck {
 
     // TODO @sonia Create Deck class:
-    private List<Card> deck;
+    private final List<Card> deck;
 
     public Deck() {
         this.deck = new ArrayList<>();
@@ -23,10 +23,6 @@ public class Deck {
         }
         // shuffle the deck
         Collections.shuffle(deck);
-    }
-    // TODO delete? Only for testing?
-    public int getSize() {
-        return this.deck.size();
     }
 
     // TODO ASK: Should I check if there are more cards like that? Maybe an isEmpty() method? Maybe create a MyExceptions class?
