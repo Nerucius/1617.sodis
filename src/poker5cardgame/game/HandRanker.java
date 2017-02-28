@@ -1,17 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.game;
 
-/**
- *
- * @author gdempegu11.alumnes
- */
-public class Ranker {
+public class HandRanker {
 
-    public enum Rank implements Comparable<Rank> {
+    public enum HandRank implements Comparable<HandRank> {
         NONE,
         PAIR,
         DOUBLE_PAIR,
@@ -25,18 +16,18 @@ public class Ranker {
         
         /* 0 for 2, 13 for Ace */
 
-        public boolean wins(Rank other) {
+        public boolean wins(HandRank other) {
             return (this.compareTo(other) > 0);
         }
 
-        public boolean loses(Rank otherR) {
+        public boolean loses(HandRank otherR) {
             return otherR.wins(this);
         }
     }
 
-    public static Rank getRank(Hand hand) {
+    public static HandRank getHandRank(Hand hand) {
         // TODO @sonia Implement rank calculation for a 5 - card Hand
-        return Rank.NONE;
+        return HandRank.NONE;
 
     }
 
