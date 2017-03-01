@@ -6,7 +6,6 @@ import java.util.List;
 
 public final class Deck {
 
-    // TODO @sonia Create Deck class:
     private final List<Card> deck;
 
     public Deck() {
@@ -25,18 +24,11 @@ public final class Deck {
         Collections.shuffle(deck);
     }
 
-    // TODO ASK: Should I check if there are more cards like that? Maybe an isEmpty() method? Maybe create a MyExceptions class?
-    public Card draw() throws Exception {
-        try {
-            return this.deck.remove(0);
-        } catch (Exception e) {
-            throw new Exception("ERROR: Can not draw a card. The deck is empty.");
-        }
-    }
-
-    @Override
-    public String toString() {
-        return this.deck.toString();
+    public Card draw() {
+        if (deck.size() > 0)
+            return this.deck.remove(deck.size());
+        System.err.println("Deck is empty.");
+        return null;
     }
 
 }

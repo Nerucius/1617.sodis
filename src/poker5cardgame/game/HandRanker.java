@@ -4,7 +4,7 @@ import poker5cardgame.game.Card.Rank;
 
 public class HandRanker {
 
-    public enum HandRank implements Comparable<HandRank> {
+    public enum HandRank {
         HIGH_CARD,
         ONE_PAIR,
         TWO_PAIR,
@@ -15,7 +15,6 @@ public class HandRanker {
         FOUR_OF_A_KIND,
         STRAIGHT_FLUSH;
 
-        // TODO ASK: should we manage a tie case?
         public boolean wins(HandRank other) {                
             return (this.compareTo(other) > 0);
         }

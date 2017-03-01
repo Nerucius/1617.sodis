@@ -13,17 +13,8 @@ public class Poker5CardGame {
      */
     public static void main(String[] args) {
         
-        Hand hand = new Hand();
-        hand.addCard(new Card(Suit.SPADES, Rank.FIVE));
-        hand.addCard(new Card(Suit.CLUBS, Rank.SIX));
-        hand.addCard(new Card(Suit.HEARTS, Rank.ACE));
-        hand.addCard(new Card(Suit.CLUBS, Rank.ACE));
-        hand.addCard(new Card(Suit.DIAMONDS, Rank.ACE));
-
-        System.out.println("Hand = " + hand);
-        System.out.println("HandRank = " + HandRanker.getHandRank(hand));
-
-
+        
+        
         
         /*HandRank handA = HandRank.ONE_PAIR;
         HandRank handB = HandRank.TWO_PAIR;
