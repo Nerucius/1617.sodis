@@ -82,7 +82,7 @@ public class Game {
 
                 // Decide on a dealer and update the flag
                 sMove.dealer = Math.random() > 0.5 ? 1 : 0;
-                isServerTurn = sMove.dealer == 0;
+                isServerTurn = sMove.dealer == 1;
                 
                 // Shuffle the Deck and draw a hand.
                 deck.generate();
