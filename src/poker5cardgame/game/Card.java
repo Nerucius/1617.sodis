@@ -131,4 +131,14 @@ public class Card implements Comparable<Card> {
         return this.getCode();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Card))
+            return false;
+        Card other = (Card)obj;
+        return this.rank == other.rank && this.suit == other.suit;        
+    }
+    
+    
+
 }
