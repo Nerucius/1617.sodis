@@ -1,5 +1,7 @@
 package poker5cardgame.network;
 
+import poker5cardgame.game.Game;
+
 /**
  * Network definition class. Packet utilities and definitions.
  */
@@ -9,7 +11,7 @@ public class Network {
      * Possible network packets that can be received by either the server
      * or the client.
      */
-    public enum Packet {
+    public enum Command {
         /** Sent by Client: To start a Game */
         START("STRT"),
         ANTE("ANTE"),
@@ -28,13 +30,13 @@ public class Network {
         FOLD("FOLD"),
         DRAW("DRAW"),
         DRAW_SERVER("DRWS"),
-        SHOWDOWN("SHOW");
+        SHOWDOWN("SHOW"),
+        ERROR("ERRO");
+        
 
-        private String code;
-        /** Argument list for the packet */
-        public String[] args = null;
+        public String code;
 
-        private Packet(String code) {
+        private Command(String code) {
             this.code = code;
         }
         
@@ -42,12 +44,23 @@ public class Network {
             return command.equalsIgnoreCase(this.code);
         }
         
-        static public Packet identifyPacket(String str){
-            for (Packet p : Packet.values())
-                if (p.isPacket(str))
+        static public Command identifyPacket(String code){
+            for (Command p : Command.values())
+                if (p.isPacket(code))
                     return p;
             
             throw new IllegalArgumentException("Unidentified Packet");
+        }
+        
+    }
+    
+    public static final class Packet{
+        public Command command;
+        public String[] args;
+        
+        public Packet(Command com, String[] args){
+            this.command = com;
+            this.args = args;
         }
         
     }

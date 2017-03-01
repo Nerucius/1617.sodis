@@ -3,6 +3,8 @@ package poker5cardgame;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Card.Rank;
 import poker5cardgame.game.Card.Suit;
+import poker5cardgame.game.KeyboardSource;
+import poker5cardgame.game.Game;
 import poker5cardgame.game.Hand;
 import poker5cardgame.game.HandRanker;
 
@@ -11,9 +13,14 @@ public class Poker5CardGame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         
+        Game game = new Game(new KeyboardSource());
         
+        while(game.getState() != Game.State.QUIT){
+            game.update();
+            Thread.sleep(200);
+        }
         
         
         /*HandRank handA = HandRank.ONE_PAIR;

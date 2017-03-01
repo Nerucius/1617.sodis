@@ -10,10 +10,12 @@ public final class Deck {
 
     public Deck() {
         this.deck = new ArrayList<>();
-        this.generate();
+        // this.generate();
     }
 
     public void generate() {
+        deck.clear();
+        
         // generate the deck
         for (Card.Suit suit : Card.Suit.values()) {
             for (Card.Rank rank : Card.Rank.values()) {
@@ -26,7 +28,7 @@ public final class Deck {
 
     public Card draw() {
         if (deck.size() > 0)
-            return this.deck.remove(deck.size());
+            return this.deck.remove(deck.size()-1);
         System.err.println("Deck is empty.");
         return null;
     }

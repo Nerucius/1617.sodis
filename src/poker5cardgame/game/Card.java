@@ -58,15 +58,13 @@ public class Card implements Comparable<Card> {
         public int getValue() {
             return value;
         }
-        
-        public static List<Integer> getSuccessiveValues()
-        {
+
+        public static List<Integer> getSuccessiveValues() {
             List<Integer> result = new ArrayList<>();
             int numOfPossibilities = Rank.values().length + 1 - 5; // 9
-            for(int i = 0; i < numOfPossibilities; i++)
-            {
+            for (int i = 0; i < numOfPossibilities; i++) {
                 int product = 1;
-                for(int j = i; j < i + 5; j++)
+                for (int j = i; j < i + 5; j++)
                     product *= Rank.values()[j].getValue();
                 result.add(product);
             }
@@ -92,6 +90,26 @@ public class Card implements Comparable<Card> {
 
     public String getCode() {
         return this.getRank().getCode() + this.getSuit().getCode();
+    }
+
+    /** Convenience method for converting card codes to real cards
+     * @return Card object
+     */
+    public static Card fromCode(String code) {
+        Card c;
+
+        // Special case for rank 10, thanks Eloi
+        if (code.charAt(0) == 1) {
+            String suit = "" + code.charAt(2);
+            c = new Card(Suit.valueOf(suit), Rank.TEN);
+
+        } else {
+            Rank rank = Rank.valueOf("" + code.charAt(0));
+            Suit suit = Suit.valueOf("" + code.charAt(1));
+            c = new Card(suit, rank);
+        }
+
+        return c;
     }
 
     public int getValue() {

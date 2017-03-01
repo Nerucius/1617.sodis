@@ -12,7 +12,7 @@ public class Connection {
         this.socket = sock;
     }
 
-    public void sendTCP(Network.Packet packet) {
+    public void sendTCP(Network.Command packet) {
         // TODO Send packet over the net
     }
 
