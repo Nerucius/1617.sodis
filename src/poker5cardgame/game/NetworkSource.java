@@ -23,7 +23,7 @@ public class NetworkSource implements Source {
     public NetworkSource(Socket socket) {
         try {
             network = new ComUtils(socket);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             System.err.println("NETWORK SORUCE: Could not Open Socket");
             ex.printStackTrace();
         }

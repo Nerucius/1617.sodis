@@ -2,6 +2,8 @@ package poker5cardgame.network;
 
 import java.net.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import poker5cardgame.game.Game;
 import poker5cardgame.game.Source;
 import poker5cardgame.network.Network.Command;
@@ -15,9 +17,14 @@ public class ComUtils{
     private DataInputStream dis;
     private DataOutputStream dos;
 
-    public ComUtils(Socket socket) throws IOException {
-        dis = new DataInputStream(socket.getInputStream());
-        dos = new DataOutputStream(socket.getOutputStream());
+    public ComUtils(Socket socket) {
+        
+        try {
+            dis = new DataInputStream(socket.getInputStream());
+            dos = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException ex) {
+            System.err.println("Failed to Open Socket");
+        }
     }
     
     /**

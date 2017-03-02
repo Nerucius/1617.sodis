@@ -8,6 +8,8 @@ import poker5cardgame.game.Game;
 import poker5cardgame.game.Hand;
 import poker5cardgame.game.HandRanker;
 import poker5cardgame.game.HandRanker.HandRank;
+import poker5cardgame.network.Client;
+import poker5cardgame.network.Server;
 
 public class Poker5CardGame {
 
@@ -15,18 +17,7 @@ public class Poker5CardGame {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InterruptedException {
-        
-        
-        Hand handA = new Hand();
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.TWO));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.THREE));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.FOUR));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.FIVE));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.SIX));
-        
-        HandRank r = HandRanker.getHandRank(handA);
-        
-        System.out.println(r);
+    
         
         /*Game game = new Game(new KeyboardSource());
         
@@ -65,7 +56,7 @@ public class Poker5CardGame {
         game.apply(Game.Action.QUIT);*/
 
         // Server
-        /*
+        
         Server server = new Server();
         server.bind(1212);
         server.start();
@@ -73,9 +64,9 @@ public class Poker5CardGame {
         
         Client client = new Client();
         client.connect("127.0.0.1", 1212);
-        Client client2 = new Client();
-        client2.connect("127.0.0.1", 1212);    
-         */
+        client.writeMsg("Hello World");
+        client.writeMsg("maths r cool");
+         
     }
 
 }
