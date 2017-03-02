@@ -7,6 +7,7 @@ import poker5cardgame.game.KeyboardSource;
 import poker5cardgame.game.Game;
 import poker5cardgame.game.Hand;
 import poker5cardgame.game.HandRanker;
+import poker5cardgame.game.HandRanker.HandRank;
 
 public class Poker5CardGame {
 
@@ -15,12 +16,24 @@ public class Poker5CardGame {
      */
     public static void main(String[] args) throws InterruptedException {
         
-        Game game = new Game(new KeyboardSource());
+        
+        Hand handA = new Hand();
+        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.TWO));
+        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.THREE));
+        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.FOUR));
+        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.FIVE));
+        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.SIX));
+        
+        HandRank r = HandRanker.getHandRank(handA);
+        
+        System.out.println(r);
+        
+        /*Game game = new Game(new KeyboardSource());
         
         while(game.getState() != Game.State.QUIT){
             game.update();
             Thread.sleep(200);
-        }
+        }*/
         
         
         /*HandRank handA = HandRank.ONE_PAIR;

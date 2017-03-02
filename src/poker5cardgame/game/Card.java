@@ -27,6 +27,7 @@ public class Card implements Comparable<Card> {
             return value;
         }
     }
+    
 
     public enum Rank {
         TWO("2", 5),
@@ -60,6 +61,7 @@ public class Card implements Comparable<Card> {
         }
 
         public static List<Integer> getSuccessiveValues() {
+            // TODO @sonia extreure llista estatica a fora i afegir as davant
             List<Integer> result = new ArrayList<>();
             int numOfPossibilities = Rank.values().length + 1 - 5; // 9
             for (int i = 0; i < numOfPossibilities; i++) {

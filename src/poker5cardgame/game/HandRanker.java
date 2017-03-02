@@ -16,7 +16,13 @@ public class HandRanker {
         STRAIGHT_FLUSH;
 
         public boolean wins(HandRank other) {                
-            return (this.compareTo(other) > 0);
+            if(this.compareTo(other) > 0)
+                return true;
+            // Mirar empat -> carta alta de la jugada
+            
+            
+            return false;
+                
         }
 
         public boolean loses(HandRank otherR) {
@@ -75,6 +81,7 @@ public class HandRanker {
     }
 
     private static boolean areSameSuit(Hand hand) {
+        // suitValue = p^5 <=> areSameSuit <=> fifth_root(suitValue) e N
         return Math.pow(hand.getSuitValue(), 1. / 5) % 1 == 0;
     }
 }

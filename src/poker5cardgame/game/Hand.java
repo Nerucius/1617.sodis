@@ -50,13 +50,9 @@ public class Hand {
     public List<Rank> getValues() {
         List<Rank> values = new ArrayList<>();
         
-        // TODO message @sonia: que trons es aixo de stream i for each?
-        //for(Card c  : hand )
-        //    values.add(c.getRank());
-        
-        this.getCards().stream().forEach((card) -> {
-            values.add(card.getRank());
-        });
+        for(Card c  : hand )
+            values.add(c.getRank());
+       
         return values;
     }
     
@@ -65,10 +61,11 @@ public class Hand {
         return this.hand.get(i);
     }
     
-    // TODO message for @alex: He implementat aquest metode pel HandRanker
-    // TODO message for @sonia: No entenc que esta pasant aqui, magia negra pel ranker?
+    // message for @alex: He implementat aquest metode pel HandRanker
+    // message for @sonia: No entenc que esta pasant aqui, magia negra pel ranker?
     // no m'atreveixo a tocar res. a classe ho mirem
-    // TODO think how to do it better ?
+    // think how to do it better ?
+    // TODO ponderator = 0? (count)
     public int getValue() {
         int product = 1;
         List<Rank> values = this.getValues();
@@ -91,8 +88,8 @@ public class Hand {
     
     public int getSuitValue() {
         int product = 1;
-        // Estic flipant amb aixo
-        product = hand.stream().map((card) -> card.getSuitValue()).reduce(product, (accumulator, _item) -> accumulator * _item);
+        for(Card card : hand)
+            product *= card.getSuitValue();
         return product;
     }
     
