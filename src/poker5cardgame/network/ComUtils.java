@@ -180,8 +180,9 @@ public class ComUtils{
         int bytesread = 0;
         do {
             bytesread = dis.read(bStr, len, numBytes - len);
-            if (bytesread == -1)
+            if (bytesread == -1) {
                 throw new IOException("Broken Pipe");
+            }
             len += bytesread;
         } while (len < numBytes);
         return bStr;
