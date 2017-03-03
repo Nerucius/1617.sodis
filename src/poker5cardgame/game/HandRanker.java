@@ -3,7 +3,7 @@ package poker5cardgame.game;
 import poker5cardgame.game.Card.Rank;
 
 public class HandRanker {
-
+    
     public enum HandRank {
         HIGH_CARD,
         ONE_PAIR,
@@ -16,22 +16,39 @@ public class HandRanker {
         STRAIGHT_FLUSH;
 
         public boolean wins(HandRank other) {                
-            if(this.compareTo(other) > 0)
-                return true;
-            // Mirar empat -> carta alta de la jugada
-            
-            
-            return false;
-                
+            return this.compareTo(other) > 0;
         }
 
-        public boolean loses(HandRank otherR) {
-            return otherR.wins(this);
+        // TODO: do we need this method?
+        public boolean ties(HandRank other) {
+            return this.compareTo(other) == 0;
+        }
+        
+        public boolean loses(HandRank other) {
+            return this.compareTo(other) < 0;
         }
     }
-
+    
+    // TODO order winner functions, delete unnecessary things and put it to the right class: this method should be in Hand class
+    public static boolean winner(Hand handWinner, Hand handLoser)
+    {
+        HandRank handRankWinner = getHandRank(handWinner);
+        HandRank handRankLoser = getHandRank(handLoser);
+        
+        if(handRankWinner.wins(handRankLoser))
+            return true;
+        if(handRankWinner.loses(handRankLoser))
+            return false;
+        else
+        {
+            // Both hand have the same HandRank. We need to compare the cards.
+            
+        }        
+        return false;
+    }
+    
     public static HandRank getHandRank(Hand hand) {
-        int x = hand.getValue();
+        int x = hand.getHandValue();
         boolean areSuccessive = areSuccessive(x);
         boolean areSameSuit = areSameSuit(hand);
 

@@ -1,8 +1,15 @@
 package poker5cardgame;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Card.Rank;
 import poker5cardgame.game.Card.Suit;
+import poker5cardgame.game.Deck;
 import poker5cardgame.game.KeyboardSource;
 import poker5cardgame.game.Game;
 import poker5cardgame.game.Hand;
@@ -17,8 +24,7 @@ public class Poker5CardGame {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws InterruptedException {
-    
-        
+
         /*Game game = new Game(new KeyboardSource());
         
         while(game.getState() != Game.State.QUIT){
@@ -54,10 +60,52 @@ public class Poker5CardGame {
         game.apply(Game.Action.PASS);
         game.apply(Game.Action.STAKES);
         game.apply(Game.Action.QUIT);*/
+        
+        /*Hand sHand = new Hand();
+        Hand cHand = new Hand();
+        
+        sHand.putCard(new Card(Suit.CLUBS, Rank.ACE));
+        sHand.putCard(new Card(Suit.CLUBS, Rank.TWO));
+        sHand.putCard(new Card(Suit.CLUBS, Rank.THREE));
+        sHand.putCard(new Card(Suit.CLUBS, Rank.FOUR));
+        sHand.putCard(new Card(Suit.CLUBS, Rank.FIVE));
+        sHand.computeHandValue();
+        
+        cHand.putCard(new Card(Suit.CLUBS, Rank.ACE));
+        cHand.putCard(new Card(Suit.CLUBS, Rank.KING));
+        cHand.putCard(new Card(Suit.CLUBS, Rank.QUEEN));
+        cHand.putCard(new Card(Suit.CLUBS, Rank.JACK));
+        cHand.putCard(new Card(Suit.CLUBS, Rank.TEN));
+        cHand.computeHandValue();
 
+        HandRank sHandRank = HandRanker.getHandRank(sHand);
+        HandRank cHandRank = HandRanker.getHandRank(cHand);
+
+        boolean sWins = HandRanker.winner(sHand, cHand);
+        boolean cWins = HandRanker.winner(cHand, sHand);
+
+        System.out.println("sHand: " + sHand + "\n    ----> " + sHandRank + "\n    ----> WINS: " + sWins);
+        System.out.println("cHand: " + cHand + "\n    ----> " + cHandRank + "\n    ----> WINS: " + cWins);*/
+        
+        /*Map dict = new HashMap();
+        dict.put(Rank.TWO, 1);
+        dict.put(Rank.THREE, 2);
+        dict.put(Rank.FOUR, 1);
+        dict.put(Rank.ACE, 1);
+        
+        System.out.println("dict: " + dict.toString());
+        System.out.println(dict.containsValue(3));
+        Iterator it = dict.keySet().iterator();
+        while(it.hasNext())
+        {
+            Rank rank = ((Rank) it.next());
+            int v = rank.getValue();
+            System.out.println(rank.toString() + v);
+        }
+        System.out.println();*/
         // Server
         
-        Server server = new Server();
+        /*Server server = new Server();
         server.bind(1212);
         server.start();
 
@@ -65,7 +113,7 @@ public class Poker5CardGame {
         Client client = new Client();
         client.connect("127.0.0.1", 1212);
         client.writeMsg("Hello World");
-        client.writeMsg("maths r cool");
+        client.writeMsg("maths r cool");*/
          
     }
 

@@ -27,22 +27,21 @@ public class Card implements Comparable<Card> {
             return value;
         }
     }
-    
 
     public enum Rank {
-        TWO("2", 5),
-        THREE("3", 7),
-        FOUR("4", 11),
-        FIVE("5", 13),
-        SIX("6", 17),
-        SEVEN("7", 19),
-        EIGHT("8", 23),
-        NINE("9", 29),
-        TEN("10", 31),
-        JACK("J", 37),
-        QUEEN("Q", 41),
-        KING("K", 43),
-        ACE("A", 47);
+        TWO("2", 11),
+        THREE("3", 13),
+        FOUR("4", 17),
+        FIVE("5", 19),
+        SIX("6", 23),
+        SEVEN("7", 29),
+        EIGHT("8", 31),
+        NINE("9", 37),
+        TEN("10", 41),
+        JACK("J", 43),
+        QUEEN("Q", 47),
+        KING("K", 53),
+        ACE("A", 59);
 
         private final String code;
         private final int value;
@@ -67,9 +66,18 @@ public class Card implements Comparable<Card> {
             for (int i = 0; i < numOfPossibilities; i++) {
                 int product = 1;
                 for (int j = i; j < i + 5; j++)
+                {
                     product *= Rank.values()[j].getValue();
+                }
                 result.add(product);
+            }      
+            // Special case: A 1 2 3 4
+            int product = Rank.ACE.getValue();
+            for(int i = 0; i < 4; i++)
+            {
+                product *= Rank.values()[i].getValue();
             }
+            result.add(product);
             return result;
         }
     }

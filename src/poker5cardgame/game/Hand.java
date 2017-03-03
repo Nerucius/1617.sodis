@@ -19,15 +19,24 @@ import poker5cardgame.game.HandRanker.HandRank;
 public class Hand {
 
     private final List<Card> hand;
+    private int handValue;
 
+    // The empty constructor is only to test (TODO delete somewhen)
     public Hand() {
         this.hand = new ArrayList();
+    }
+
+    public Hand(Deck deck) {
+        this.hand = new ArrayList();
+        this.draw5FromDeck(deck);
+        this.computeHandValue();
     }
     
     /**
      * @param h Other Hand to compare to
      * @return 1 if Win, 0 if tie, -1 if loses.
      */
+    // TODO change because HandRank comparasisons have been changed
     public int compareTo(Hand h){
         HandRank ra = HandRanker.getHandRank(this);
         HandRank rb = HandRanker.getHandRank(h);
@@ -50,7 +59,7 @@ public class Hand {
     public List<Rank> getValues() {
         List<Rank> values = new ArrayList<>();
         
-        for(Card c  : hand )
+        for(Card c  : hand)
             values.add(c.getRank());
        
         return values;
@@ -61,12 +70,17 @@ public class Hand {
         return this.hand.get(i);
     }
     
+    public int getHandValue() {
+        return this.handValue;
+    }
+    
     // message for @alex: He implementat aquest metode pel HandRanker
     // message for @sonia: No entenc que esta pasant aqui, magia negra pel ranker?
     // no m'atreveixo a tocar res. a classe ho mirem
     // think how to do it better ?
     // TODO ponderator = 0? (count)
-    public int getValue() {
+    public void computeHandValue()
+    {
         int product = 1;
         List<Rank> values = this.getValues();
 
@@ -83,7 +97,7 @@ public class Hand {
             if (ponderator != 0)
                 product *= ponderator * card.getValue();
         }
-        return product;
+        this.handValue = product;
     }
     
     public int getSuitValue() {
