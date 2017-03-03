@@ -1,109 +1,114 @@
 package poker5cardgame.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Card implements Comparable<Card> {
 
+    // <editor-fold defaultstate="collapsed" desc="Data definition">
+    // Prime numbers to give weigth to each card
+    private static final int PRIME_01 = 11; // 2
+    private static final int PRIME_02 = 13; // 3
+    private static final int PRIME_03 = 17; // 4
+    private static final int PRIME_04 = 19; // 5
+    private static final int PRIME_05 = 23; // 6
+    private static final int PRIME_06 = 29; // 7
+    private static final int PRIME_07 = 31; // 8
+    private static final int PRIME_08 = 37; // 9
+    private static final int PRIME_09 = 41; // 10
+    private static final int PRIME_10 = 43; // J
+    private static final int PRIME_11 = 47; // Q
+    private static final int PRIME_12 = 53; // K
+    private static final int PRIME_13 = 59; // A
+
+    // Possible hand ranks when the hand is a STRAIGHT
+    public final int[] SUCCESSIVE_CARDS
+            = {
+                PRIME_13 * PRIME_01 * PRIME_02 * PRIME_03 * PRIME_04, // A 2 3 4 5 (Special case)
+                PRIME_01 * PRIME_02 * PRIME_03 * PRIME_04 * PRIME_05, // 2 3 4 5 6
+                PRIME_02 * PRIME_03 * PRIME_04 * PRIME_05 * PRIME_06, // 3 4 5 6 7
+                PRIME_03 * PRIME_04 * PRIME_05 * PRIME_06 * PRIME_07, // 4 5 6 7 8
+                PRIME_04 * PRIME_05 * PRIME_06 * PRIME_07 * PRIME_08, // 5 6 7 8 9
+                PRIME_05 * PRIME_06 * PRIME_07 * PRIME_08 * PRIME_09, // 6 7 8 9 10
+                PRIME_06 * PRIME_07 * PRIME_08 * PRIME_09 * PRIME_10, // 7 8 9 10 J
+                PRIME_07 * PRIME_08 * PRIME_09 * PRIME_10 * PRIME_11, // 8 9 10 J Q
+                PRIME_08 * PRIME_09 * PRIME_10 * PRIME_11 * PRIME_12, // 9 10 J Q K
+                PRIME_09 * PRIME_10 * PRIME_11 * PRIME_12 * PRIME_13 // 10 J Q K A
+            };
+
+    // Possible suits for a card
     public enum Suit {
-        CLUBS("C", 2),
-        DIAMONDS("D", 3),
-        HEARTS("H", 7),
-        SPADES("S", 11);
+        CLUBS("C", PRIME_01),
+        DIAMONDS("D", PRIME_02),
+        HEARTS("H", PRIME_03),
+        SPADES("S", PRIME_04);
 
-        private final String code;
-        private final int value;
+        private String code;    // suit code to write and read the card
+        private int id;         // id to find easily a FLUSH case
 
-        Suit(String code, int value) {
+        Suit(String code, int id) {
             this.code = code;
-            this.value = value;
-        }
-
-        public String getCode() {
-            return code;
-        }
-
-        public int getValue() {
-            return value;
+            this.id = id;
         }
     }
 
+    // Possible ranks for a card
     public enum Rank {
-        TWO("2", 11),
-        THREE("3", 13),
-        FOUR("4", 17),
-        FIVE("5", 19),
-        SIX("6", 23),
-        SEVEN("7", 29),
-        EIGHT("8", 31),
-        NINE("9", 37),
-        TEN("10", 41),
-        JACK("J", 43),
-        QUEEN("Q", 47),
-        KING("K", 53),
-        ACE("A", 59);
+        TWO("2", PRIME_01),
+        THREE("3", PRIME_02),
+        FOUR("4", PRIME_03),
+        FIVE("5", PRIME_04),
+        SIX("6", PRIME_05),
+        SEVEN("7", PRIME_06),
+        EIGHT("8", PRIME_07),
+        NINE("9", PRIME_08),
+        TEN("10", PRIME_09),
+        JACK("J", PRIME_10),
+        QUEEN("Q", PRIME_11),
+        KING("K", PRIME_12),
+        ACE("A", PRIME_13);
 
-        private final String code;
-        private final int value;
+        private String code;    // rank code to write and read the card
+        private int weight;     // weight to manage the hand ranker
 
         Rank(String code, int value) {
             this.code = code;
-            this.value = value;
-        }
-
-        public String getCode() {
-            return code;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public static List<Integer> getSuccessiveValues() {
-            // TODO @sonia extreure llista estatica a fora i afegir as davant
-            List<Integer> result = new ArrayList<>();
-            int numOfPossibilities = Rank.values().length + 1 - 5; // 9
-            for (int i = 0; i < numOfPossibilities; i++) {
-                int product = 1;
-                for (int j = i; j < i + 5; j++)
-                {
-                    product *= Rank.values()[j].getValue();
-                }
-                result.add(product);
-            }      
-            // Special case: A 1 2 3 4
-            int product = Rank.ACE.getValue();
-            for(int i = 0; i < 4; i++)
-            {
-                product *= Rank.values()[i].getValue();
-            }
-            result.add(product);
-            return result;
+            this.weight = value;
         }
     }
+    // </editor-fold>
 
-    private final Suit suit;
-    private final Rank rank;
+    // <editor-fold defaultstate="collapsed" desc="Attributes">
+    private Suit suit;
+    private Rank rank;
+    //</editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Constructors">
     public Card(Suit suit, Rank rank) {
         this.suit = suit;
         this.rank = rank;
     }
+    //</editor-fold>
 
-    public Suit getSuit() {
-        return this.suit;
+    // <editor-fold defaultstate="collapsed" desc="Public Methods">
+    public int getRankWeight() {
+        return this.rank.weight;
     }
 
-    public Rank getRank() {
-        return this.rank;
+    public int getSuitId() {
+        return this.suit.id;
     }
-
+    
+    /**
+     * Get the card code from a real card.
+     * 
+     * @return String
+     */
     public String getCode() {
-        return this.getRank().getCode() + this.getSuit().getCode();
+        return this.rank.code + this.suit.code;
     }
 
-    /** Convenience method for converting card codes to real cards
-     * @return Card object
+    /**
+     * Get the real card from a card code.
+     *
+     * @return Card
      */
     public static Card fromCode(String code) {
         Card c;
@@ -112,28 +117,19 @@ public class Card implements Comparable<Card> {
         if (code.charAt(0) == 1) {
             String suit = "" + code.charAt(2);
             c = new Card(Suit.valueOf(suit), Rank.TEN);
-
+            
         } else {
             Rank rank = Rank.valueOf("" + code.charAt(0));
             Suit suit = Suit.valueOf("" + code.charAt(1));
             c = new Card(suit, rank);
         }
-
         return c;
-    }
-
-    public int getValue() {
-        return this.getRank().getValue();
-    }
-
-    public int getSuitValue() {
-        return this.getSuit().getValue();
     }
 
     @Override
     public int compareTo(Card other) {
         // TODO ASK: Is this card ordering enough?
-        return -this.getRank().compareTo(other.getRank());
+        return -this.rank.compareTo(other.rank);
     }
 
     @Override
@@ -143,12 +139,11 @@ public class Card implements Comparable<Card> {
 
     @Override
     public boolean equals(Object obj) {
-        if(!(obj instanceof Card))
+        if (!(obj instanceof Card)) {
             return false;
-        Card other = (Card)obj;
-        return this.rank == other.rank && this.suit == other.suit;        
+        }
+        Card other = (Card) obj;
+        return this.rank == other.rank && this.suit == other.suit;
     }
-    
-    
-
+    // </editor-fold>
 }
