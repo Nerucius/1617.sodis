@@ -1,8 +1,12 @@
 package poker5cardgame.game;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Card implements Comparable<Card> {
 
-    // <editor-fold defaultstate="collapsed" desc="Data definition">
+    // <editor-fold defaultstate="collapsed" desc="Data Definition">
     // Prime numbers to give weigth to each card
     private static final int PRIME_01 = 11; // 2
     private static final int PRIME_02 = 13; // 3
@@ -19,7 +23,7 @@ public class Card implements Comparable<Card> {
     private static final int PRIME_13 = 59; // A
 
     // Possible hand ranks when the hand is a STRAIGHT
-    public final int[] SUCCESSIVE_CARDS
+    private static final Integer[] SUCCESSIVE_CARDS_VALUES
             = {
                 PRIME_13 * PRIME_01 * PRIME_02 * PRIME_03 * PRIME_04, // A 2 3 4 5 (Special case)
                 PRIME_01 * PRIME_02 * PRIME_03 * PRIME_04 * PRIME_05, // 2 3 4 5 6
@@ -32,6 +36,8 @@ public class Card implements Comparable<Card> {
                 PRIME_08 * PRIME_09 * PRIME_10 * PRIME_11 * PRIME_12, // 9 10 J Q K
                 PRIME_09 * PRIME_10 * PRIME_11 * PRIME_12 * PRIME_13 // 10 J Q K A
             };
+    public static final List SUCCESSIVE_CARDS 
+            = new ArrayList<Integer>(Arrays.asList(SUCCESSIVE_CARDS_VALUES));
 
     // Possible suits for a card
     public enum Suit {
@@ -72,20 +78,30 @@ public class Card implements Comparable<Card> {
             this.code = code;
             this.weight = value;
         }
+
+        public int getWeight() {
+            return weight;
+        }
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Attributes">
     private Suit suit;
     private Rank rank;
-    //</editor-fold>
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructors">
     public Card(Suit suit, Rank rank) {
         this.suit = suit;
         this.rank = rank;
     }
-    //</editor-fold>
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Getters">
+    public Rank getRank() {
+        return this.rank;
+    }
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Public Methods">
     public int getRankWeight() {
@@ -95,10 +111,10 @@ public class Card implements Comparable<Card> {
     public int getSuitId() {
         return this.suit.id;
     }
-    
+
     /**
      * Get the card code from a real card.
-     * 
+     *
      * @return String
      */
     public String getCode() {
@@ -117,7 +133,7 @@ public class Card implements Comparable<Card> {
         if (code.charAt(0) == 1) {
             String suit = "" + code.charAt(2);
             c = new Card(Suit.valueOf(suit), Rank.TEN);
-            
+
         } else {
             Rank rank = Rank.valueOf("" + code.charAt(0));
             Suit suit = Suit.valueOf("" + code.charAt(1));
@@ -128,8 +144,7 @@ public class Card implements Comparable<Card> {
 
     @Override
     public int compareTo(Card other) {
-        // TODO ASK: Is this card ordering enough?
-        return -this.rank.compareTo(other.rank);
+        return this.rank.compareTo(other.rank);
     }
 
     @Override

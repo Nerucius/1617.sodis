@@ -86,8 +86,8 @@ public class Game {
                 
                 // Shuffle the Deck and draw a hand.
                 deck.generate();
-                cHand.draw5FromDeck(deck);
-                sHand.draw5FromDeck(deck);
+                cHand.generate(deck);
+                sHand.generate(deck);
                 
                 sMove.cards = new Card[5];
                 cHand.getCards().toArray(sMove.cards);

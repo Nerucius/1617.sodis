@@ -1,9 +1,12 @@
 package poker5cardgame.game;
 
+import java.util.HashMap;
+import java.util.Map;
 import poker5cardgame.game.Card.Rank;
 
 public class HandRanker {
-    
+
+    // <editor-fold defaultstate="collapsed" desc="Data Definition">
     public enum HandRank {
         HIGH_CARD,
         ONE_PAIR,
@@ -15,90 +18,102 @@ public class HandRanker {
         FOUR_OF_A_KIND,
         STRAIGHT_FLUSH;
 
-        public boolean wins(HandRank other) {                
+        public boolean wins(HandRank other) {
             return this.compareTo(other) > 0;
         }
 
-        // TODO: do we need this method?
         public boolean ties(HandRank other) {
             return this.compareTo(other) == 0;
         }
-        
+
         public boolean loses(HandRank other) {
             return this.compareTo(other) < 0;
         }
     }
-    
-    // TODO order winner functions, delete unnecessary things and put it to the right class: this method should be in Hand class
-    public static boolean winner(Hand handWinner, Hand handLoser)
-    {
-        HandRank handRankWinner = getHandRank(handWinner);
-        HandRank handRankLoser = getHandRank(handLoser);
-        
-        if(handRankWinner.wins(handRankLoser))
-            return true;
-        if(handRankWinner.loses(handRankLoser))
-            return false;
-        else
-        {
-            // Both hand have the same HandRank. We need to compare the cards.
-            
-        }        
-        return false;
-    }
-    
+    // </editor-fold>
+
     public static HandRank getHandRank(Hand hand) {
-        int x = hand.getHandValue();
-        boolean areSuccessive = areSuccessive(x);
-        boolean areSameSuit = areSameSuit(hand);
+        int hSuitId = hand.getSuitId();
+        int hWeight = hand.getWeight();
+        Map hDict = hand.getDict();
 
-        // Check if the cards are successive => STRAIGHT_FLUSH, STRAIGHT
-        if (areSuccessive) {
-            // Check if the cards are of the same suit => STRAIGHT_FLUSH
-            if (areSameSuit) {
-                return HandRank.STRAIGHT_FLUSH;
-            }
-            return HandRank.STRAIGHT;
-        }
-        // Case 4 | x => FOUR_OF_A_KIND, TWO_PAIR
-        if (x % 4 == 0) {
-            hand.sort();
-            if (x / (4 * hand.getCard(0).getValue() * hand.getCard(4).getValue()) == 1) {
-                return HandRank.FOUR_OF_A_KIND;
-            }
-            // Check if the cards are of the same suit (ifnot) => TWO_PAIR
-            if (!areSameSuit) {
-                return HandRank.TWO_PAIR;
-            }
-        }
-        // Case 3 | x => FULL_HOUSE, THREE_OF_A_KIND
-        if (x % 3 == 0) {
-            // Check if 2 | x => FULL_HOUSE
-            if (x % 2 == 0) {
+        boolean straight = areSuccessive(hWeight);
+        boolean flush = areSameSuit(hSuitId);
+        int hDictProduct = computeDictProduct(hDict);
+
+        switch (hDictProduct) {
+            case 6:
                 return HandRank.FULL_HOUSE;
-            }
-            // Check if the cards are of the same suit (ifnot) => THREE_OF_A_KIND
-            if (!areSameSuit) {
-                return HandRank.THREE_OF_A_KIND;
-            }
+
+            case 4:
+                if (hDict.containsValue(4)) {
+                    return HandRank.FOUR_OF_A_KIND;
+                }
+                if (!flush) {
+                    return HandRank.TWO_PAIR;
+                }
+                return HandRank.FLUSH;
+
+            case 3:
+                if (!flush) {
+                    return HandRank.THREE_OF_A_KIND;
+                }
+                return HandRank.FLUSH;
+
+            case 2:
+                if (!flush) {
+                    return HandRank.ONE_PAIR;
+                }
+                return HandRank.FLUSH;
+
+            case 1:
+                if (straight) {
+                    if (flush) {
+                        return HandRank.STRAIGHT_FLUSH;
+                    }
+                    return HandRank.STRAIGHT;
+                }
+                if (flush) {
+                    return HandRank.FLUSH;
+                }
+                return HandRank.HIGH_CARD;
+
+            default:
+                return null;
         }
-        // Check if the cards are of the same suit => FLUSH
-        if (areSameSuit) {
-            return HandRank.FLUSH;
-        }
-        // Case 2 | x => ONE_PAIR
-        if (x % 2 == 0) {
-            return HandRank.ONE_PAIR;
-        }
-        return HandRank.HIGH_CARD;
     }
 
-    private static boolean areSuccessive(int x) {
-        return Rank.getSuccessiveValues().contains(x);
+    private static boolean areSuccessive(int hWeight) {
+        return Card.SUCCESSIVE_CARDS.contains(hWeight);
     }
 
-    private static boolean areSameSuit(Hand hand) {
-        // suitValue = p^5 <=> areSameSuit <=> fifth_root(suitValue) e N
-        return Math.pow(hand.getSuitValue(), 1. / 5) % 1 == 0;
+    private static boolean areSameSuit(int hSuitId) {
+        // The hand suit id has been generated by the product of the ids of each 
+        // suit of the hand, so if all five cards are the same suit, the result 
+        // of this product will be a number so that the fifth root is equal to an
+        // integer (the suit ids are integer and prime).
+        return (float) Math.pow(hSuitId, 1. / 5) % 1 == 0;
+    }
+
+    private static int computeDictProduct(Map hDict) {
+        // Multiply the number of occurrences of each card rank
+        int product = 1;
+        for (Object value : hDict.values()) {
+            product *= (int) value;
+        }
+        return product;
+    }
+        
+    // TODO delete
+    private static Map mergeDicts(Map hDict1, Map hDict2) {
+        // mergeDict contains all the keys of hDict1 and hDict2 with the sum number of occurrences
+        Map mergeDict = new HashMap(hDict1);
+        mergeDict.putAll(hDict2);
+        for (Object key : mergeDict.keySet()) {
+            if (hDict1.containsKey(key) && hDict2.containsKey(key)) {
+                mergeDict.put(key, (int) hDict1.get(key) + (int) hDict2.get(key));
+            }
+        }
+        return mergeDict;
     }
 }

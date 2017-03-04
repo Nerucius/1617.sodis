@@ -61,48 +61,57 @@ public class Poker5CardGame {
         game.apply(Game.Action.STAKES);
         game.apply(Game.Action.QUIT);*/
         
-        /*Hand sHand = new Hand();
+        Hand sHand = new Hand();
         Hand cHand = new Hand();
         
         sHand.putCard(new Card(Suit.CLUBS, Rank.ACE));
         sHand.putCard(new Card(Suit.CLUBS, Rank.TWO));
         sHand.putCard(new Card(Suit.CLUBS, Rank.THREE));
         sHand.putCard(new Card(Suit.CLUBS, Rank.FOUR));
-        sHand.putCard(new Card(Suit.CLUBS, Rank.FIVE));
-        sHand.computeHandValue();
+        sHand.putCard(new Card(Suit.HEARTS, Rank.SIX));
+        //sHand.computeHandValue();
+        sHand.generateRankerInformation();
         
         cHand.putCard(new Card(Suit.CLUBS, Rank.ACE));
-        cHand.putCard(new Card(Suit.CLUBS, Rank.KING));
-        cHand.putCard(new Card(Suit.CLUBS, Rank.QUEEN));
-        cHand.putCard(new Card(Suit.CLUBS, Rank.JACK));
-        cHand.putCard(new Card(Suit.CLUBS, Rank.TEN));
-        cHand.computeHandValue();
+        cHand.putCard(new Card(Suit.CLUBS, Rank.TWO));
+        cHand.putCard(new Card(Suit.CLUBS, Rank.THREE));
+        cHand.putCard(new Card(Suit.CLUBS, Rank.FOUR));
+        cHand.putCard(new Card(Suit.HEARTS, Rank.FIVE));
+        /*cHand.putCard(new Card(Suit.DIAMONDS, Rank.ACE));
+        cHand.putCard(new Card(Suit.DIAMONDS, Rank.KING));
+        cHand.putCard(new Card(Suit.DIAMONDS, Rank.QUEEN));
+        cHand.putCard(new Card(Suit.DIAMONDS, Rank.JACK));
+        cHand.putCard(new Card(Suit.HEARTS, Rank.NINE));*/
+        //cHand.computeHandValue();
+        cHand.generateRankerInformation();
 
-        HandRank sHandRank = HandRanker.getHandRank(sHand);
-        HandRank cHandRank = HandRanker.getHandRank(cHand);
-
-        boolean sWins = HandRanker.winner(sHand, cHand);
-        boolean cWins = HandRanker.winner(cHand, sHand);
-
-        System.out.println("sHand: " + sHand + "\n    ----> " + sHandRank + "\n    ----> WINS: " + sWins);
-        System.out.println("cHand: " + cHand + "\n    ----> " + cHandRank + "\n    ----> WINS: " + cWins);*/
+        System.out.println("sHand vs cHand ::: " + sHand.compareTo(cHand));
         
         /*Map dict = new HashMap();
         dict.put(Rank.TWO, 1);
-        dict.put(Rank.THREE, 2);
+        dict.put(Rank.THREE, 1);
         dict.put(Rank.FOUR, 1);
-        dict.put(Rank.ACE, 1);
+        dict.put(Rank.ACE, 1);        
+        System.out.println(dict.toString());
         
-        System.out.println("dict: " + dict.toString());
-        System.out.println(dict.containsValue(3));
-        Iterator it = dict.keySet().iterator();
-        while(it.hasNext())
+        Map dict2 = new HashMap();
+        dict2.put(Rank.TWO, 1);
+        dict2.put(Rank.JACK, 1);
+        dict2.put(Rank.FOUR, 1);
+        dict2.put(Rank.FIVE, 1);
+        System.out.println(dict2.toString());
+        
+        Map d = new HashMap(dict);
+        d.putAll(dict2);
+        for(Object key : d.keySet())
         {
-            Rank rank = ((Rank) it.next());
-            int v = rank.getValue();
-            System.out.println(rank.toString() + v);
+            if(dict2.containsKey(key) && dict.containsKey(key))
+                d.put(key, (int)dict2.get(key) + (int)dict.get(key));
         }
-        System.out.println();*/
+        
+        System.out.println(d.toString());*/
+        
+        
         // Server
         
         /*Server server = new Server();
