@@ -1,6 +1,6 @@
 package poker5cardgame.game;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import poker5cardgame.game.Card.Rank;
 
@@ -32,10 +32,11 @@ public class HandRanker {
     }
     // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Public Methods">
     public static HandRank getHandRank(Hand hand) {
         int hSuitId = hand.getSuitId();
         int hWeight = hand.getWeight();
-        Map hDict = hand.getDict();
+        Map hDict = hand.getOcurDict();
 
         boolean straight = areSuccessive(hWeight);
         boolean flush = areSameSuit(hSuitId);
@@ -43,31 +44,60 @@ public class HandRanker {
 
         switch (hDictProduct) {
             case 6:
+                // Save required information to manage the tie case
+                Rank trioFull = (Rank) Hand.getKeysByValue(hDict, 3).get(0);
+                Rank pairFull = (Rank) Hand.getKeysByValue(hDict, 2).get(0);
+                hand.putIntoRankDict(HandRank.THREE_OF_A_KIND, trioFull);
+                hand.putIntoRankDict(HandRank.ONE_PAIR, pairFull);
+
                 return HandRank.FULL_HOUSE;
 
             case 4:
                 if (hDict.containsValue(4)) {
+                    // Save required information to manage the tie case
+                    Rank quatrain = (Rank) Hand.getKeysByValue(hDict, 4).get(0);
+                    hand.putIntoRankDict(HandRank.FOUR_OF_A_KIND, quatrain);
+
                     return HandRank.FOUR_OF_A_KIND;
                 }
                 if (!flush) {
+                    // Save required information to manage the tie case
+                    Rank highPair = (Rank) Collections.max(Hand.getKeysByValue(hDict, 2));
+                    Rank lowPair = (Rank) Collections.min(Hand.getKeysByValue(hDict, 2));
+                    hand.putIntoRankDict(HandRank.ONE_PAIR, highPair);
+                    hand.putIntoRankDict(HandRank.TWO_PAIR, lowPair);
+
                     return HandRank.TWO_PAIR;
                 }
+                // Information about the cards should be treated appart (not in rankDict)
                 return HandRank.FLUSH;
 
             case 3:
                 if (!flush) {
+                    Rank trio = (Rank) Hand.getKeysByValue(hDict, 3).get(0);
+                    hand.putIntoRankDict(HandRank.THREE_OF_A_KIND, trio);
+                    // TODO: Information about the 2 remaining cards should be treated appart (not in rankDict)
                     return HandRank.THREE_OF_A_KIND;
                 }
                 return HandRank.FLUSH;
 
             case 2:
                 if (!flush) {
+                    Rank pair = (Rank) Collections.min(Hand.getKeysByValue(hDict, 2));
+                    hand.putIntoRankDict(HandRank.ONE_PAIR, pair);
+                    // TODO: Information about the 3 remaining cards should be treated appart (not in rankDict)
                     return HandRank.ONE_PAIR;
                 }
                 return HandRank.FLUSH;
 
             case 1:
                 if (straight) {
+                    Rank highCard = (Rank) Collections.max(Hand.getKeysByValue(hDict, 1));
+                    // Special case: A 2 3 4 5
+                    if (hDict.containsKey(Rank.ACE) && hDict.containsKey(Rank.TWO)) {
+                        highCard = Rank.FIVE;
+                    }
+                    hand.putIntoRankDict(HandRank.HIGH_CARD, highCard);
                     if (flush) {
                         return HandRank.STRAIGHT_FLUSH;
                     }
@@ -82,7 +112,9 @@ public class HandRanker {
                 return null;
         }
     }
+    // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Private Methods">
     private static boolean areSuccessive(int hWeight) {
         return Card.SUCCESSIVE_CARDS.contains(hWeight);
     }
@@ -103,17 +135,5 @@ public class HandRanker {
         }
         return product;
     }
-        
-    // TODO delete
-    private static Map mergeDicts(Map hDict1, Map hDict2) {
-        // mergeDict contains all the keys of hDict1 and hDict2 with the sum number of occurrences
-        Map mergeDict = new HashMap(hDict1);
-        mergeDict.putAll(hDict2);
-        for (Object key : mergeDict.keySet()) {
-            if (hDict1.containsKey(key) && hDict2.containsKey(key)) {
-                mergeDict.put(key, (int) hDict1.get(key) + (int) hDict2.get(key));
-            }
-        }
-        return mergeDict;
-    }
+    // </editor-fold>
 }

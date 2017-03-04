@@ -7,7 +7,7 @@ import java.util.List;
 public class Card implements Comparable<Card> {
 
     // <editor-fold defaultstate="collapsed" desc="Data Definition">
-    // Prime numbers to give weigth to each card
+    // Prime numbers to give weigth to each card (they are prime in order to have unic product weights)
     private static final int PRIME_01 = 11; // 2
     private static final int PRIME_02 = 13; // 3
     private static final int PRIME_03 = 17; // 4
@@ -34,9 +34,9 @@ public class Card implements Comparable<Card> {
                 PRIME_06 * PRIME_07 * PRIME_08 * PRIME_09 * PRIME_10, // 7 8 9 10 J
                 PRIME_07 * PRIME_08 * PRIME_09 * PRIME_10 * PRIME_11, // 8 9 10 J Q
                 PRIME_08 * PRIME_09 * PRIME_10 * PRIME_11 * PRIME_12, // 9 10 J Q K
-                PRIME_09 * PRIME_10 * PRIME_11 * PRIME_12 * PRIME_13 // 10 J Q K A
+                PRIME_09 * PRIME_10 * PRIME_11 * PRIME_12 * PRIME_13  // 10 J Q K A
             };
-    public static final List SUCCESSIVE_CARDS 
+    public static final List SUCCESSIVE_CARDS
             = new ArrayList<Integer>(Arrays.asList(SUCCESSIVE_CARDS_VALUES));
 
     // Possible suits for a card
@@ -72,7 +72,7 @@ public class Card implements Comparable<Card> {
         ACE("A", PRIME_13);
 
         private String code;    // rank code to write and read the card
-        private int weight;     // weight to manage the hand ranker
+        private int weight;     // weight to find easily a STRAIGHT case
 
         Rank(String code, int value) {
             this.code = code;
@@ -101,9 +101,7 @@ public class Card implements Comparable<Card> {
     public Rank getRank() {
         return this.rank;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public Methods">
     public int getRankWeight() {
         return this.rank.weight;
     }
@@ -111,7 +109,9 @@ public class Card implements Comparable<Card> {
     public int getSuitId() {
         return this.suit.id;
     }
+    // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Public Methods">
     /**
      * Get the card code from a real card.
      *
@@ -148,17 +148,17 @@ public class Card implements Comparable<Card> {
     }
 
     @Override
-    public String toString() {
-        return this.getCode();
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Card)) {
             return false;
         }
         Card other = (Card) obj;
         return this.rank == other.rank && this.suit == other.suit;
+    }
+
+    @Override
+    public String toString() {
+        return this.getCode();
     }
     // </editor-fold>
 }
