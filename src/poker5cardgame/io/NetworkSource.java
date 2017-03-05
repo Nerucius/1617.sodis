@@ -34,7 +34,9 @@ public class NetworkSource implements Source {
     }
 
     /**
-     * Transforms a Network Packet into a move
+     * Transforms a Network Packet into a move. Handles ALL possible exceptions
+     * and always returns something. If there was an irrecoverable error, this
+     * will return an Action.TERMINATE move.
      *
      * @return Next move provided by network.
      */
@@ -58,10 +60,23 @@ public class NetworkSource implements Source {
                     break;
                 case ANTE:
                     move.chips = packet.getField("chips", Integer.class);
+                    
+                    // Request the next Move directly, which should be a STAKES
+                    Move stks = getNextMove();
+                    if(stks.action != Action.STAKES){
+                        System.err.println("Invalid packet after ANTE");
+                        move.action = Action.NOOP;
+                        return move;
+                    }
+                    
+                    move.action = Action.ANTE_STAKES;
+                    move.cStakes = stks.cStakes;
+                    move.sStakes = stks.sStakes;
                     break;
                 case STAKES:
-                    move.sStakes = packet.getField("server_stakes", Integer.class);
-                    move.cStakes = packet.getField("client_stakes", Integer.class);
+                    move.action = Action.STAKES;
+                    move.sStakes = packet.getField("stakes_client", Integer.class);
+                    move.cStakes = packet.getField("stakes_server", Integer.class);
                     break;
                 case ANTE_OK:
                     move.action = Action.ANTE_OK;
@@ -72,12 +87,19 @@ public class NetworkSource implements Source {
                 case DEALER:
                     move.action = Action.DEALER_HAND;
                     move.dealer = packet.getField("dealer", Integer.class);
-                    Move next = getNextMove();
-                    break;
+                    Move hand = getNextMove();
+                    if(hand.cards == null){
+                        System.err.println("Invalid packet after DEALER");
+                        move.action = Action.NOOP;
+                        return move;
+                    }
+                    move.cards = hand.cards;
+                    break;                    
                 case HAND:
                     move.action = Action.DEALER_HAND;
-                    move.cards = cardsFromCodeString(packet.getField("hand", String.class));
+                    move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
+                    
                 case RAISE:
                     move.action = Action.RAISE;
                     move.chips = packet.getField("chips", Integer.class);
@@ -86,6 +108,7 @@ public class NetworkSource implements Source {
                     move.action = Action.BET;
                     move.chips = packet.getField("chips", Integer.class);
                     break;
+                    
                 case DRAW:
                     // If any cards were requested, get the Card array
                     move.action = Action.DRAW;
@@ -93,20 +116,37 @@ public class NetworkSource implements Source {
                         move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
                 case DRAW_SERVER:
+                    move.action = Action.DRAW_SERVER;
                     move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
+                    
                 case SHOWDOWN:
+                    move.action = Action.SHOW;
+                    move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
+                    
                 case ERROR:
                     System.err.println(packet.getField("error", String.class));
                     move.action = Action.NOOP;
                     break;
+                    
                 case NET_ERROR:
                     // Irrecoverable network error. Terminate the Client Game
                     move.action = Action.TERMINATE;
                     break;
+                    
+                case PASS:
+                    move.action = Action.PASS;
+                    break;
+                case CALL:
+                    move.action = Action.CALL;
+                    break;
+                case FOLD:
+                    move.action = Action.FOLD;
+                    break;
             }
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Network Source: Problem reading next Move arguments");
             move.action = Action.NOOP;
         }
@@ -115,11 +155,14 @@ public class NetworkSource implements Source {
     }
 
     /**
-     * Transforms a game Action into a Network Packet and sends it over.
+     * Transforms a game Action into a Network Packet and sends it over. If
+     * this method returns FALSE, the Source has been terminated. You can handle
+     * the termination right there. Or on the next call to getNextMove() you'll
+     * get an Action.TERMINATE move.
      *
-     * @param move
+     * @param move Move to send over the Network.
      */
-    public void sendMove(Game.Move move) {
+    public boolean sendMove(Game.Move move) {
         // Define an array as large as the most packets sent by a single Move
         // Some moves send more than one packet.
         Packet[] packets = new Packet[2];
@@ -130,7 +173,7 @@ public class NetworkSource implements Source {
                 packets[0].putField("id", move.id);
                 break;
 
-            case SEND_ANTE_STAKES:
+            case ANTE_STAKES:
                 packets[0] = new Packet(Network.Command.ANTE);
                 packets[0].putField("chips", move.chips);
                 
@@ -158,7 +201,7 @@ public class NetworkSource implements Source {
                 packets[0].putField("chips", move.dealer);
 
                 packets[1] = new Packet(Network.Command.HAND);
-                packets[1].putField("hand", cardsToCodeString(move.cards));
+                packets[1].putField("cards", cardsToCodeString(move.cards));
                 break;
 
             case PASS:
@@ -200,6 +243,10 @@ public class NetworkSource implements Source {
             case SHOW:
                 packets[0] = new Packet(Network.Command.SHOWDOWN);
                 break;
+                
+            case ERROR:
+                packets[0] = new Packet(Network.Command.ERROR);
+                packets[0].putWrittable(new Writable.VariableString(2, move.error));                
         }
 
         // Write all packets to the network
@@ -214,8 +261,10 @@ public class NetworkSource implements Source {
                         System.err.println("Network: Error while closing connection.");
                     }
                     comUtils = null;
+                    return false;
                 }
         }
+        return true;
     }
 
     public ComUtils getCom() {

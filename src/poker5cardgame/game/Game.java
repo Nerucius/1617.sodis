@@ -64,7 +64,7 @@ public class Game {
                 // which will send 2 packets to the client and advance the
                 // Game state
                 sMove = new Move();
-                sMove.action = Action.SEND_ANTE_STAKES;
+                sMove.action = Action.ANTE_STAKES;
                 sMove.chips = anteBet;
                 sMove.cStakes = 1000; // TODO Read client stakes from some stakes database indexed by client
                 sMove.sStakes = serverChips;
@@ -170,16 +170,14 @@ public class Game {
             System.out.println(state + " -> " + action + " -> " + newState + " R2:" + round2);
             this.state = newState;
         } else {
-            System.out.println("--- ILLEGAL ACTION");
-            System.out.println("--- " + state + " DOES NOT ACCEPT " + action);
-
-            // Special case for NetworkSoruce, send an error packet
-            if (source instanceof NetworkSource) {
-                Packet packet = new Packet(Network.Command.ERROR);
-                packet.putWrittable(new Writable.VariableString(2, "PROTOCOL ERROR"));
-                NetworkSource src = (NetworkSource) source;
-                src.getCom().write_NetworkPacket(packet);
-            }
+            System.err.println("--- ILLEGAL ACTION");
+            System.err.println("--- " + state + " DOES NOT ACCEPT " + action);
+            
+            // Send special Error Move -> ERRO Packet
+            Move errMove= new Move();
+            errMove.action = Action.ERROR;
+            errMove.error = "Protocol Error";
+            source.sendMove(errMove);
 
         }
     }
@@ -204,6 +202,8 @@ public class Game {
         public int dealer = -1;
         // Array of cards to deal or discard
         public Card[] cards = null;
+        // Error Message
+        public String error = null;
 
         public Move() {
             action = Action.NOOP;
@@ -225,7 +225,7 @@ public class Game {
 
     public enum Action {
         START,
-        SEND_ANTE_STAKES,
+        ANTE_STAKES,
         STAKES,
         QUIT,
         ANTE_OK,
@@ -239,6 +239,8 @@ public class Game {
         DRAW_SERVER,
         SHOW,
         NOOP,
+        // Special Command to send an Error Message to the Client
+        ERROR,
         // Special command to terminate the Game anytime
         TERMINATE;
     }
@@ -273,7 +275,7 @@ public class Game {
                     state.transitions.put(Action.START, State.START);
                     break;
                 case START:
-                    state.transitions.put(Action.SEND_ANTE_STAKES, State.ACCEPT_ANTE);
+                    state.transitions.put(Action.ANTE_STAKES, State.ACCEPT_ANTE);
                     break;
                 case ACCEPT_ANTE:
                     state.transitions.put(Action.ANTE_OK, State.PLAY);

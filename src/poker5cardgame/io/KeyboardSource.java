@@ -61,13 +61,13 @@ public class KeyboardSource implements Source {
         return move;
     }
 
-    public void sendMove(Game.Move move) {
+    public boolean sendMove(Game.Move move) {
         // PRINTS SERVER REPLY TO Console
         System.out.println("SERVER: " + move.action);
 
         // Optional Arguments
         switch (move.action) {
-            case SEND_ANTE_STAKES:
+            case ANTE_STAKES:
                 System.out.println("ANTE: " + move.chips);
                 System.out.println("STAKES: " + move.cStakes + " " + move.sStakes);
                 break;
@@ -90,6 +90,8 @@ public class KeyboardSource implements Source {
             case NOOP:
                 break;
         }
+        
+        return true;
     }
 
 }

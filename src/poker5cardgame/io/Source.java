@@ -17,6 +17,6 @@ public interface Source {
     public Move getNextMove();
     
     /** Method to inform of a move to the opponent **/
-    public void sendMove(Move move);
+    public boolean sendMove(Move move);
     
 }

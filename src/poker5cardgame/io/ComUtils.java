@@ -3,7 +3,6 @@ package poker5cardgame.io;
 import java.net.*;
 import java.io.*;
 import java.util.Arrays;
-import poker5cardgame.game.Card;
 import poker5cardgame.network.Network;
 import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
@@ -51,7 +50,7 @@ public class ComUtils {
             // Read first 4 bytes (4 chars) to identify code
             String opcode = read_chars(4);
             packet.command = Network.Command.identifyPacket(opcode);
-            System.out.println("COM: detected packet: "+packet.command);
+            // System.out.println("COM: detected packet: "+packet.command);
             // Read arguments from Stream if applicable
             if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
@@ -89,14 +88,14 @@ public class ComUtils {
 
     private void read_PacketArgs(Packet packet) throws IOException {
         read_bytes(1); // Consume Space
-
+        
         // TODO Implement reading packet args for every command type
         switch (packet.command) {
             case START:
                 packet.putField("id", read_int32());
                 break;
             case ANTE:
-                packet.putField("ante", read_int32());
+                packet.putField("chips", read_int32());
                 break;
             case STAKES:
                 packet.putField("stakes_client", read_int32());
@@ -107,7 +106,6 @@ public class ComUtils {
                 packet.putField("dealer", read_int32());
                 break;
             case HAND:
-                packet.putField("number", read_int32());
                 packet.putField("cards", read_cards(5));
                 break;
             case BET:
@@ -118,10 +116,11 @@ public class ComUtils {
                 break;
             case DRAW:
                 int drawCount = read_int32();
-                System.out.println("COM: read card count " + drawCount);
                 packet.putField("number", drawCount);
-                if (drawCount > 0)
+                if (drawCount > 0){
+                    read_bytes(1); // Consume space
                     packet.putField("cards", read_cards(drawCount));
+                }
                 break;
             case DRAW_SERVER:
                 // TODO implement method to read DRWS msg
@@ -296,8 +295,8 @@ public class ComUtils {
     }
 
     /**
-     * Reads a stream of card codes and returns a Card[] interpretation. Automatically consumes leading
-     * spaces.
+     * Reads a stream of card codes and returns a Card[] interpretation.
+     * Automatically consumes spaces in between cards.
      * 
      * @param num Number of cards to read
      * @return
@@ -307,14 +306,13 @@ public class ComUtils {
         String[] cards = new String[num];
 
         for (int i = 0; i < num; i++) {
-            read_bytes(1); // Consume space
+            if(i != 0) read_bytes(1); // Consume space after the first card
             char[] cs = new char[3];
             cs[0] = (char)read_bytes(1)[0];
             cs[1] = (char)read_bytes(1)[0];
             
             if (cs[0] == '1') {
                 // Read last character for 10X cards
-                System.out.println("COM: Detected 10X card.");
                 cs[2] = (char)read_bytes(1)[0];
                 cards[i] = String.valueOf(cs);
             } else {
@@ -322,8 +320,6 @@ public class ComUtils {
                 cards[i] = String.valueOf(Arrays.copyOf(cs, 2));
             }
             
-            System.out.println(cs);
-            System.out.println("COM: Read card: " + cards[i]);
         }
         return String.join(" ", cards);
     }
