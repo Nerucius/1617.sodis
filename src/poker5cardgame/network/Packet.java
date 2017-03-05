@@ -15,9 +15,9 @@ import java.util.List;
  * A Multipurpose packet. Used to send and receive data from the network.
  * Contains a list of arguments that can be written to a stream or read by name
  * individually.
- * 
- * Arguments must be of a type implemented by the {@link Writable}
- * Interface, otherwise they will not be written to the stream.
+ *
+ * Arguments must be of a type implemented by the {@link Writable} Interface,
+ * otherwise they will not be written to the stream.
  *
  * @author Herman Dempere
  */
@@ -41,9 +41,17 @@ public class Packet implements Writable {
                 return type.cast(e.object);
         return null;
     }
-    
-    /** DANGER! USE ONLY IF YOU KNOW WHAT YOU'RE DOING */
-    public void putWrittable(Writable w){
+
+    /** Pad the output with the given number of spaces */
+    public void pad(int n) {
+        while(n-- > 0)
+            entries.add(new Entry("-", " "));
+    }
+
+    /**
+     * DANGER! USE ONLY IF YOU KNOW WHAT YOU'RE DOING
+     */
+    public void putWrittable(Writable w) {
         Entry e = new Entry(null, null);
         e.writable = w;
         entries.add(e);
@@ -62,6 +70,26 @@ public class Packet implements Writable {
     }
 
     /**
+     * List of Network commands with no Arguments
+     */
+    static final ArrayList<Network.Command> NO_ARGS = new ArrayList<>();
+
+    static {
+        NO_ARGS.add(Network.Command.ANTE_OK);
+        NO_ARGS.add(Network.Command.CALL);
+        NO_ARGS.add(Network.Command.FOLD);
+        NO_ARGS.add(Network.Command.PASS);
+        NO_ARGS.add(Network.Command.QUIT);
+    }
+
+    /**
+     * returns true if the packet has additional arguments to be read
+     */
+    public static boolean hasArgs(Packet packet) {
+        return !NO_ARGS.contains(packet.command);
+    }
+
+    /**
      * Entries inside a Packet. An ordered list of Arguments
      */
     private class Entry {
@@ -77,7 +105,7 @@ public class Packet implements Writable {
                 writable = new Writable.String((java.lang.String) o);
             if (o instanceof java.lang.Integer)
                 writable = new Writable.Integer((java.lang.Integer) o);
-            
+
         }
     }
 

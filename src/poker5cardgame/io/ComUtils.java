@@ -14,6 +14,8 @@ public class ComUtils {
     /* Objectes per escriure i llegir dades */
     private DataInputStream dis;
     private DataOutputStream dos;
+    //private BufferedInputStream bis;
+    private BufferedOutputStream bos;
     protected Socket socket;
 
     public ComUtils(Socket socket) {
@@ -21,6 +23,10 @@ public class ComUtils {
             this.socket = socket;
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
+            
+            // Buffered versions -> Only 1 TCP packet per command. More stable reads
+            //bis = new BufferedInputStream(dis);
+            bos = new BufferedOutputStream(dos);
         } catch (IOException ex) {
             System.err.println("COM: Failed to Open Socket");
         }
@@ -43,7 +49,9 @@ public class ComUtils {
             // Read first 4 bytes (4 chars) to identify code
             String opcode = read_chars(4);
             packet.command = Network.Command.identifyPacket(opcode);
-            read_PacketArgs(packet);
+            // Read arguments from Stream if applicable
+            if(Packet.hasArgs(packet))
+                read_PacketArgs(packet);
 
         } catch (IOException e) {
             System.err.println("CU: Error Reading socket");
@@ -68,6 +76,7 @@ public class ComUtils {
         try {
             // Packet knows how to write itself. yay
             packet.write(this);
+            bos.flush();
             return true;
         } catch (IOException e) {
             System.err.println("CU: Error sending Packet");
@@ -130,7 +139,8 @@ public class ComUtils {
         byte bytes[] = new byte[4];
 
         int32ToBytes(number, bytes, "be");
-        dos.write(bytes, 0, 4);
+        bos.write(bytes, 0, 4);
+        //dos.write(bytes, 0, 4);
     }
 
     /* Llegir un string de mida STRSIZE */
@@ -149,11 +159,10 @@ public class ComUtils {
         return str.trim();
     }
 
-    /** Read a specified number of chars(1 byte each) from the stream */
+    /** Read a specified number of chars (1 byte each) from the stream */
     public String read_chars(int num) throws IOException {
-        char[] chars = new char[4];
-        for(int i = 0; i < num; i++)
-            chars[i] = (char)dis.readUnsignedByte();
+        byte[] chars = new byte[4];
+        dis.read(chars, 0, num);
         return new String(chars);
     }
 
@@ -179,7 +188,7 @@ public class ComUtils {
     }
 
     public void write_string_pure(String str) throws IOException {
-        dos.writeBytes(str);
+        bos.write(str.getBytes(), 0, str.length());
     }
 
     /* Passar d'enters a bytes */

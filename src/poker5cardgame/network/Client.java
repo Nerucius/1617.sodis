@@ -19,6 +19,7 @@ public class Client {
             InetAddress address = InetAddress.getByName(IP);
             Socket sock = new Socket(address, port);
             outSource = new NetworkSource(sock);
+            System.err.println("Client: Connected to Server on IP:" + IP + ".");
 
         } catch (Exception ex) {
             System.err.println("Client: Failed to connect to Server on IP:" + IP + ".");

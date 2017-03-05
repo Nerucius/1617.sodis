@@ -5,7 +5,6 @@
  */
 package poker5cardgame.io;
 
-import poker5cardgame.io.Source;
 import java.io.IOException;
 import java.net.Socket;
 import poker5cardgame.game.Card;
@@ -16,6 +15,8 @@ import poker5cardgame.network.Network;
 import poker5cardgame.network.Packet;
 
 /**
+ * Class Implementing the Source Interface for sending and receiving Moves using
+ * a Network Connection.
  *
  * @author Herman Dempere
  */
@@ -48,55 +49,65 @@ public class NetworkSource implements Source {
 
         Packet packet = comUtils.read_NetworkPacket();
 
-        // TODO Fill in all cases
-        switch (packet.command) {
-            case START:
-                move.action = Action.START;
-                move.id = packet.getField("id", Integer.class);
-                break;
-
-            case ANTE:
-                break;
-            case STAKES:
-                break;
-
-            case ANTE_OK:
-                move.action = Action.ANTE_OK;
-                break;
-            case QUIT:
-                move.action = Action.QUIT;
-                break;
-            case DEALER:
-                move.action = Action.DEALER_HAND;
-                //move.dealer = Integer.valueOf(packet.arg/s[0]);
-                Move next = getNextMove();
-                break;
-            case HAND:
-                move.action = Action.DEALER_HAND;
-                //move.cards = cardsFromCodeString(packet.args[0]);
-                break;
-            case RAISE:
-                move.action = Action.RAISE;
-                move.chips = packet.getField("chips", Integer.class);
-                break;
-            case BET:
-                move.action = Action.BET;
-                move.chips = packet.getField("chips", Integer.class);
-                break;
-            case DRAW:
-                break;
-            case DRAW_SERVER:
-                break;
-            case SHOWDOWN:
-                break;
-            case ERROR:
-                //System.err.println("PROTOCOL ERROR: " + packet.args[0]);
-                move.action = Action.NOOP;
-                break;
-            case NET_ERROR:
-                // TODO Handle connection closed
-                move.action = Action.TERMINATE;
-                break;
+        try {
+            // TODO Fill in all cases
+            switch (packet.command) {
+                case START:
+                    move.action = Action.START;
+                    move.id = packet.getField("id", Integer.class);
+                    break;
+                case ANTE:
+                    move.chips = packet.getField("chips", Integer.class);
+                    break;
+                case STAKES:
+                    move.sStakes = packet.getField("server_stakes", Integer.class);
+                    move.cStakes = packet.getField("client_stakes", Integer.class);
+                    break;
+                case ANTE_OK:
+                    move.action = Action.ANTE_OK;
+                    break;
+                case QUIT:
+                    move.action = Action.QUIT;
+                    break;
+                case DEALER:
+                    move.action = Action.DEALER_HAND;
+                    move.dealer = packet.getField("dealer", Integer.class);
+                    Move next = getNextMove();
+                    break;
+                case HAND:
+                    move.action = Action.DEALER_HAND;
+                    move.cards = cardsFromCodeString(packet.getField("hand", String.class));
+                    break;
+                case RAISE:
+                    move.action = Action.RAISE;
+                    move.chips = packet.getField("chips", Integer.class);
+                    break;
+                case BET:
+                    move.action = Action.BET;
+                    move.chips = packet.getField("chips", Integer.class);
+                    break;
+                case DRAW:
+                    // If any cards were requested, get the Card array
+                    if (packet.getField("number", Integer.class) > 0)
+                        move.cards = cardsFromCodeString(packet.getField("cards", String.class));
+                    break;
+                case DRAW_SERVER:
+                    move.cards = cardsFromCodeString(packet.getField("cards", String.class));
+                    break;
+                case SHOWDOWN:
+                    break;
+                case ERROR:
+                    System.err.println(packet.getField("error", String.class));
+                    move.action = Action.NOOP;
+                    break;
+                case NET_ERROR:
+                    // Irrecoverable network error. Terminate the Client Game
+                    move.action = Action.TERMINATE;
+                    break;
+            }
+        } catch (Exception e) {
+            System.err.println("Network Source: Problem reading next Move arguments");
+            move.action = Action.NOOP;
         }
 
         return move;
@@ -121,7 +132,7 @@ public class NetworkSource implements Source {
             case SEND_ANTE_STAKES:
                 packets[0] = new Packet(Network.Command.ANTE);
                 packets[0].putField("chips", move.chips);
-
+                
                 packets[1] = new Packet(Network.Command.STAKES);
                 packets[1].putField("stakes_client", move.cStakes);
                 packets[1].putField("stakes_server", move.sStakes);
@@ -159,7 +170,7 @@ public class NetworkSource implements Source {
                 break;
 
             case RAISE:
-                packets[0] = new Packet(Network.Command.BET);
+                packets[0] = new Packet(Network.Command.RAISE);
                 packets[0].putField("chips", move.chips);
                 break;
 
@@ -227,6 +238,8 @@ public class NetworkSource implements Source {
      */
     private Card[] cardsFromCodeString(String cards) {
         String[] cardsplits = cards.split(" ");
+        
+        // Returns zero lenght arrays some times -> its OK
         Card[] arr = new Card[cardsplits.length];
         for (int i = 0; i < cardsplits.length; i++) {
             arr[i] = Card.fromCode(cardsplits[i]);

@@ -40,6 +40,7 @@ public class Server implements Runnable {
      */
     @Override
     public void run() {
+        System.out.println("Server: Started on port " + serverSocket.getLocalPort());
         try {
 
             // Main loop for accepting new Connections
@@ -86,6 +87,10 @@ public class Server implements Runnable {
             while (true) {
 
                 Game.Move m = source.getNextMove();
+                if (m.action == Game.Action.TERMINATE) {
+                    System.out.println("Server: Received TERMINATE packet.");
+                    break;
+                }
                 System.out.println(m.toString());
 
             }
