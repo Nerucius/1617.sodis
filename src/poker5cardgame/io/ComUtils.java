@@ -2,6 +2,8 @@ package poker5cardgame.io;
 
 import java.net.*;
 import java.io.*;
+import java.util.Arrays;
+import poker5cardgame.game.Card;
 import poker5cardgame.network.Network;
 import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
@@ -23,7 +25,7 @@ public class ComUtils {
             this.socket = socket;
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
-            
+
             // Buffered versions -> Only 1 TCP packet per command. More stable reads
             //bis = new BufferedInputStream(dis);
             bos = new BufferedOutputStream(dos);
@@ -44,19 +46,20 @@ public class ComUtils {
      */
     public Packet read_NetworkPacket() {
         Packet packet = new Packet(null);
-        
+
         try {
             // Read first 4 bytes (4 chars) to identify code
             String opcode = read_chars(4);
             packet.command = Network.Command.identifyPacket(opcode);
+            System.out.println("COM: detected packet: "+packet.command);
             // Read arguments from Stream if applicable
-            if(Packet.hasArgs(packet))
+            if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
 
         } catch (IOException e) {
             System.err.println("CU: Error Reading socket");
             packet.command = Command.NET_ERROR;
-            
+
         } catch (IllegalArgumentException e) {
             System.err.println("CU: Malformed PROTOCOL code");
             packet.command = Command.ERROR;
@@ -104,8 +107,8 @@ public class ComUtils {
                 packet.putField("dealer", read_int32());
                 break;
             case HAND:
-                // TODO Implement method to read cards from the net
-                packet.putField("cards", read_int32());
+                packet.putField("number", read_int32());
+                packet.putField("cards", read_cards(5));
                 break;
             case BET:
                 packet.putField("chips", read_int32());
@@ -114,10 +117,15 @@ public class ComUtils {
                 packet.putField("chips", read_int32());
                 break;
             case DRAW:
-                // TODO imlement method to read DRAW msg
+                int drawCount = read_int32();
+                System.out.println("COM: read card count " + drawCount);
+                packet.putField("number", drawCount);
+                if (drawCount > 0)
+                    packet.putField("cards", read_cards(drawCount));
                 break;
             case DRAW_SERVER:
                 // TODO implement method to read DRWS msg
+                // PROBLEM : Needs to know if expects cards or not
                 break;
             case ERROR:
                 packet.putField("error", read_string_variable(2));
@@ -159,7 +167,9 @@ public class ComUtils {
         return str.trim();
     }
 
-    /** Read a specified number of chars (1 byte each) from the stream */
+    /**
+     * Read a specified number of chars (1 byte each) from the stream
+     */
     public String read_chars(int num) throws IOException {
         byte[] chars = new byte[4];
         dis.read(chars, 0, num);
@@ -283,5 +293,38 @@ public class ComUtils {
         dos.write(bHeader, 0, size);
         // Enviem l'string writeBytes de DataOutputStrem no envia el byte més alt dels chars.
         dos.writeBytes(str);
+    }
+
+    /**
+     * Reads a stream of card codes and returns a Card[] interpretation. Automatically consumes leading
+     * spaces.
+     * 
+     * @param num Number of cards to read
+     * @return
+     * @throws IOException 
+     */
+    private String read_cards(int num) throws IOException {
+        String[] cards = new String[num];
+
+        for (int i = 0; i < num; i++) {
+            read_bytes(1); // Consume space
+            char[] cs = new char[3];
+            cs[0] = (char)read_bytes(1)[0];
+            cs[1] = (char)read_bytes(1)[0];
+            
+            if (cs[0] == '1') {
+                // Read last character for 10X cards
+                System.out.println("COM: Detected 10X card.");
+                cs[2] = (char)read_bytes(1)[0];
+                cards[i] = String.valueOf(cs);
+            } else {
+                // Cut array to 2 places otherwise
+                cards[i] = String.valueOf(Arrays.copyOf(cs, 2));
+            }
+            
+            System.out.println(cs);
+            System.out.println("COM: Read card: " + cards[i]);
+        }
+        return String.join(" ", cards);
     }
 }

@@ -45,9 +45,16 @@ public class Card implements Comparable<Card> {
         DIAMONDS("D", PRIME_02),
         HEARTS("H", PRIME_03),
         SPADES("S", PRIME_04);
-
+        
         private String code;    // suit code to write and read the card
         private int id;         // id to find easily a FLUSH case
+        
+        private static Suit fromCode(String suit) {
+            for(Suit s :Suit.values())
+                if(s.code.equals(suit))
+                    return s;
+            throw new IllegalArgumentException("No suit with code: "+suit);
+        }
 
         Suit(String code, int id) {
             this.code = code;
@@ -73,6 +80,13 @@ public class Card implements Comparable<Card> {
 
         private String code;    // rank code to write and read the card
         private int weight;     // weight to find easily a STRAIGHT case
+        
+        private static Rank fromCode(String suit) {
+            for (Rank r : Rank.values())
+                if (r.code.equals(suit))
+                    return r;
+            throw new IllegalArgumentException("No suit with code: " + suit);
+        }
 
         Rank(String code, int value) {
             this.code = code;
@@ -130,13 +144,13 @@ public class Card implements Comparable<Card> {
         Card c;
 
         // Special case for rank 10, thanks Eloi
-        if (code.charAt(0) == 1) {
+        if (code.charAt(0) == '1') {
             String suit = "" + code.charAt(2);
-            c = new Card(Suit.valueOf(suit), Rank.TEN);
+            c = new Card(Suit.fromCode(suit), Rank.TEN);
 
         } else {
-            Rank rank = Rank.valueOf("" + code.charAt(0));
-            Suit suit = Suit.valueOf("" + code.charAt(1));
+            Rank rank = Rank.fromCode("" + code.charAt(0));
+            Suit suit = Suit.fromCode("" + code.charAt(1));
             c = new Card(suit, rank);
         }
         return c;

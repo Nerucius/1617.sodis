@@ -1,5 +1,6 @@
 package poker5cardgame.game;
 
+import java.util.Arrays;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
 import java.util.HashMap;
@@ -215,7 +216,8 @@ public class Game {
                     + (chips == -1 ? "" : " " + chips)
                     + (cStakes == -1 ? "" : " " + cStakes)
                     + (sStakes == -1 ? "" : " " + sStakes)
-                    + (dealer == -1 ? "" : " " + dealer);
+                    + (dealer == -1 ? "" : " " + dealer)
+                    + (cards == null ? "" : " " + Arrays.toString(cards));
             return str;
         }
 

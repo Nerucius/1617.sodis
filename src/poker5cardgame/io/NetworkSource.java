@@ -88,6 +88,7 @@ public class NetworkSource implements Source {
                     break;
                 case DRAW:
                     // If any cards were requested, get the Card array
+                    move.action = Action.DRAW;
                     if (packet.getField("number", Integer.class) > 0)
                         move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
@@ -224,7 +225,7 @@ public class NetworkSource implements Source {
     /**
      * Convert an array of cards to a String of card codes separated by " "
      */
-    private String cardsToCodeString(Card[] cards) {
+    public static String cardsToCodeString(Card[] cards) {
         String[] codes = new String[cards.length];
 
         for (int i = 0; i < cards.length; i++)
@@ -236,7 +237,7 @@ public class NetworkSource implements Source {
     /**
      * Convert an array of cards to an array of card codes
      */
-    private Card[] cardsFromCodeString(String cards) {
+    public static Card[] cardsFromCodeString(String cards) {
         String[] cardsplits = cards.split(" ");
         
         // Returns zero lenght arrays some times -> its OK
