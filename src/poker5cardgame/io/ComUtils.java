@@ -101,6 +101,9 @@ public class ComUtils {
             case BET:
                 packet.putField("chips", read_int32());
                 break;
+            case RAISE:
+                packet.putField("chips", read_int32());
+                break;
             case DRAW:
                 // TODO imlement method to read DRAW msg
                 break;

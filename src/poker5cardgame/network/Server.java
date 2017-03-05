@@ -86,7 +86,7 @@ public class Server implements Runnable {
             while (true) {
 
                 Game.Move m = source.getNextMove();
-                System.out.println(m.action + " " + m.id);
+                System.out.println(m.toString());
 
             }
 

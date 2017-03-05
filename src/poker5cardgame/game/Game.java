@@ -87,12 +87,12 @@ public class Game {
                 // Decide on a dealer and update the flag
                 sMove.dealer = Math.random() > 0.5 ? 1 : 0;
                 isServerTurn = sMove.dealer == 1;
-                
+
                 // Shuffle the Deck and draw a hand.
                 deck.generate();
                 cHand.generate(deck);
                 sHand.generate(deck);
-                
+
                 sMove.cards = new Card[5];
                 cHand.getCards().toArray(sMove.cards);
 
@@ -142,8 +142,8 @@ public class Game {
     public void apply(Game.Action action) {
         if (action == Action.NOOP)
             return;
-        
-        if(action == Action.TERMINATE){
+
+        if (action == Action.TERMINATE) {
             System.err.println("Game: Terminating Game now due to Error");
             this.state = State.QUIT;
             return;
@@ -175,11 +175,11 @@ public class Game {
             // Special case for NetworkSoruce, send an error packet
             if (source instanceof NetworkSource) {
                 Packet packet = new Packet(Network.Command.ERROR);
-                packet.putWrittable(new Writable.VariableString(2, "PROTOCOL ERROR"));                
-                NetworkSource src = (NetworkSource)source;
+                packet.putWrittable(new Writable.VariableString(2, "PROTOCOL ERROR"));
+                NetworkSource src = (NetworkSource) source;
                 src.getCom().write_NetworkPacket(packet);
             }
-            
+
         }
     }
 
@@ -194,23 +194,35 @@ public class Game {
 
         public Game.Action action;
         // Client Game ID
-        public int id;
+        public int id = -1;
         // Generic chips param for ANTE, BET or RAISE
-        public int chips;
+        public int chips = -1;
         // Client and server Stakes
-        public int cStakes, sStakes;
+        public int cStakes = -1, sStakes = -1;
         // Dealer Flag, 1 for Client dealer, 0 for server dealer
-        public int dealer;
+        public int dealer = -1;
         // Array of cards to deal or discard
-        public Card[] cards;
+        public Card[] cards = null;
 
         public Move() {
             action = Action.NOOP;
         }
+
+        @Override
+        public String toString() {
+            String str = action.toString()
+                    + (id == -1 ? "" : " " + id)
+                    + (chips == -1 ? "" : " " + chips)
+                    + (cStakes == -1 ? "" : " " + cStakes)
+                    + (sStakes == -1 ? "" : " " + sStakes)
+                    + (dealer == -1 ? "" : " " + dealer);
+            return str;
+        }
+
     }
 
     public enum Action {
-        CLIENT_START,
+        START,
         SEND_ANTE_STAKES,
         STAKES,
         QUIT,
@@ -256,7 +268,7 @@ public class Game {
         for (State state : State.values()) {
             switch (state) {
                 case INIT:
-                    state.transitions.put(Action.CLIENT_START, State.START);
+                    state.transitions.put(Action.START, State.START);
                     break;
                 case START:
                     state.transitions.put(Action.SEND_ANTE_STAKES, State.ACCEPT_ANTE);

@@ -51,8 +51,8 @@ public class NetworkSource implements Source {
         // TODO Fill in all cases
         switch (packet.command) {
             case START:
-                move.action = Action.CLIENT_START;
-                //move.id = Integer.valueOf(packet.args[0]);
+                move.action = Action.START;
+                move.id = packet.getField("id", Integer.class);
                 break;
 
             case ANTE:
@@ -75,13 +75,13 @@ public class NetworkSource implements Source {
                 move.action = Action.DEALER_HAND;
                 //move.cards = cardsFromCodeString(packet.args[0]);
                 break;
-            case PASS:
+            case RAISE:
+                move.action = Action.RAISE;
+                move.chips = packet.getField("chips", Integer.class);
                 break;
             case BET:
-                break;
-            case CALL:
-                break;
-            case FOLD:
+                move.action = Action.BET;
+                move.chips = packet.getField("chips", Integer.class);
                 break;
             case DRAW:
                 break;
@@ -113,7 +113,7 @@ public class NetworkSource implements Source {
         Packet[] packets = new Packet[2];
 
         switch (move.action) {
-            case CLIENT_START:
+            case START:
                 packets[0] = new Packet(Network.Command.START);
                 packets[0].putField("id", move.id);
                 break;

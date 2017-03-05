@@ -3,8 +3,6 @@ package poker5cardgame;
 import java.util.Scanner;
 import poker5cardgame.game.Game;
 import poker5cardgame.network.Client;
-import poker5cardgame.network.Network;
-import poker5cardgame.network.Packet;
 import poker5cardgame.network.Server;
 
 public class Poker5CardGame {
@@ -35,8 +33,12 @@ public class Poker5CardGame {
 
                 Game.Move m = new Game.Move();
                 m.action = Game.Action.valueOf(ls[0]);
-                //m.id = Integer.valueOf(ls[1]);
-                m.chips = Integer.valueOf(ls[1]);
+                if(ls.length > 1) m.id = Integer.valueOf(ls[1]);
+                if(ls.length > 1) m.chips = Integer.valueOf(ls[1]);
+                if(ls.length > 1) m.dealer = Integer.valueOf(ls[1]);
+                if(ls.length > 1) m.cStakes = Integer.valueOf(ls[1]);
+                if(ls.length > 2) m.sStakes = Integer.valueOf(ls[2]);
+                
                 c.getOutSource().sendMove(m);
 
             }
