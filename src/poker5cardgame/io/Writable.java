@@ -59,7 +59,7 @@ public interface Writable {
 
         @Override
         public java.lang.String toString() {
-            return str;
+            return java.lang.String.format("%02d%s", str.length(), str);
         }
 
     }
@@ -78,7 +78,7 @@ public interface Writable {
 
         @Override
         public void write(ComUtils out) throws IOException {
-            out.write_int32(i.intValue());
+            out.write_int32(i);
         }
 
         @Override

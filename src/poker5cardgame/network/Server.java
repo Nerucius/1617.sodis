@@ -91,7 +91,12 @@ public class Server implements Runnable {
                     System.out.println("Server: Received TERMINATE packet.");
                     break;
                 }
-                System.out.println(m.toString());
+                System.out.println("Server: Echoing " + m.action);
+
+                Game.Move echo = new Game.Move();
+                echo.action = Game.Action.ERROR;
+                echo.error = m.toString();
+                source.sendMove(echo);
 
             }
 

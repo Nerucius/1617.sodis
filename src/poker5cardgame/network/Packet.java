@@ -61,12 +61,16 @@ public class Packet implements Writable {
     public void write(ComUtils out) throws IOException {
         // Write command code
         out.write_string_pure(command.code);
+        //System.out.print("Packet: "+command.code);
 
         // Write a list of arguments
         for (Entry e : entries) {
             out.write_string_pure(" ");
             e.writable.write(out);
+            //System.out.print(" "+e.writable.toString());
         }
+        
+        //System.out.print("\n");
     }
 
     /**

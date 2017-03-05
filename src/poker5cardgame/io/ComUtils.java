@@ -14,7 +14,7 @@ public class ComUtils {
 
     /* Objectes per escriure i llegir dades */
     private DataInputStream dis;
-    private DataOutputStream dos;
+    //private DataOutputStream dos;
     //private BufferedInputStream bis;
     private BufferedOutputStream bos;
     protected Socket socket;
@@ -23,7 +23,7 @@ public class ComUtils {
         try {
             this.socket = socket;
             dis = new DataInputStream(socket.getInputStream());
-            dos = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
             // Buffered versions -> Only 1 TCP packet per command. More stable reads
             //bis = new BufferedInputStream(dis);
@@ -60,7 +60,6 @@ public class ComUtils {
             packet.command = Command.NET_ERROR;
 
         } catch (IllegalArgumentException e) {
-            System.err.println("CU: Malformed PROTOCOL code");
             packet.command = Command.ERROR;
             packet.putField("error", "Malformed PROTOCOL code");
         }
@@ -193,7 +192,7 @@ public class ComUtils {
         for (int i = numBytes; i < STRSIZE; i++)
             bStr[i] = (byte) ' ';
 
-        dos.write(bStr, 0, STRSIZE);
+        bos.write(bStr, 0, STRSIZE);
     }
 
     public void write_string_pure(String str) throws IOException {
@@ -289,9 +288,9 @@ public class ComUtils {
         for (int i = 0; i < size; i++)
             bHeader[i] = (byte) strHeader.charAt(i);
         // Enviem la capçalera
-        dos.write(bHeader, 0, size);
+        bos.write(bHeader, 0, size);
         // Enviem l'string writeBytes de DataOutputStrem no envia el byte més alt dels chars.
-        dos.writeBytes(str);
+        write_string_pure(str);
     }
 
     /**

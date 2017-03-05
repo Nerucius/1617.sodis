@@ -217,7 +217,8 @@ public class Game {
                     + (cStakes == -1 ? "" : " " + cStakes)
                     + (sStakes == -1 ? "" : " " + sStakes)
                     + (dealer == -1 ? "" : " " + dealer)
-                    + (cards == null ? "" : " " + Arrays.toString(cards));
+                    + (cards == null ? "" : " " + Arrays.toString(cards))
+                    + (error == null ? "" : " " + error);
             return str;
         }
 

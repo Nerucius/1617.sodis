@@ -13,12 +13,13 @@ public class Client {
 
     public Client() {
     }
-
+    
     public void connect(String IP, int port) {
         try {
             InetAddress address = InetAddress.getByName(IP);
             Socket sock = new Socket(address, port);
             outSource = new NetworkSource(sock);
+            inSource = outSource;
             System.err.println("Client: Connected to Server on IP:" + IP + ".");
 
         } catch (Exception ex) {
@@ -27,6 +28,10 @@ public class Client {
 
     }
 
+    public boolean isConnected(){
+        return (outSource != null);
+    }
+    
     public void close() {
         if (outSource == null) {
             System.err.println("Client: Not connected. Can't close()");

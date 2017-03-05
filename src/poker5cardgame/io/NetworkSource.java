@@ -126,8 +126,8 @@ public class NetworkSource implements Source {
                     break;
                     
                 case ERROR:
-                    System.err.println(packet.getField("error", String.class));
-                    move.action = Action.NOOP;
+                    move.action = Action.ERROR;
+                    move.error = packet.getField("error", String.class);
                     break;
                     
                 case NET_ERROR:

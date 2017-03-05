@@ -11,11 +11,11 @@ public class Poker5CardGame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String... args) {       
+    public static void main(String... args) {
         // Read console input
         Scanner sc = new Scanner(System.in);
         String line;
-        Client c = null;
+        final Client c = new Client();
 
         while (!(line = sc.nextLine()).equals("q")) {
             String[] ls = line.split(" ");
@@ -27,17 +27,26 @@ public class Poker5CardGame {
 
             } else if (ls[0].equals("connect")) {
                 // Type "connect" to connecto to localhost
-                c = new Client();
                 c.connect(ls[1], 1212);
-                
-                
+                if (!c.isConnected())
+                    continue;
+                // Begin echo listen
+                new Thread(new Runnable() {
+                    public void run() {
+                        while (true) {
+                            System.out.println("Client: Listening for echo...");
+                            Game.Move m = c.getInSource().getNextMove();
+                            System.out.println(m);
+                        }
+                    }
+                }).start();
+
             } else if (ls[0].equals("close")) {
                 // Type "close" to terminate client
                 c.close();
-                c = null;
 
             } else if (c != null) {
-                
+
                 // test card array
                 Card[] cards = new Card[5];
                 cards[0] = Card.fromCode("10S");
@@ -45,7 +54,7 @@ public class Poker5CardGame {
                 cards[2] = Card.fromCode("3S");
                 cards[3] = Card.fromCode("4S");
                 cards[4] = Card.fromCode("5S");
-                
+
                 Game.Move m = new Game.Move();
                 m.cards = cards;
                 m.action = Game.Action.valueOf(ls[0]);

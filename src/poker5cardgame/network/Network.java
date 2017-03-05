@@ -45,7 +45,7 @@ public class Network {
          * To be intercepted by Sources, Indicates the channel has been
          * terminated
          */
-        NET_ERROR("NERR");
+        NET_ERROR("-");
 
         public String code;
 
