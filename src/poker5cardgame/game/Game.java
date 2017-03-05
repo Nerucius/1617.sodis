@@ -1,9 +1,11 @@
 package poker5cardgame.game;
 
+import poker5cardgame.io.NetworkSource;
+import poker5cardgame.io.Source;
 import java.util.HashMap;
 import java.util.Map;
 import poker5cardgame.network.Network;
-import poker5cardgame.network.Writable;
+import poker5cardgame.io.Writable;
 
 /**
  * Finite State Machine for the Game State
@@ -172,9 +174,9 @@ public class Game {
             // Special case for NetworkSoruce, send an error packet
             if (source instanceof NetworkSource) {
                 Writable[] msg = new Writable[]{new Writable.String("PROTOCOL ERROR")};
-                Network.Packet packet = new Network.Packet(Network.Command.ERROR, msg);
+                Network.WritablePacket packet = new Network.WritablePacket(Network.Command.ERROR, msg);
                 NetworkSource src = (NetworkSource)source;
-                src.getNetwork().write_NetworkPacket(packet);
+                src.getCom().write_NetworkPacket(packet);
             }
             
         }
@@ -189,17 +191,17 @@ public class Game {
      */
     public static class Move {
 
-        Game.Action action;
+        public Game.Action action;
         // Client Game ID
-        int id;
+        public int id;
         // Generic chips param for ANTE, BET or RAISE
-        int chips;
+        public int chips;
         // Client and server Stakes
-        int cStakes, sStakes;
+        public int cStakes, sStakes;
         // Dealer Flag, 1 for Client dealer, 0 for server dealer
-        int dealer;
+        public int dealer;
         // Array of cards to deal or discard
-        Card[] cards;
+        public Card[] cards;
 
         public Move() {
             action = Action.NOOP;

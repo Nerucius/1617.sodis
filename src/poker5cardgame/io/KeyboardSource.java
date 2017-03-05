@@ -3,10 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package poker5cardgame.game;
+package poker5cardgame.io;
 
+import poker5cardgame.io.Source;
 import java.util.Arrays;
 import java.util.Scanner;
+import poker5cardgame.game.Card;
+import poker5cardgame.game.Game;
 
 /**
  * Simple Keyboard source to play the game on the same computer.
@@ -64,7 +67,7 @@ public class KeyboardSource implements Source {
 
         // Optional Arguments
         switch (move.action) {
-            case ANTE_STAKES:
+            case SEND_ANTE_STAKES:
                 System.out.println("ANTE: " + move.chips);
                 System.out.println("STAKES: " + move.cStakes + " " + move.sStakes);
                 break;

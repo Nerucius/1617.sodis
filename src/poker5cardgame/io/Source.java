@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package poker5cardgame.game;
+package poker5cardgame.io;
 
 import poker5cardgame.game.Game.Move;
 

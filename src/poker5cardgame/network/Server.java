@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import poker5cardgame.game.NetworkSource;
+import poker5cardgame.game.Game;
+import poker5cardgame.io.NetworkSource;
 
 public class Server implements Runnable {
 
@@ -44,6 +45,7 @@ public class Server implements Runnable {
             // Main loop for accepting new Connections
             while (true) {
                 Socket client = serverSocket.accept();
+                System.out.println("Server: New Client connected from " + client.getInetAddress());
                 new Thread(new HandlerRunnable(client)).start();
             }
 
@@ -72,23 +74,22 @@ public class Server implements Runnable {
     private class HandlerRunnable implements Runnable {
 
         NetworkSource source;
-        ComUtils com;
 
         public HandlerRunnable(Socket sock) {
-            com = new ComUtils(sock);
+            source = new NetworkSource(sock);
         }
 
         @Override
         public void run() {
-            try {
-                while (true) {
-                    String str = com.read_string_variable(4);
-                    System.out.println("echo: " + str);
-                }
-            } catch (IOException ex) {
-                System.err.println("Client Failure. Connection Closed");
+
+            // Main Server <-> Client Loop
+            while (true) {
+
+                Game.Move m = source.getNextMove();
+                System.out.println(m.action + " " + m.id);
+
             }
+
         }
     }
-
 }

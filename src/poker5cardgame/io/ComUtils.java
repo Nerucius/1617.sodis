@@ -1,32 +1,35 @@
-package poker5cardgame.network;
+package poker5cardgame.io;
 
 import java.net.*;
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import poker5cardgame.game.Game;
-import poker5cardgame.game.Source;
+import poker5cardgame.network.Network;
 import poker5cardgame.network.Network.Command;
-import poker5cardgame.network.Network.Packet;
+import poker5cardgame.network.Packet;
 
-public class ComUtils{
+public class ComUtils {
 
     /* Mida d'una cadena de caracters */
-    private final int STRSIZE = 40;
+    private final int STRSIZE = 32;
+
     /* Objectes per escriure i llegir dades */
     private DataInputStream dis;
     private DataOutputStream dos;
+    protected Socket socket;
 
     public ComUtils(Socket socket) {
-        
         try {
+            this.socket = socket;
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
         } catch (IOException ex) {
-            System.err.println("Failed to Open Socket");
+            System.err.println("COM: Failed to Open Socket");
         }
     }
-    
+
+    public Socket getSocket() {
+        return socket;
+    }
+
     /**
      * Reads the next Network Packet received by the server and returns it for
      * further processing.
@@ -34,67 +37,81 @@ public class ComUtils{
      * @return received Network Packet.
      */
     public Packet read_NetworkPacket() {
-        Packet pkt = null;
+        Packet packet = new Packet(null);
+        
         try {
-            String opcode = new String(read_bytes(4));
-            Command com = Network.Command.identifyPacket(opcode);
+            // Read first 4 bytes (4 chars) to identify code
+            String opcode = read_chars(4);
+            packet.command = Network.Command.identifyPacket(opcode);
+            read_PacketArgs(packet);
 
-            String args[] = read_PacketArgs(com);
-            pkt = new Packet(com, args);
-
-        } catch (IOException ex) {
-            System.err.println("Error Reading Network Packet");
+        } catch (IOException e) {
+            System.err.println("CU: Error Reading socket");
+            packet.command = Command.NET_ERROR;
+            
+        } catch (IllegalArgumentException e) {
+            System.err.println("CU: Malformed PROTOCOL code");
+            packet.command = Command.ERROR;
+            packet.putField("error", "Malformed PROTOCOL code");
         }
 
-        return pkt;
+        return packet;
     }
-    
-    public void write_NetworkPacket(Packet packet){
-        System.out.println("NETWORK: Wrote" + packet.command);
-        // TODO Implement writting for every command type
+
+    /**
+     * Returns true if could be sent. False if there was a problem
+     *
+     * @param packet Packet to send over the net
+     * @return
+     */
+    public boolean write_NetworkPacket(Writable packet) {
+        try {
+            // Packet knows how to write itself. yay
+            packet.write(this);
+            return true;
+        } catch (IOException e) {
+            System.err.println("CU: Error sending Packet");
+            return false;
+        }
     }
-    
-    
-    private String[] read_PacketArgs(Command com) throws IOException {
-        String args[] = null;
+
+    private void read_PacketArgs(Packet packet) throws IOException {
+        read_bytes(1); // Consume Space
 
         // TODO Implement reading packet args for every command type
-        switch (com) {
+        switch (packet.command) {
             case START:
+                packet.putField("id", read_int32());
                 break;
             case ANTE:
+                packet.putField("ante", read_int32());
                 break;
             case STAKES:
-                break;
-            case ANTE_OK:
-                break;
-            case QUIT:
+                packet.putField("stakes_client", read_int32());
+                read_bytes(1);
+                packet.putField("stakes_server", read_int32());
                 break;
             case DEALER:
+                packet.putField("dealer", read_int32());
                 break;
             case HAND:
-                break;
-            case PASS:
+                // TODO Implement method to read cards from the net
+                packet.putField("cards", read_int32());
                 break;
             case BET:
-                break;
-            case CALL:
-                break;
-            case FOLD:
+                packet.putField("chips", read_int32());
                 break;
             case DRAW:
+                // TODO imlement method to read DRAW msg
                 break;
             case DRAW_SERVER:
-                break;
-            case SHOWDOWN:
+                // TODO implement method to read DRWS msg
                 break;
             case ERROR:
-                String errorMsg = read_string_variable(2);
-                args = new String[]{errorMsg};
+                packet.putField("error", read_string_variable(2));
                 break;
 
         }
-        return args;
     }
 
     /* Llegir un enter de 32 bits */
@@ -129,6 +146,14 @@ public class ComUtils{
         return str.trim();
     }
 
+    /** Read a specified number of chars(1 byte each) from the stream */
+    public String read_chars(int num) throws IOException {
+        char[] chars = new char[4];
+        for(int i = 0; i < num; i++)
+            chars[i] = (char)dis.readUnsignedByte();
+        return new String(chars);
+    }
+
     /* Escriure un string */
     public void write_string(String str) throws IOException {
         int numBytes, lenStr;
@@ -148,6 +173,10 @@ public class ComUtils{
             bStr[i] = (byte) ' ';
 
         dos.write(bStr, 0, STRSIZE);
+    }
+
+    public void write_string_pure(String str) throws IOException {
+        dos.writeBytes(str);
     }
 
     /* Passar d'enters a bytes */
