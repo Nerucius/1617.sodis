@@ -3,6 +3,7 @@ package poker5cardgame.game;
 import java.util.HashMap;
 import java.util.Map;
 import poker5cardgame.network.Network;
+import poker5cardgame.network.Writable;
 
 /**
  * Finite State Machine for the Game State
@@ -59,7 +60,7 @@ public class Game {
                 // which will send 2 packets to the client and advance the
                 // Game state
                 sMove = new Move();
-                sMove.action = Action.ANTE_STAKES;
+                sMove.action = Action.SEND_ANTE_STAKES;
                 sMove.chips = anteBet;
                 sMove.cStakes = 1000; // TODO Read client stakes from some stakes database indexed by client
                 sMove.sStakes = serverChips;
@@ -67,7 +68,7 @@ public class Game {
                 apply(sMove.action);
                 break;
 
-            case ANTE:
+            case ACCEPT_ANTE:
                 // We wait for ANTE_OK or QUIT
                 cMove = source.getNextMove();
                 apply(cMove.action);
@@ -138,6 +139,12 @@ public class Game {
     public void apply(Game.Action action) {
         if (action == Action.NOOP)
             return;
+        
+        if(action == Action.TERMINATE){
+            System.err.println("Game: Terminating Game now due to Error");
+            this.state = State.QUIT;
+            return;
+        }
 
         if (this.state.transitions.containsKey(action)) {
 
@@ -164,7 +171,7 @@ public class Game {
 
             // Special case for NetworkSoruce, send an error packet
             if (source instanceof NetworkSource) {
-                String[] msg = {"Illegal Action Error"};
+                Writable[] msg = new Writable[]{new Writable.String("PROTOCOL ERROR")};
                 Network.Packet packet = new Network.Packet(Network.Command.ERROR, msg);
                 NetworkSource src = (NetworkSource)source;
                 src.getNetwork().write_NetworkPacket(packet);
@@ -200,8 +207,8 @@ public class Game {
     }
 
     public enum Action {
-        START,
-        ANTE_STAKES,
+        CLIENT_START,
+        SEND_ANTE_STAKES,
         STAKES,
         QUIT,
         ANTE_OK,
@@ -214,14 +221,16 @@ public class Game {
         DRAW,
         DRAW_SERVER,
         SHOW,
-        NOOP
+        NOOP,
+        // Special command to terminate the Game anytime
+        TERMINATE;
     }
 
     // TODO Evaluate best possible state list
     public enum State {
         INIT,
         START,
-        ANTE,
+        ACCEPT_ANTE,
         PLAY,
         BETTING,
         BETTING_DEALER,
@@ -244,12 +253,12 @@ public class Game {
         for (State state : State.values()) {
             switch (state) {
                 case INIT:
-                    state.transitions.put(Action.START, State.START);
+                    state.transitions.put(Action.CLIENT_START, State.START);
                     break;
                 case START:
-                    state.transitions.put(Action.ANTE_STAKES, State.ANTE);
+                    state.transitions.put(Action.SEND_ANTE_STAKES, State.ACCEPT_ANTE);
                     break;
-                case ANTE:
+                case ACCEPT_ANTE:
                     state.transitions.put(Action.ANTE_OK, State.PLAY);
                     state.transitions.put(Action.QUIT, State.QUIT);
                     break;
@@ -280,7 +289,7 @@ public class Game {
                     state.transitions.put(Action.DRAW_SERVER, State.BETTING);
                     break;
                 case SHOWDOWN:
-                    state.transitions.put(Action.STAKES, State.ANTE);
+                    state.transitions.put(Action.STAKES, State.ACCEPT_ANTE);
                     break;
 
             }
