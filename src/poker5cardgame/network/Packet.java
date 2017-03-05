@@ -15,6 +15,9 @@ import java.util.List;
  * A Multipurpose packet. Used to send and receive data from the network.
  * Contains a list of arguments that can be written to a stream or read by name
  * individually.
+ * 
+ * Arguments must be of a type implemented by the {@link Writable}
+ * Interface, otherwise they will not be written to the stream.
  *
  * @author Herman Dempere
  */
@@ -30,7 +33,6 @@ public class Packet implements Writable {
 
     public void putField(java.lang.String name, Object o) {
         entries.add(new Entry(name, o));
-
     }
 
     public <T> T getField(java.lang.String name, Class<T> type) {
@@ -38,6 +40,13 @@ public class Packet implements Writable {
             if (e.name.equals(name))
                 return type.cast(e.object);
         return null;
+    }
+    
+    /** DANGER! USE ONLY IF YOU KNOW WHAT YOU'RE DOING */
+    public void putWrittable(Writable w){
+        Entry e = new Entry(null, null);
+        e.writable = w;
+        entries.add(e);
     }
 
     @Override

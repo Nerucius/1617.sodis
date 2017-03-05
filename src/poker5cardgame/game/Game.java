@@ -4,8 +4,9 @@ import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
 import java.util.HashMap;
 import java.util.Map;
-import poker5cardgame.network.Network;
 import poker5cardgame.io.Writable;
+import poker5cardgame.network.Network;
+import poker5cardgame.network.Packet;
 
 /**
  * Finite State Machine for the Game State
@@ -173,8 +174,8 @@ public class Game {
 
             // Special case for NetworkSoruce, send an error packet
             if (source instanceof NetworkSource) {
-                Writable[] msg = new Writable[]{new Writable.String("PROTOCOL ERROR")};
-                Network.WritablePacket packet = new Network.WritablePacket(Network.Command.ERROR, msg);
+                Packet packet = new Packet(Network.Command.ERROR);
+                packet.putWrittable(new Writable.VariableString(2, "PROTOCOL ERROR"));                
                 NetworkSource src = (NetworkSource)source;
                 src.getCom().write_NetworkPacket(packet);
             }

@@ -40,8 +40,33 @@ public interface Writable {
     }
 
     /**
-     * Writable Integer, can write itself, in a single 4 bytes operation,
-     * onto the Stream.
+     * Writable String, can write itself, byte by byte onto the Stream.
+     */
+    public static class VariableString implements Writable {
+
+        private java.lang.String str;
+        private int len;
+
+        public VariableString(int len, java.lang.String str) {
+            this.len = len;
+            this.str = str;
+        }
+
+        @Override
+        public void write(ComUtils out) throws IOException {
+            out.write_string_variable(len, str);
+        }
+
+        @Override
+        public java.lang.String toString() {
+            return str;
+        }
+
+    }
+
+    /**
+     * Writable Integer, can write itself, in a single 4 bytes operation, onto
+     * the Stream.
      */
     public static class Integer implements Writable {
 
@@ -58,7 +83,7 @@ public interface Writable {
 
         @Override
         public java.lang.String toString() {
-            return i+"";
+            return i + "";
         }
 
     }
