@@ -48,6 +48,8 @@ public class ComUtils {
 
         try {
             // Read first 4 bytes (4 chars) to identify code
+            
+            // TODO Read bytes one by one to detect PROTOCOL CODE
             String opcode = read_chars(4);
             packet.command = Network.Command.identifyPacket(opcode);
             // System.out.println("COM: detected packet: "+packet.command);

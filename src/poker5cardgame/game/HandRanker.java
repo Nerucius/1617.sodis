@@ -6,7 +6,6 @@ import poker5cardgame.game.Card.Rank;
 
 public class HandRanker {
 
-    // <editor-fold defaultstate="collapsed" desc="Data Definition">
     public enum HandRank {
         HIGH_CARD,
         ONE_PAIR,
@@ -30,7 +29,6 @@ public class HandRanker {
             return this.compareTo(other) < 0;
         }
     }
-    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Public Methods">
     public static HandRank getHandRank(Hand hand) {
