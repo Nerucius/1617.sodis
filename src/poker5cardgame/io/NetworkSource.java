@@ -118,6 +118,7 @@ public class NetworkSource implements Source {
                 case DRAW_SERVER:
                     move.action = Action.DRAW_SERVER;
                     move.cards = cardsFromCodeString(packet.getField("cards", String.class));
+                    // TODO Read Server's discarded cards
                     break;
                     
                 case SHOWDOWN:
@@ -198,7 +199,7 @@ public class NetworkSource implements Source {
 
             case DEALER_HAND:
                 packets[0] = new Packet(Network.Command.DEALER);
-                packets[0].putField("chips", move.dealer);
+                packets[0].putField("dealer", move.dealer);
 
                 packets[1] = new Packet(Network.Command.HAND);
                 packets[1].putField("cards", cardsToCodeString(move.cards));
@@ -242,6 +243,7 @@ public class NetworkSource implements Source {
 
             case SHOW:
                 packets[0] = new Packet(Network.Command.SHOWDOWN);
+                // TODO add card array
                 break;
                 
             case ERROR:
@@ -252,7 +254,9 @@ public class NetworkSource implements Source {
         // Write all packets to the network
         for (Packet packet : packets) {
             if (packet != null)
-
+                // TODO Deal with exception inside try-catch
+                
+                
                 if (!comUtils.write_NetworkPacket(packet)) {
                     // Something has gone wrong. Terminate everything
                     try {
