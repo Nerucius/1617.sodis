@@ -4,6 +4,7 @@ import java.util.Scanner;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Game;
 import poker5cardgame.network.Client;
+import poker5cardgame.network.EchoServer;
 import poker5cardgame.network.Server;
 
 public class Poker5CardGame {
@@ -21,7 +22,7 @@ public class Poker5CardGame {
             String[] ls = line.split(" ");
 
             if (ls[0].equals("server")) {
-                Server server = new Server();
+                Server server = new EchoServer();
                 server.bind(1212);
                 server.start();
 
