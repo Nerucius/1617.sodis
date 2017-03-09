@@ -52,7 +52,7 @@ public class NetworkSource implements Source {
         Packet packet = comUtils.read_NetworkPacket();
 
         try {
-            // TODO Fill in all cases
+            // TODO @alex Fill in all cases
             switch (packet.command) {
                 case START:
                     move.action = Action.START;
@@ -75,8 +75,8 @@ public class NetworkSource implements Source {
                     break;
                 case STAKES:
                     move.action = Action.STAKES;
-                    move.sStakes = packet.getField("stakes_client", Integer.class);
-                    move.cStakes = packet.getField("stakes_server", Integer.class);
+                    move.cStakes = packet.getField("stakes_client", Integer.class);
+                    move.sStakes = packet.getField("stakes_server", Integer.class);
                     break;
                 case ANTE_OK:
                     move.action = Action.ANTE_OK;

@@ -74,7 +74,7 @@ public class HandRanker {
                 if (!flush) {
                     Rank trio = (Rank) Hand.getKeysByValue(hDict, 3).get(0);
                     hand.putIntoRankDict(HandRank.THREE_OF_A_KIND, trio);
-                    // TODO: Information about the 2 remaining cards should be treated appart (not in rankDict)
+                    // TODO @sonia Information about the 2 remaining cards should be treated appart (not in rankDict)
                     return HandRank.THREE_OF_A_KIND;
                 }
                 return HandRank.FLUSH;
@@ -83,7 +83,7 @@ public class HandRanker {
                 if (!flush) {
                     Rank pair = (Rank) Collections.min(Hand.getKeysByValue(hDict, 2));
                     hand.putIntoRankDict(HandRank.ONE_PAIR, pair);
-                    // TODO: Information about the 3 remaining cards should be treated appart (not in rankDict)
+                    // TODO @sonia Information about the 3 remaining cards should be treated appart (not in rankDict)
                     return HandRank.ONE_PAIR;
                 }
                 return HandRank.FLUSH;

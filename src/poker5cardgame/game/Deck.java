@@ -13,7 +13,9 @@ public final class Deck {
     // <editor-fold defaultstate="collapsed" desc="Constructors">
     public Deck() {
         this.deck = new ArrayList<>();
-        // this.generate(); // TODO ASK @alex: why is this commented?
+        // this.generate();
+        // ---- ASK @alex: why is this commented?
+        // TODO REPLY: Because it's better to call generate when you need it.
     }
     // </editor-fold>
 

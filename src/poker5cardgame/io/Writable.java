@@ -83,7 +83,7 @@ public interface Writable {
 
         @Override
         public java.lang.String toString() {
-            return i + "";
+            return "'" + i + "'";
         }
 
     }

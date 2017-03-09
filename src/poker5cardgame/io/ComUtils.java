@@ -8,6 +8,8 @@ import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
 
 public class ComUtils {
+    
+    // TODO @alex Implement Socket Timeouts
 
     /* Mida d'una cadena de caracters */
     private final int STRSIZE = 32;
@@ -36,7 +38,7 @@ public class ComUtils {
     public Socket getSocket() {
         return socket;
     }
-    
+
     /**
      * Reads the next Network Packet received by the server and returns it for
      * further processing.
@@ -49,17 +51,19 @@ public class ComUtils {
         try {
             // Read first 4 bytes (4 chars) to identify code
             byte[] nextBytes = read_bytes(4);
-            
+
             // While the current 4 bytes are not a valid command, read one more byte
-            while(!Network.Command.isValid(new String(nextBytes))){
-                // TODO @alex send error
+            while (!Network.Command.isValid(new String(nextBytes))) {
+                // Send an error packet every time this fails
+                send_error_packet("Invalid PROTOCOL Code");
+                // Move last 3 bytes back, and read one more
                 System.arraycopy(nextBytes, 1, nextBytes, 0, 3);
-                nextBytes[3] = read_bytes(1)[0];               
+                nextBytes[3] = read_bytes(1)[0];
             }
-            
+
             String opCode = new String(nextBytes);
             opCode = opCode.toUpperCase();
-     
+
             packet.command = Network.Command.identifyCode(opCode);
             // System.out.println("COM: detected packet: "+packet.command);
             // Read arguments from Stream if applicable
@@ -84,7 +88,7 @@ public class ComUtils {
      * @param packet Packet to send over the net
      * @return
      */
-    public boolean write_NetworkPacket(Writable packet) {
+    public boolean write_NetworkPacket(Packet packet) {
         try {
             // Packet knows how to write itself. yay
             packet.write(this);
@@ -98,8 +102,8 @@ public class ComUtils {
 
     private void read_PacketArgs(Packet packet) throws IOException {
         read_bytes(1); // Consume Space
-        
-        // TODO Implement reading packet args for every command type
+
+        // TODO @alex Implement reading packet args for every command type
         switch (packet.command) {
             case START:
                 packet.putField("id", read_int32());
@@ -108,7 +112,6 @@ public class ComUtils {
                 packet.putField("chips", read_int32());
                 break;
             case STAKES:
-                // TODO @alex esta flipat schips<->cchips
                 packet.putField("stakes_client", read_int32());
                 read_bytes(1);
                 packet.putField("stakes_server", read_int32());
@@ -128,13 +131,13 @@ public class ComUtils {
             case DRAW:
                 int drawCount = read_int32();
                 packet.putField("number", drawCount);
-                if (drawCount > 0){
+                if (drawCount > 0) {
                     read_bytes(1); // Consume space
                     packet.putField("cards", read_cards(drawCount));
                 }
                 break;
             case DRAW_SERVER:
-                // TODO implement method to read DRWS msg
+                // TODO @alex implement method to read DRWS msg
                 // PROBLEM : Needs to know if expects cards or not
                 break;
             case ERROR:
@@ -143,7 +146,13 @@ public class ComUtils {
 
         }
     }
-
+    
+        private void send_error_packet(String str){
+        Packet p = new Packet(Command.ERROR);
+        p.putWrittable(new Writable.VariableString(2, str));
+        write_NetworkPacket(p);
+    }
+        
     /* Llegir un enter de 32 bits */
     public int read_int32() throws IOException {
         byte bytes[] = new byte[4];
@@ -308,29 +317,30 @@ public class ComUtils {
     /**
      * Reads a stream of card codes and returns a Card[] interpretation.
      * Automatically consumes spaces in between cards.
-     * 
+     *
      * @param num Number of cards to read
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     private String read_cards(int num) throws IOException {
         String[] cards = new String[num];
 
         for (int i = 0; i < num; i++) {
-            if(i != 0) read_bytes(1); // Consume space after the first card
+            if (i != 0)
+                read_bytes(1); // Consume space after the first card
             char[] cs = new char[3];
-            cs[0] = (char)read_bytes(1)[0];
-            cs[1] = (char)read_bytes(1)[0];
-            
+            cs[0] = (char) read_bytes(1)[0];
+            cs[1] = (char) read_bytes(1)[0];
+
             if (cs[0] == '1') {
                 // Read last character for 10X cards
-                cs[2] = (char)read_bytes(1)[0];
+                cs[2] = (char) read_bytes(1)[0];
                 cards[i] = String.valueOf(cs);
             } else {
                 // Cut array to 2 places otherwise
                 cards[i] = String.valueOf(Arrays.copyOf(cs, 2));
             }
-            
+
         }
         return String.join(" ", cards);
     }
