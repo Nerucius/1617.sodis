@@ -52,6 +52,7 @@ public class ComUtils {
             
             // While the current 4 bytes are not a valid command, read one more byte
             while(!Network.Command.isValid(new String(nextBytes))){
+                // TODO @alex send error
                 System.arraycopy(nextBytes, 1, nextBytes, 0, 3);
                 nextBytes[3] = read_bytes(1)[0];               
             }
@@ -107,6 +108,7 @@ public class ComUtils {
                 packet.putField("chips", read_int32());
                 break;
             case STAKES:
+                // TODO @alex esta flipat schips<->cchips
                 packet.putField("stakes_client", read_int32());
                 read_bytes(1);
                 packet.putField("stakes_server", read_int32());

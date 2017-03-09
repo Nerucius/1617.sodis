@@ -14,6 +14,8 @@ import poker5cardgame.network.Packet;
  */
 public class Game {
 
+    // TODO @sonia Extreure totes les variables del joc a una nova clase que encapsuli les dades (Model/data)
+    
     // Game Resources
     private Source source;
     private Deck deck;
@@ -47,7 +49,7 @@ public class Game {
      * Run the game with the next iteration of commands
      */
     public void update() {
-        // TODO implement game logic for all states
+        // TODO @sonia Acabar la logica de tots els estats i comprovar que seguim el protocol
         Move cMove;
         Move sMove;
 
@@ -55,7 +57,11 @@ public class Game {
 
             case INIT:
                 // Game Init, waiting for the START action
+                // TODO @sonia metode pq cmove sigui valid 
                 cMove = source.getNextMove();
+                while(!state.transitions.containsKey(cMove.action))
+                    cMove = source.getNextMove();
+                
                 apply(cMove.action);
                 break;
 
@@ -104,11 +110,11 @@ public class Game {
             case BETTING:
                 if (isServerTurn) {
                     // On our turn, we pass
+                    
+                    // sMove = ia.getMoveForGame(Game g)
                     sMove = new Move();
                     sMove.action = Action.PASS;
                     source.sendMove(sMove);
-
-                    isServerTurn = !isServerTurn;
                     apply(sMove.action);
                 } else {
                     // On player turn, we read his move
@@ -118,6 +124,8 @@ public class Game {
                     }
                     apply(cMove.action);
                 }
+                
+                isServerTurn = !isServerTurn;
                 break;
 
             case BETTING_DEALER:
