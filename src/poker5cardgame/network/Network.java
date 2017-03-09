@@ -52,17 +52,21 @@ public class Network {
         private Command(String code) {
             this.code = code;
         }
+        
+        static public boolean isValid(String str)
+        {
+            return (identifyCode(str) != null);
+        }
 
-        protected boolean isPacket(String command) {
+        protected boolean isCode(String command) {
             return command.equalsIgnoreCase(this.code);
         }
 
-        static public Command identifyPacket(String code) {
-            for (Command p : Command.values())
-                if (p.isPacket(code))
-                    return p;
-
-            throw new IllegalArgumentException("Unidentified Packet");
+        static public Command identifyCode(String code) {
+            for (Command c : Command.values())
+                if (c.isCode(code))
+                    return c;
+            return null;
         }
 
     }

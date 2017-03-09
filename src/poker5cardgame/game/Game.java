@@ -25,7 +25,7 @@ public class Game {
     private boolean round2 = false;
     private boolean isServerTurn;
     private int anteBet = 100;
-    private int serverChips = 10000, clientChips;
+    private int serverChips = 10000, clientChips = 1000;
     private int clientBet, serverBet;
 
     /**
@@ -66,7 +66,7 @@ public class Game {
                 sMove = new Move();
                 sMove.action = Action.ANTE_STAKES;
                 sMove.chips = anteBet;
-                sMove.cStakes = 1000; // TODO Read client stakes from some stakes database indexed by client
+                sMove.cStakes = clientChips;
                 sMove.sStakes = serverChips;
                 source.sendMove(sMove);
                 apply(sMove.action);
@@ -246,7 +246,6 @@ public class Game {
         TERMINATE;
     }
 
-    // TODO Evaluate best possible state list
     public enum State {
         INIT,
         START,

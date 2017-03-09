@@ -29,14 +29,14 @@ public class ComUtils {
             //bis = new BufferedInputStream(dis);
             bos = new BufferedOutputStream(dos);
         } catch (IOException ex) {
-            System.err.println("COM: Failed to Open Socket");
+            System.err.println("CU: Failed to Open Socket");
         }
     }
 
     public Socket getSocket() {
         return socket;
     }
-
+    
     /**
      * Reads the next Network Packet received by the server and returns it for
      * further processing.
@@ -48,17 +48,25 @@ public class ComUtils {
 
         try {
             // Read first 4 bytes (4 chars) to identify code
+            byte[] nextBytes = read_bytes(4);
             
-            // TODO Read bytes one by one to detect PROTOCOL CODE
-            String opcode = read_chars(4);
-            packet.command = Network.Command.identifyPacket(opcode);
+            // While the current 4 bytes are not a valid command, read one more byte
+            while(!Network.Command.isValid(new String(nextBytes))){
+                System.arraycopy(nextBytes, 1, nextBytes, 0, 3);
+                nextBytes[3] = read_bytes(1)[0];               
+            }
+            
+            String opCode = new String(nextBytes);
+            opCode = opCode.toUpperCase();
+     
+            packet.command = Network.Command.identifyCode(opCode);
             // System.out.println("COM: detected packet: "+packet.command);
             // Read arguments from Stream if applicable
             if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
 
         } catch (IOException e) {
-            System.err.println("CU: Error Reading socket");
+            System.err.println("CU: Socket closed");
             packet.command = Command.NET_ERROR;
 
         } catch (IllegalArgumentException e) {
