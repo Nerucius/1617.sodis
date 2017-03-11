@@ -240,7 +240,7 @@ public class NetworkSource implements Source {
 
             case SHOW:
                 packets[0] = new Packet(Network.Command.SHOWDOWN);
-                // TODO add card array
+                packets[0].putField("cards", cardsToCodeString(move.cards));
                 break;
                 
             case ERROR:

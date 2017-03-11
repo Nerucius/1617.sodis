@@ -3,6 +3,8 @@ package poker5cardgame.io;
 import java.net.*;
 import java.io.*;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import poker5cardgame.network.Network;
 import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
@@ -50,34 +52,34 @@ public class ComUtils {
      * Packet Reading wrapper for real reading function. Deals with timeouts.
      */
     public Packet read_NetworkPacket() {
-        System.out.println("CU: Waiting for next Packet");
+        // System.err.println("CU: Waiting for next Packet");
 
         int toCount = 0;
         Packet packet = null;
 
         while (true) {
-            
+
             try {
                 // Try to read next packet
                 packet = _read_NetworkPacket();
                 return packet;
+
             } catch (SocketTimeoutException e) {
                 // Timing out allowed for a number of tries
                 toCount++;
                 System.err.println("CU: Timed out " + toCount + " times.");
-                
+
                 // Upon reaching max timeout times, stop trying to read
                 if (toCount >= maxTimeout) {
                     System.out.println("CU: Max timeout reached. Disconnecting");
-                    break;
+                    send_error_packet("Max Timeout Reached.");
+
+                    packet = new Packet(Command.NET_ERROR);
+                    return packet;
                 }
             }
-            
         }
-        
-        packet = new Packet(Command.NET_ERROR);
-        //System.out.println("CU: Returning packet: "+packet.command);
-        return packet;
+
     }
 
     /**
@@ -110,6 +112,9 @@ public class ComUtils {
             // Read arguments from Stream if applicable
             if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
+            
+            
+            System.err.println("CU: Received: " + packet);
 
         } catch (SocketTimeoutException e) {
             // TODO do something with exception ? see current read bytes
@@ -133,6 +138,7 @@ public class ComUtils {
             // Packet knows how to write itself. yay
             packet.write(this);
             bos.flush();
+            System.err.println("CU: Sent: " + packet);
             return true;
         } catch (IOException e) {
             System.err.println("CU: Error sending Packet");
@@ -180,6 +186,9 @@ public class ComUtils {
                 // TODO @alex implement method to read DRWS msg
                 // PROBLEM : Needs to know if expects cards or not
                 break;
+            case SHOWDOWN:
+
+                packet.putField("cards", read_cards(5));
             case ERROR:
                 packet.putField("error", read_string_variable(2));
                 break;
@@ -383,5 +392,18 @@ public class ComUtils {
 
         }
         return String.join(" ", cards);
+    }
+
+    public void setTimeout(int timeout) {     
+        if(socket == null || socket.isClosed()){
+            System.err.println("CU: Can't set timeout with no connection.");
+            return;
+        }
+        
+        try {
+            socket.setSoTimeout(timeout);
+        } catch (SocketException ex) {
+            Logger.getLogger(ComUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

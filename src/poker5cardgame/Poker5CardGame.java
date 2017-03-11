@@ -3,8 +3,9 @@ package poker5cardgame;
 import java.util.Scanner;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Game;
+import poker5cardgame.io.NetworkSource;
 import poker5cardgame.network.Client;
-import poker5cardgame.network.EchoServer;
+import poker5cardgame.network.GameServer;
 import poker5cardgame.network.Server;
 
 public class Poker5CardGame {
@@ -16,27 +17,44 @@ public class Poker5CardGame {
         // Read console input
         Scanner sc = new Scanner(System.in);
         String line;
-        final Client c = new Client();
+        final Client client = new Client();
+        Server server = null;
 
-        while (!(line = sc.nextLine()).equals("q")) {
+        // Commands
+        // quit         : terminate program
+        // server       : start server on port 1212
+        // connect <ip> : connect to a given IP
+        // <ACTION> <args> : send the given action with a list of arguments
+        while (true) {
+            line = sc.nextLine();
             String[] ls = line.split(" ");
 
+            if (ls[0].equals("quit")) {
+                client.close();
+                if (server != null)
+                    server.close();
+                System.exit(0);
+            }
+
             if (ls[0].equals("server")) {
-                Server server = new EchoServer();
+                // Type "server" to start a server
+                server = new GameServer();
                 server.bind(1212);
                 server.start();
 
             } else if (ls[0].equals("connect")) {
                 // Type "connect" to connecto to localhost
-                c.connect(ls[1], 1212);
-                if (!c.isConnected())
+                client.connect(ls[1], 1212);
+                if (!client.isConnected())
                     continue;
-                // Begin echo listen
+
+                // Begin our client
                 new Thread(new Runnable() {
                     public void run() {
-                        while (true) {
-                            System.out.println("Client: Listening for echo...");
-                            Game.Move m = c.getSource().getNextMove();
+                        ((NetworkSource) client.getSource()).getCom().setTimeout(0);
+                        while (client.isConnected()) {
+                            System.out.println("Client: Ready to recieve next Move...");
+                            Game.Move m = client.getSource().getNextMove();
                             System.out.println(m);
                         }
                     }
@@ -44,9 +62,9 @@ public class Poker5CardGame {
 
             } else if (ls[0].equals("close")) {
                 // Type "close" to terminate client
-                c.close();
+                client.close();
 
-            } else if (c != null) {
+            } else if (client.isConnected()) {
 
                 // test card array
                 Card[] cards = new Card[5];
@@ -57,8 +75,15 @@ public class Poker5CardGame {
                 cards[4] = Card.fromCode("5S");
 
                 Game.Move m = new Game.Move();
+
+                try {
+                    m.action = Game.Action.valueOf(ls[0]);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Not a Move: " + ls[0]);
+                    continue;
+                }
+
                 m.cards = cards;
-                m.action = Game.Action.valueOf(ls[0]);
                 if (ls.length > 1) {
                     m.id = Integer.valueOf(ls[1]);
                     m.chips = Integer.valueOf(ls[1]);
@@ -70,7 +95,7 @@ public class Poker5CardGame {
                     m.sStakes = Integer.valueOf(ls[2]);
                 }
 
-                c.getSource().sendMove(m);
+                client.getSource().sendMove(m);
 
             }
         }
