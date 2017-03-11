@@ -1,34 +1,122 @@
 package poker5cardgame.game;
 
 import java.util.Arrays;
-import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
 import java.util.HashMap;
 import java.util.Map;
-import poker5cardgame.io.Writable;
-import poker5cardgame.network.Network;
-import poker5cardgame.network.Packet;
 
 /**
  * Finite State Machine for the Game State
  */
 public class Game {
 
-    // TODO @sonia Extreure totes les variables del joc a una nova clase que encapsuli les dades (Model/data)
-    
-    // Game Resources
-    private Source source;
-    private Deck deck;
-    private Hand sHand;
-    private Hand cHand;
+    // Define all the game actions
+    public enum Action {
+        START,
+        ANTE_STAKES,
+        STAKES,
+        QUIT,
+        ANTE_OK,
+        DEALER_HAND,
+        PASS,
+        BET,
+        RAISE,
+        FOLD,
+        CALL,
+        DRAW,
+        DRAW_SERVER,
+        SHOW,
+        // Special no-operation command to do nothing
+        NOOP,
+        // Special command to send an error message to the client
+        ERROR,
+        // Special command to terminate the game anytime
+        TERMINATE;
+    }
 
-    // Game Flags
-    protected State state = State.INIT;
-    private boolean round2 = false;
-    private boolean isServerTurn;
-    private int anteBet = 100;
-    private int serverChips = 10000, clientChips = 1000;
-    private int clientBet, serverBet;
+    // Define all the game states
+    public enum State {
+        INIT,
+        START,
+        ACCEPT_ANTE,
+        PLAY,
+        BETTING,
+        BETTING_DEALER,
+        COUNTER,
+        DRAW,
+        DRAW_SERVER,
+        SHOWDOWN,
+        QUIT;
+
+        // Define a map with the valid state -> action -> state combinations
+        // This map contains a Game.State as value (the next state after applying 
+        // a specific action) and a Game.Action as key (the specific applied action)
+        private Map<Game.Action, Game.State> transitions;
+
+        private State() {
+            transitions = new HashMap<>();
+        }
+    }
+
+    // Fill the transitions map
+    static {
+        for (State state : State.values())
+            switch (state) {
+
+                case INIT:
+                    state.transitions.put(Action.START, State.START);
+                    break;
+
+                case START:
+                    state.transitions.put(Action.ANTE_STAKES, State.ACCEPT_ANTE);
+                    break;
+                    
+                case ACCEPT_ANTE:
+                    state.transitions.put(Action.ANTE_OK, State.PLAY);
+                    state.transitions.put(Action.QUIT, State.QUIT);
+                    break;
+                    
+                case PLAY:
+                    state.transitions.put(Action.DEALER_HAND, State.BETTING);
+                    break;
+                    
+                case BETTING:
+                    state.transitions.put(Action.PASS, State.BETTING_DEALER);
+                    state.transitions.put(Action.BET, State.COUNTER);
+                    break;
+                    
+                case BETTING_DEALER:
+                    state.transitions.put(Action.PASS, State.DRAW);
+                    state.transitions.put(Action.BET, State.COUNTER);
+                    // 2nd time betting, exits to showdown
+                    state.transitions.put(Action.SHOW, State.SHOWDOWN);
+                    break;
+                    
+                case COUNTER:
+                    state.transitions.put(Action.CALL, State.DRAW);
+                    state.transitions.put(Action.RAISE, State.COUNTER);
+                    state.transitions.put(Action.FOLD, State.QUIT);
+                    // 2nd time betting, exits to showdown
+                    state.transitions.put(Action.SHOW, State.SHOWDOWN);
+                    break;
+                    
+                case DRAW:
+                    state.transitions.put(Action.DRAW, State.DRAW_SERVER);
+                    break;
+                    
+                case DRAW_SERVER:
+                    state.transitions.put(Action.DRAW_SERVER, State.BETTING);
+                    break;
+                    
+                case SHOWDOWN:
+                    state.transitions.put(Action.STAKES, State.ACCEPT_ANTE);
+                    break;
+            }
+    }
+
+    // TODO @sonia Extreure totes les variables del joc a una nova clase que encapsuli les dades (Model/data)
+    private Source source;
+    private GameData data;
 
     /**
      * Create a new Game Instance with the given source. Which is in charge of
@@ -39,10 +127,65 @@ public class Game {
      */
     public Game(Source source) {
         this.source = source;
+        this.data = new GameData();
+    }
 
-        deck = new Deck();
-        sHand = new Hand();
-        cHand = new Hand();
+    /**
+     * Set to the game state the next game state after applying a specific
+     * action to the actual game state.
+     *
+     * @param action Action that is applied to the actual game state
+     */
+    public void apply(Action action) {
+        // If the action is noop, do nothing
+        if (action == Action.NOOP)
+            return;
+
+        // If the action is terminate, finish the game
+        if (action == Action.TERMINATE) {
+            System.err.println("Game: Terminating Game now due to Error");
+            data.setState(State.QUIT);
+            return;
+        }
+
+        // If the action we want to apply to the actual state is valid, set the next state as actual
+        if (data.getState().transitions.containsKey(action)) {
+
+            if (action == Action.STAKES)
+                data.setSecondRound(false); // set again to false after the second round 
+            
+            // We finish a round in the next cases: 
+            // 1) applying a PASS action being in a BETTING_DEALER state (finish 1st round, go to 2nd)
+            // 2) applying a CALL action being in a COUNTER state (finish 2nd round)
+            if ((data.getState() == State.BETTING_DEALER && action == Action.PASS) ||
+                (data.getState() == State.COUNTER && action == Action.CALL)) 
+            
+                if (!data.isSecondRound())
+                    data.setSecondRound(true);
+                else 
+                {
+                    // Apply the action show after finishing the 2nd round
+                    this.apply(Action.SHOW);
+                    return;
+                }
+
+            // Set the next state as actual
+            State nextState = data.getState().transitions.get(action);
+            System.out.println(data.getState() + " -> " + action + " -> " + nextState + " R2:" + data.isSecondRound()); // TODO delete print
+            data.setState(nextState);
+        } 
+        
+        // If the action we want to apply to the actual state is invalid, send an ERROR move
+        else {
+            System.err.println("--- ILLEGAL ACTION");
+            System.err.println("--- " + data.getState() + " DOES NOT ACCEPT " + action);
+
+            // Send special Error Move -> ERRO Packet
+            Move errMove = new Move();
+            errMove.action = Action.ERROR;
+            errMove.error = "Protocol Error";
+            source.sendMove(errMove);
+        }
     }
 
     /**
@@ -50,18 +193,18 @@ public class Game {
      */
     public void update() {
         // TODO @sonia Acabar la logica de tots els estats i comprovar que seguim el protocol
-        Move cMove;
-        Move sMove;
+        Move sMove, cMove;
 
-        switch (this.state) {
+        switch (data.getState()) {
 
             case INIT:
                 // Game Init, waiting for the START action
                 // TODO @sonia metode pq cmove sigui valid 
                 cMove = source.getNextMove();
-                while(!state.transitions.containsKey(cMove.action))
+                while (!data.getState().transitions.containsKey(cMove.action)) {
                     cMove = source.getNextMove();
-                
+                }
+
                 apply(cMove.action);
                 break;
 
@@ -71,9 +214,9 @@ public class Game {
                 // Game state
                 sMove = new Move();
                 sMove.action = Action.ANTE_STAKES;
-                sMove.chips = anteBet;
-                sMove.cStakes = clientChips;
-                sMove.sStakes = serverChips;
+                sMove.chips = data.getAnteBet();
+                sMove.cStakes = data.getcChips();
+                sMove.sStakes = data.getsChips();
                 source.sendMove(sMove);
                 apply(sMove.action);
                 break;
@@ -86,31 +229,31 @@ public class Game {
 
             case PLAY:
                 // Player has agreed, so now we set min bet and decide who bets first
-                clientBet = anteBet;
-                serverBet = anteBet;
+                data.setcBet(data.getAnteBet());
+                data.setsBet(data.getAnteBet());
                 sMove = new Move();
                 sMove.action = Action.DEALER_HAND;
 
                 // Decide on a dealer and update the flag
                 sMove.dealer = Math.random() > 0.5 ? 1 : 0;
-                isServerTurn = sMove.dealer == 1;
+                data.setServerTurn(sMove.dealer == 1);
 
                 // Shuffle the Deck and draw a hand.
-                deck.generate();
-                cHand.generate(deck);
-                sHand.generate(deck);
+                data.getDeck().generate();
+                data.getsHand().generate(data.getDeck());
+                data.getcHand().generate(data.getDeck());
 
                 sMove.cards = new Card[5];
-                cHand.getCards().toArray(sMove.cards);
+                data.getcHand().getCards().toArray(sMove.cards);
 
                 source.sendMove(sMove);
                 apply(sMove.action);
                 break;
 
             case BETTING:
-                if (isServerTurn) {
+                if (data.isServerTurn()) {
                     // On our turn, we pass
-                    
+
                     // sMove = ia.getMoveForGame(Game g)
                     sMove = new Move();
                     sMove.action = Action.PASS;
@@ -120,12 +263,12 @@ public class Game {
                     // On player turn, we read his move
                     cMove = source.getNextMove();
                     if (cMove.action == Action.BET) {
-                        clientBet += cMove.chips;
+                        //clientBet += cMove.chips;
+                        data.setcBet(+cMove.chips);
                     }
                     apply(cMove.action);
                 }
-                
-                isServerTurn = !isServerTurn;
+                data.setServerTurn(!data.isServerTurn());
                 break;
 
             case BETTING_DEALER:
@@ -148,58 +291,14 @@ public class Game {
         }
     }
 
-    public void apply(Game.Action action) {
-        if (action == Action.NOOP)
-            return;
 
-        if (action == Action.TERMINATE) {
-            System.err.println("Game: Terminating Game now due to Error");
-            this.state = State.QUIT;
-            return;
-        }
-
-        if (this.state.transitions.containsKey(action)) {
-
-            if (action == Action.STAKES)
-                round2 = false;
-
-            // Special Case for 1st and 2nd Round Betting
-            if ((state == State.BETTING_DEALER && action == Action.PASS)
-                    || (state == State.COUNTER && action == Action.CALL)) {
-                if (!round2)
-                    round2 = true;
-                else {
-                    this.apply(Action.SHOW);
-                    return;
-                }
-            }
-
-            State newState = this.state.transitions.get(action);
-            System.out.println(state + " -> " + action + " -> " + newState + " R2:" + round2);
-            this.state = newState;
-        } else {
-            System.err.println("--- ILLEGAL ACTION");
-            System.err.println("--- " + state + " DOES NOT ACCEPT " + action);
-            
-            // Send special Error Move -> ERRO Packet
-            Move errMove= new Move();
-            errMove.action = Action.ERROR;
-            errMove.error = "Protocol Error";
-            source.sendMove(errMove);
-
-        }
-    }
-
-    public Game.State getState() {
-        return state;
-    }
 
     /**
      * Class defining a move made by either player, affecting the game.
      */
     public static class Move {
 
-        public Game.Action action;
+        public Action action;
         // Client Game ID
         public int id = -1;
         // Generic chips param for ANTE, BET or RAISE
@@ -229,98 +328,5 @@ public class Game {
                     + (error == null ? "" : " " + error);
             return str;
         }
-
     }
-
-    public enum Action {
-        START,
-        ANTE_STAKES,
-        STAKES,
-        QUIT,
-        ANTE_OK,
-        DEALER_HAND,
-        PASS,
-        BET,
-        RAISE,
-        FOLD,
-        CALL,
-        DRAW,
-        DRAW_SERVER,
-        SHOW,
-        NOOP,
-        // Special Command to send an Error Message to the Client
-        ERROR,
-        // Special command to terminate the Game anytime
-        TERMINATE;
-    }
-
-    public enum State {
-        INIT,
-        START,
-        ACCEPT_ANTE,
-        PLAY,
-        BETTING,
-        BETTING_DEALER,
-        COUNTER,
-        DRAW,
-        DRAW_SERVER,
-        SHOWDOWN,
-        QUIT;
-
-        Map<Game.Action, Game.State> transitions;
-
-        State() {
-            transitions = new HashMap<>();
-        }
-
-    }
-
-    // Define State Transitions
-    static {
-        for (State state : State.values()) {
-            switch (state) {
-                case INIT:
-                    state.transitions.put(Action.START, State.START);
-                    break;
-                case START:
-                    state.transitions.put(Action.ANTE_STAKES, State.ACCEPT_ANTE);
-                    break;
-                case ACCEPT_ANTE:
-                    state.transitions.put(Action.ANTE_OK, State.PLAY);
-                    state.transitions.put(Action.QUIT, State.QUIT);
-                    break;
-                case PLAY:
-                    state.transitions.put(Action.DEALER_HAND, State.BETTING);
-                    break;
-                case BETTING:
-                    state.transitions.put(Action.PASS, State.BETTING_DEALER);
-                    state.transitions.put(Action.BET, State.COUNTER);
-                    break;
-                case BETTING_DEALER:
-                    state.transitions.put(Action.PASS, State.DRAW);
-                    state.transitions.put(Action.BET, State.COUNTER);
-                    // 2nd time betting, exits to showdown
-                    state.transitions.put(Action.SHOW, State.SHOWDOWN);
-                    break;
-                case COUNTER:
-                    state.transitions.put(Action.CALL, State.DRAW);
-                    state.transitions.put(Action.RAISE, State.COUNTER);
-                    state.transitions.put(Action.FOLD, State.QUIT);
-                    // 2nd time betting, exits to showdown
-                    state.transitions.put(Action.SHOW, State.SHOWDOWN);
-                    break;
-                case DRAW:
-                    state.transitions.put(Action.DRAW, State.DRAW_SERVER);
-                    break;
-                case DRAW_SERVER:
-                    state.transitions.put(Action.DRAW_SERVER, State.BETTING);
-                    break;
-                case SHOWDOWN:
-                    state.transitions.put(Action.STAKES, State.ACCEPT_ANTE);
-                    break;
-
-            }
-        }
-    }
-
 }

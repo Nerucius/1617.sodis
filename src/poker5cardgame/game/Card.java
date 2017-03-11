@@ -6,7 +6,6 @@ import java.util.List;
 
 public class Card implements Comparable<Card> {
 
-    // <editor-fold defaultstate="collapsed" desc="Data Definition">
     // Prime numbers to give weigth to each card (they are prime in order to have unic product weights)
     private static final int PRIME_01 = 11; // 2
     private static final int PRIME_02 = 13; // 3
@@ -97,7 +96,6 @@ public class Card implements Comparable<Card> {
             return weight;
         }
     }
-    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Attributes">
     private Suit suit;

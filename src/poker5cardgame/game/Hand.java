@@ -13,9 +13,7 @@ import static poker5cardgame.game.HandRanker.getHandRank;
 
 public class Hand implements Comparable<Hand> {
 
-    // <editor-fold defaultstate="collapsed" desc="Data Definition">
     private final int SIZE = 5;
-    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Attributes">
     private final List<Card> cards; // List of the card that contains a hand
@@ -93,8 +91,8 @@ public class Hand implements Comparable<Hand> {
 
     /**
      * Initialize and generate the required hand information to manage the
-     * HandRanker. - init rankDict - init and fill ocurDict - init and calculate
-     * weight - init and calculate suitId
+     * HandRanker. Init rankDict; init and fill ocurDict; init and calculate
+     * weight; init and calculate suitId
      */
     public void generateRankerInformation() {
         this.rankDict = new HashMap();
