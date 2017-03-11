@@ -8,7 +8,7 @@ import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
 
 public class ComUtils {
-    
+
     // TODO @alex Implement Socket Timeouts
 
     /* Mida d'una cadena de caracters */
@@ -19,7 +19,11 @@ public class ComUtils {
     //private DataOutputStream dos;
     //private BufferedInputStream bis;
     private BufferedOutputStream bos;
+
+    // Network
     protected Socket socket;
+    int maxTimeout = 5;
+    int timeOutMillis = 2000;
 
     public ComUtils(Socket socket) {
         try {
@@ -27,7 +31,10 @@ public class ComUtils {
             dis = new DataInputStream(socket.getInputStream());
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
-            // Buffered versions -> Only 1 TCP packet per command. More stable reads
+            // Set one Second timeout
+            this.socket.setSoTimeout(timeOutMillis);
+
+            // Buffered versions -> Only 1 TCP packet per command.
             //bis = new BufferedInputStream(dis);
             bos = new BufferedOutputStream(dos);
         } catch (IOException ex) {
@@ -40,12 +47,46 @@ public class ComUtils {
     }
 
     /**
+     * Packet Reading wrapper for real reading function. Deals with timeouts.
+     */
+    public Packet read_NetworkPacket() {
+        System.out.println("CU: Waiting for next Packet");
+
+        int toCount = 0;
+        Packet packet = null;
+
+        while (true) {
+            
+            try {
+                // Try to read next packet
+                packet = _read_NetworkPacket();
+                return packet;
+            } catch (SocketTimeoutException e) {
+                // Timing out allowed for a number of tries
+                toCount++;
+                System.err.println("CU: Timed out " + toCount + " times.");
+                
+                // Upon reaching max timeout times, stop trying to read
+                if (toCount >= maxTimeout) {
+                    System.out.println("CU: Max timeout reached. Disconnecting");
+                    break;
+                }
+            }
+            
+        }
+        
+        packet = new Packet(Command.NET_ERROR);
+        //System.out.println("CU: Returning packet: "+packet.command);
+        return packet;
+    }
+
+    /**
      * Reads the next Network Packet received by the server and returns it for
      * further processing.
      *
      * @return received Network Packet.
      */
-    public Packet read_NetworkPacket() {
+    private Packet _read_NetworkPacket() throws SocketTimeoutException {
         Packet packet = new Packet(null);
 
         try {
@@ -70,13 +111,12 @@ public class ComUtils {
             if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
 
+        } catch (SocketTimeoutException e) {
+            // TODO do something with exception ? see current read bytes
+            throw e;
         } catch (IOException e) {
-            System.err.println("CU: Socket closed");
+            System.err.println("CU: Socket Error (closed?)");
             packet.command = Command.NET_ERROR;
-
-        } catch (IllegalArgumentException e) {
-            packet.command = Command.ERROR;
-            packet.putField("error", "Malformed PROTOCOL code");
         }
 
         return packet;
@@ -146,13 +186,13 @@ public class ComUtils {
 
         }
     }
-    
-        private void send_error_packet(String str){
+
+    private void send_error_packet(String str) {
         Packet p = new Packet(Command.ERROR);
         p.putWrittable(new Writable.VariableString(2, str));
         write_NetworkPacket(p);
     }
-        
+
     /* Llegir un enter de 32 bits */
     public int read_int32() throws IOException {
         byte bytes[] = new byte[4];

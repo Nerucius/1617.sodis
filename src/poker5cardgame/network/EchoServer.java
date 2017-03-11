@@ -6,30 +6,55 @@
 package poker5cardgame.network;
 
 import java.net.Socket;
-import poker5cardgame.game.Game;
+import poker5cardgame.io.ComUtils;
 import poker5cardgame.io.NetworkSource;
+import poker5cardgame.io.Writable;
 
 /**
- * Echoing server. Listens for any correctly formatted protocol message and sends back
- * an ERRO message with the parsed command and arguments.
+ * Echoing server. Listens for any correctly formatted protocol message and
+ * sends back an ERRO message with the parsed command and arguments.
  *
  * @author German Dempere
  */
 public class EchoServer extends MultithreadServer {
-    
+
     NetworkSource source;
+    Socket client;
 
     @Override
     public void handleConnection(Socket client) {
-
+        this.client = client;
         source = new NetworkSource(client);
+        ComUtils com = source.getCom();
 
-        // Main Server <-> Client Loop
+        // Echo loop for one client
         while (true) {
 
+            Packet packet = com.read_NetworkPacket();
+
+            if (packet.command == Network.Command.NET_ERROR) {
+                System.out.println("Server: Network Error for " + client.getInetAddress());
+                break;
+            }
+
+            // Copy entire packet to a new String
+            StringBuilder sb = new StringBuilder();
+            sb.append(packet.command.code);
+            for (Packet.Entry e : packet.getFields())
+                sb.append(" ").append(e.writable.toString());
+
+            Packet reply = new Packet(Network.Command.ERROR);
+            reply.putWrittable(new Writable.VariableString(2, sb.toString()));
+
+            // Send Packet
+            com.write_NetworkPacket(reply);
+
+            System.out.println("EchoServer: Replied to packet " + packet + ": " + reply);
+
+
+            /* Move Testing Code
             Game.Move m = source.getNextMove();
             if (m.action == Game.Action.TERMINATE) {
-                System.out.println("Server: Received TERMINATE packet.");
                 break;
             }
             System.out.println("Server: Echoing " + m.action);
@@ -38,6 +63,7 @@ public class EchoServer extends MultithreadServer {
             echo.action = Game.Action.ERROR;
             echo.error = m.toString();
             source.sendMove(echo);
+             */
         }
 
     }

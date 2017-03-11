@@ -36,7 +36,7 @@ public class Poker5CardGame {
                     public void run() {
                         while (true) {
                             System.out.println("Client: Listening for echo...");
-                            Game.Move m = c.getInSource().getNextMove();
+                            Game.Move m = c.getSource().getNextMove();
                             System.out.println(m);
                         }
                     }
@@ -70,7 +70,7 @@ public class Poker5CardGame {
                     m.sStakes = Integer.valueOf(ls[2]);
                 }
 
-                c.getOutSource().sendMove(m);
+                c.getSource().sendMove(m);
 
             }
         }

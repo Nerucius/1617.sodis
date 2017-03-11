@@ -41,6 +41,11 @@ public class Packet implements Writable {
                 return type.cast(e.object);
         return null;
     }
+    
+    /** Returns the list of entries inside this packet. A copy, not the real list. */
+    public List<Entry> getFields(){
+        return new ArrayList<>(entries);
+    }
 
     /** Pad the output with the given number of spaces */
     public void pad(int n) {
@@ -72,6 +77,18 @@ public class Packet implements Writable {
         
         //System.out.print("\n");
     }
+    
+    /** Packet to Syntax string method */
+    @Override
+    public java.lang.String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(command.code);
+        for(Entry e: entries){
+            sb.append(" ");
+            sb.append(e.writable.toString());
+        }        
+        return sb.toString();        
+    }
 
     /**
      * List of Network commands with no Arguments
@@ -96,7 +113,7 @@ public class Packet implements Writable {
     /**
      * Entries inside a Packet. An ordered list of Arguments
      */
-    private class Entry {
+    public static class Entry {
 
         java.lang.String name;
         Object object;
@@ -109,7 +126,6 @@ public class Packet implements Writable {
                 writable = new Writable.String((java.lang.String) o);
             if (o instanceof java.lang.Integer)
                 writable = new Writable.Integer((java.lang.Integer) o);
-
         }
     }
 

@@ -13,7 +13,7 @@ import java.net.SocketException;
  */
 public abstract class MultithreadServer implements Server {
 
-    ServerSocket serverSocket = null;
+    private ServerSocket serverSocket = null;
 
     public MultithreadServer() {
     }
@@ -31,6 +31,7 @@ public abstract class MultithreadServer implements Server {
         }
     }
 
+    @Override
     public final void start() {
         if (serverSocket != null)
             new Thread(this).start();
@@ -59,14 +60,21 @@ public abstract class MultithreadServer implements Server {
                     handleConnection(client);
                 }).start();
             }
-            // Delete ServerSocket
-            serverSocket = null;
 
         } catch (SocketException e) {
             // Thrown when the server socket is closed();
             System.err.println("Server: Closed");
+            
         } catch (IOException e) {
             System.err.println("Server: Failed to accept(). Server Terminated");
+            
+        } catch (Exception e){
+            System.err.println("Server: Unknown exception. Server Terminated");
+            e.printStackTrace();   
+            
+        } finally {            
+            // Delete ServerSocket
+            serverSocket = null;
         }
     }
 

@@ -8,7 +8,7 @@ import poker5cardgame.io.Source;
 
 public class Client {
 
-    Source inSource;
+    //Source inSource;
     Source outSource;
 
     public Client() {
@@ -19,7 +19,7 @@ public class Client {
             InetAddress address = InetAddress.getByName(IP);
             Socket sock = new Socket(address, port);
             outSource = new NetworkSource(sock);
-            inSource = outSource;
+            //inSource = outSource;
             System.err.println("Client: Connected to Server on IP:" + IP + ".");
 
         } catch (Exception ex) {
@@ -42,16 +42,19 @@ public class Client {
             Socket sock = ((NetworkSource) outSource).getCom().getSocket();
             sock.close();
             outSource = null;
+            //inSource = null;
         } catch (IOException ex) {
             System.err.println("Client: Error while closing Socket.");
         }
     }
 
+    @Deprecated
     public Source getInSource() {
-        return inSource;
+        throw new UnsupportedOperationException();
+        //return inSource;
     }
 
-    public Source getOutSource() {
+    public Source getSource() {
         return outSource;
     }
 

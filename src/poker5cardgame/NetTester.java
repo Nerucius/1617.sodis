@@ -9,7 +9,6 @@ import poker5cardgame.game.Game;
 import poker5cardgame.game.Game.Move;
 import poker5cardgame.network.Client;
 import poker5cardgame.network.EchoServer;
-import poker5cardgame.network.MultithreadServer;
 import poker5cardgame.network.Server;
 
 /**
@@ -18,7 +17,7 @@ import poker5cardgame.network.Server;
  */
 public class NetTester {
 
-    static public void main(String... args) {
+    static public void main(String... args) throws Exception{
 
         Server s = new EchoServer();
         s.bind(1212);
@@ -31,13 +30,13 @@ public class NetTester {
         move.action = Game.Action.BET;
         move.chips = 50;
         
-        c.getOutSource().sendMove(move);
-        Move reply = c.getInSource().getNextMove();
-        System.out.println(reply);
+        c.getSource().sendMove(move);
+        //Move reply = c.getSource().getNextMove();
+        //System.out.println(reply);
         
-        c.close();       
+        Thread.sleep(100000);
         
-        
+        c.close();
         s.close();
 
     }

@@ -13,10 +13,13 @@ import poker5cardgame.game.Game.Move;
  */
 public interface Source {
     
-    /** Method to get the next move **/
+    /** Method to get the next move
+     * @return next move **/
     public Move getNextMove();
     
-    /** Method to inform of a move to the opponent **/
+    /** Method to inform of a move to the opponent
+     * @param move Move to send
+     * @return True if success, False otherwise **/
     public boolean sendMove(Move move);
     
 }

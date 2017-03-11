@@ -33,13 +33,7 @@ public class NetworkSource implements Source {
         }
     }
 
-    /**
-     * Transforms a Network Packet into a move. Handles ALL possible exceptions
-     * and always returns something. If there was an irrecoverable error, this
-     * will return an Action.TERMINATE move.
-     *
-     * @return Next move provided by network.
-     */
+
     public Move getNextMove() {
         Move move = new Game.Move();
 
@@ -49,6 +43,9 @@ public class NetworkSource implements Source {
             return move;
         }
 
+        // Read the next full packet from the network. This method
+        // never fails or throws exception. If the network connection
+        // breaks the packet will just say NET_ERROR.
         Packet packet = comUtils.read_NetworkPacket();
 
         try {
