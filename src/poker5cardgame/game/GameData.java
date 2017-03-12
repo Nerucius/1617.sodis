@@ -2,14 +2,17 @@ package poker5cardgame.game;
 
 public class GameData {
     
-    // Game resources
+    /* Game resources */
     public Deck deck;
     public Hand sHand, cHand;
     private int sChips = 10000, cChips = 1000;
     private int minBet = 100;
     private int sBet, cBet;
     
-    // Game flags
+    /* Game flags */
+    // sInteractive to know which way plays the server (1: auto without IA; 2: auto with IA)
+    // cInteractive to know which wat plays the client (0: manual; 1: auto without IA; 2: auto with IA)
+    public int sInteractive = 1, cInteractive = 0;
     protected Game.State state = Game.State.INIT;
     private boolean secondRound = false;
     private boolean serverTurn;
@@ -59,14 +62,6 @@ public class GameData {
 
     public void setcBet(int cBet) {
         this.cBet = cBet;
-    }
-
-    public Game.State getState() {
-        return state;
-    }
-
-    public void setState(Game.State state) {
-        this.state = state;
     }
 
     public boolean isSecondRound() {

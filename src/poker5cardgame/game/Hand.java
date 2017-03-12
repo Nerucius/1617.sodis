@@ -13,7 +13,7 @@ import static poker5cardgame.game.HandRanker.getHandRank;
 
 public class Hand implements Comparable<Hand> {
 
-    private final int SIZE = 5;
+    public static final int SIZE = 5;
 
     // <editor-fold defaultstate="collapsed" desc="Attributes">
     private final List<Card> cards; // List of the card that contains a hand
@@ -64,7 +64,7 @@ public class Hand implements Comparable<Hand> {
         }
         return this;
     }
-
+    
     /**
      * Put a new card to the hand.
      *
@@ -78,6 +78,19 @@ public class Hand implements Comparable<Hand> {
         }
     }
 
+    /**
+     * Put n new cards from the deck to the hand.
+     * 
+     * @param deck Deck that contains all the remaining cards
+     * @param n int that is the number of cards to put into the hand
+     */
+    public void putNCards(Deck deck, int n)
+    {
+        for (int i = 0; i < n; i++) {
+            putCard(deck.draw());
+        }
+    }
+    
     /**
      * Remove one or more cards from the hand.
      *
