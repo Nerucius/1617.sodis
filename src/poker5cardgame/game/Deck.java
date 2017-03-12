@@ -19,8 +19,9 @@ public final class Deck {
     // <editor-fold defaultstate="collapsed" desc="Public Methods">
     /**
      * Generate a new deck.
+     * @return Deck
      */
-    public void generate() {
+    public Deck generate() {
         deck.clear();
 
         // generate the deck
@@ -31,6 +32,7 @@ public final class Deck {
         }
         // shuffle the deck
         Collections.shuffle(deck);
+        return this;
     }
 
     /**

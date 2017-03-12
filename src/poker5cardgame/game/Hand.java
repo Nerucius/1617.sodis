@@ -56,11 +56,13 @@ public class Hand implements Comparable<Hand> {
      * Generate a new hand (5 cards) from the deck.
      *
      * @param deck Deck that contains all the remaining cards
+     * @return Hand
      */
-    public void generate(Deck deck) {
+    public Hand generate(Deck deck) {
         for (int i = 0; i < SIZE; i++) {
             putCard(deck.draw());
         }
+        return this;
     }
 
     /**

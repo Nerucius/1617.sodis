@@ -114,7 +114,6 @@ public class Game {
             }
     }
 
-    // TODO @sonia Extreure totes les variables del joc a una nova clase que encapsuli les dades (Model/data)
     private Source source;
     private GameData data;
 
@@ -193,22 +192,56 @@ public class Game {
      */
     public void update() {
         // TODO @sonia Acabar la logica de tots els estats i comprovar que seguim el protocol
+        // TODO @sonia metode pq cmove sigui valid 
+
         Move sMove, cMove;
 
         switch (data.getState()) {
 
             case INIT:
+                // Turn: CLIENT
+                // Expected move: START
+                // Parameters: ID (game id) ---> TODO HashMap with game ids
+                
+                // get the move from the client
+                cMove = source.getNextMove();
+                // wait until the move is valid
+                while(!data.state.transitions.containsKey(cMove.action))
+                    cMove = source.getNextMove();
+                // apply the move to the game
+                apply(cMove.action);
+                break;
+                
+                /*
                 // Game Init, waiting for the START action
-                // TODO @sonia metode pq cmove sigui valid 
                 cMove = source.getNextMove();
                 while (!data.getState().transitions.containsKey(cMove.action)) {
                     cMove = source.getNextMove();
                 }
 
                 apply(cMove.action);
-                break;
+                break;*/
 
             case START:
+                // Turn: SERVER
+                // Expected first move: ANTE
+                // Parameters: CHIPS (minimum bet)
+                // Expected second move: STAKES
+                // Parameters: CHIPS (client chips), CHIPS (server chips)
+                
+                // set the server next move to ANTE_STAKES
+                sMove = new Move();
+                sMove.action = Action.ANTE_STAKES;
+                // set the required parameters
+                sMove.chips = data.getMinBet();     // ANTE parameter
+                sMove.cStakes = data.getcChips();   // STAKES parameter
+                sMove.sStakes = data.getsChips();   // STAKES parameter
+                // send the move to the client
+                source.sendMove(sMove);
+                // apply the move to the game
+                apply(sMove.action);
+                break;
+                /*
                 // Game has begun, we now send the ANTE_STAKES action,
                 // which will send 2 packets to the client and advance the
                 // Game state
@@ -219,18 +252,28 @@ public class Game {
                 sMove.sStakes = data.getsChips();
                 source.sendMove(sMove);
                 apply(sMove.action);
-                break;
+                break;*/
 
             case ACCEPT_ANTE:
+                // Turn: CLIENT
+                // Expected move: ANTE_OK or QUIT
+                // Parameters: none                
+                
                 // We wait for ANTE_OK or QUIT
                 cMove = source.getNextMove();
                 apply(cMove.action);
                 break;
 
             case PLAY:
+                // Turn: SERVER
+                // Expected first move: DEALER
+                // Parameters: '0' (dealer = server) or '1' (dealer = client)
+                // Expected second move: HAND
+                // Parameters: client hand
+                
                 // Player has agreed, so now we set min bet and decide who bets first
-                data.setcBet(data.getAnteBet());
-                data.setsBet(data.getAnteBet());
+                data.setcBet(data.getMinBet());
+                data.setsBet(data.getMinBet());
                 sMove = new Move();
                 sMove.action = Action.DEALER_HAND;
 
@@ -239,18 +282,23 @@ public class Game {
                 data.setServerTurn(sMove.dealer == 1);
 
                 // Shuffle the Deck and draw a hand.
-                data.getDeck().generate();
-                data.getsHand().generate(data.getDeck());
-                data.getcHand().generate(data.getDeck());
+                data.deck.generate();
+                data.sHand.generate(data.deck);
+                data.cHand.generate(data.deck);
 
                 sMove.cards = new Card[5];
-                data.getcHand().getCards().toArray(sMove.cards);
+                data.cHand.getCards().toArray(sMove.cards);
 
                 source.sendMove(sMove);
                 apply(sMove.action);
                 break;
 
             case BETTING:
+                // Turn: non dealer
+                // Expected move: BET or PASS
+                // Parameters: CHIPS (if bet) or none (if PASS)     
+                
+                
                 if (data.isServerTurn()) {
                     // On our turn, we pass
 
@@ -272,6 +320,7 @@ public class Game {
                 break;
 
             case BETTING_DEALER:
+                
                 break;
 
             case COUNTER:
@@ -292,7 +341,17 @@ public class Game {
     }
 
 
-
+    private Move getClientValidMove()
+    {        
+        // get the next clients move
+        Move cMove = source.getNextMove();
+        // wait until the clients move is valid
+        while (!data.state.transitions.containsKey(cMove.action))
+            cMove = source.getNextMove();
+        // return the clients valid move
+        return cMove;
+    }
+    
     /**
      * Class defining a move made by either player, affecting the game.
      */
@@ -315,7 +374,7 @@ public class Game {
         public Move() {
             action = Action.NOOP;
         }
-
+        
         @Override
         public String toString() {
             String str = action.toString()

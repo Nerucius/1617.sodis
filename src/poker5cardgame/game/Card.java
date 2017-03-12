@@ -47,17 +47,17 @@ public class Card implements Comparable<Card> {
         
         private String code;    // suit code to write and read the card
         private int id;         // id to find easily a FLUSH case
-        
-        private static Suit fromCode(String suit) {
-            for(Suit s :Suit.values())
-                if(s.code.equals(suit))
-                    return s;
-            throw new IllegalArgumentException("No suit with code: "+suit);
-        }
 
         Suit(String code, int id) {
             this.code = code;
             this.id = id;
+        }
+                
+        private static Suit fromCode(String code) {
+            for(Suit s : Suit.values())
+                if(s.code.equals(code))
+                    return s;
+            throw new IllegalArgumentException("No suit with code: "+code);
         }
     }
 
@@ -79,13 +79,6 @@ public class Card implements Comparable<Card> {
 
         private String code;    // rank code to write and read the card
         private int weight;     // weight to find easily a STRAIGHT case
-        
-        private static Rank fromCode(String suit) {
-            for (Rank r : Rank.values())
-                if (r.code.equals(suit))
-                    return r;
-            throw new IllegalArgumentException("No suit with code: " + suit);
-        }
 
         Rank(String code, int value) {
             this.code = code;
@@ -94,6 +87,13 @@ public class Card implements Comparable<Card> {
 
         public int getWeight() {
             return weight;
+        }
+                
+        private static Rank fromCode(String code) {
+            for (Rank r : Rank.values())
+                if (r.code.equals(code))
+                    return r;
+            throw new IllegalArgumentException("No suit with code: " + code);
         }
     }
 
@@ -136,6 +136,7 @@ public class Card implements Comparable<Card> {
     /**
      * Get the real card from a card code.
      *
+     * @param code
      * @return Card
      */
     public static Card fromCode(String code) {
