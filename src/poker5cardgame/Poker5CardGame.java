@@ -110,8 +110,9 @@ public class Poker5CardGame {
                         catch(Exception e)
                         {
                             // Case DRWS CARDS #
-                            for(int i = 1; i < ls.length-1; i++)
+                            for(int i = 1; i < ls.length-2; i++)
                                 cardsStr += String.valueOf(ls[i]) + " ";
+                            cardsStr += String.valueOf(ls[ls.length-1]);
                             m.cards = NetworkSource.cardsFromCodeString(cardsStr);
                         }                       
                     }

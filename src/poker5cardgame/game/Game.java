@@ -169,6 +169,7 @@ public class Game {
                     data.setSecondRound(true);
                 else 
                 {
+                    System.out.println("[DEBUG Game] coses de showndowns");
                     // Apply the action show after finishing the 2nd round
                     this.apply(Action.SHOW); // TODO set data, better do that with a flag?
                     return;
@@ -359,9 +360,9 @@ public class Game {
                 
                 // TODO ia
                 // Now change only the first card
-                sMove.cards = new Card[]{data.sHand.getCards().get(0)}; 
-                data.sHand.discard(data.sHand.getCards().get(0));
-                data.sHand.putNCards(data.deck, 1);
+                sMove.cards = new Card[]{data.sHand.getCards().get(0), data.sHand.getCards().get(1)}; 
+                data.sHand.discard(sMove.cards);
+                data.sHand.putNCards(data.deck, 2);
 
                 source.sendMove(sMove);
                 apply(sMove.action);
@@ -395,20 +396,18 @@ public class Game {
     }
 
     private void manageBetAndRaise(Move move) {
-
-        if ((move.action.equals(Action.BET) || move.action.equals(Action.RAISE)) && move.chips > data.minBet) {
+        if (move.action.equals(Action.BET) || move.action.equals(Action.RAISE)) {
             if (data.isServerTurn()) {
-                if (data.sChips >= move.chips) {
+                if (data.sChips >= move.chips && move.chips > data.minBet) {
                     data.sChips -= move.chips;
                     data.sBet += move.chips;
                 }
-            } else if (data.cChips >= move.chips) {
+            } else if (data.cChips >= move.chips && move.chips > data.minBet) {
                 data.cChips -= move.chips;
                 data.cBet += move.chips;
+            } else {
+                this.manageBetAndRaise(this.sentNotValidChipsValue());
             }
-
-        } else {
-            this.manageBetAndRaise(this.sentNotValidChipsValue());
         }
     }
     

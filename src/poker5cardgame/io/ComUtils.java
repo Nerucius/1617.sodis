@@ -187,12 +187,13 @@ public class ComUtils {
             case DRAW_SERVER:
                 // TODO @alex implement method to read DRWS msg
                 // PROBLEM : Needs to know if expects cards or not
-                // Sonia implemented the next lines to test (for the specific example: 1 card)
-                packet.putField("cards", read_cards(1));
+                // Sonia implemented the next lines to test (for the specific example: 2 cards)
+                packet.putField("cards", read_cards(2));
+                read_bytes(1); // Consume space
                 packet.putField("number", 1);
+                System.out.println("[DEBUG comUtils] packet " + packet.toString());
                 break;
             case SHOWDOWN:
-
                 packet.putField("cards", read_cards(5));
             case ERROR:
                 packet.putField("error", read_string_variable(2));

@@ -35,6 +35,8 @@ public class NetworkSource implements Source {
 
 
     public Move getNextMove() {
+        System.out.println("[DEBUG NetworkSource: getNextMove");
+        
         Move move = new Game.Move();
 
         if (comUtils == null) {
@@ -116,6 +118,7 @@ public class NetworkSource implements Source {
                     move.action = Action.DRAW_SERVER;
                     move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     // TODO Read Server's discarded cards
+                    packet.getField("number", Integer.class);
                     break;
                     
                 case SHOWDOWN:
@@ -161,6 +164,9 @@ public class NetworkSource implements Source {
      * @param move Move to send over the Network.
      */
     public boolean sendMove(Game.Move move) {
+        System.out.println("[DEBUG NetworkSource: sendMove");
+
+                
         // Define an array as large as the most packets sent by a single Move
         // Some moves send more than one packet.
         Packet[] packets = new Packet[2];
