@@ -82,7 +82,7 @@ public class Poker5CardGame {
                     System.err.println("Not a Move: " + ls[0]);
                     continue;
                 }
-
+                
                 m.cards = cards;
                 if (ls.length > 1) {
                     m.id = Integer.valueOf(ls[1]);
@@ -92,7 +92,29 @@ public class Poker5CardGame {
                     m.error = ls[1];
                 }
                 if (ls.length > 2) {
-                    m.sStakes = Integer.valueOf(ls[2]);
+                    
+                    try {
+                        // Case: STKS CHIPS CHIPS
+                        m.sStakes = Integer.valueOf(ls[2]);
+                    } 
+                    catch(NumberFormatException nfe)
+                    {
+                        String cardsStr = "";
+                        try
+                        {   // CASE DRAW # CARDS
+                            for(int i = 2; i < ls.length; i++)
+                                cardsStr += String.valueOf(ls[i]) + " ";
+
+                            m.cards = NetworkSource.cardsFromCodeString(cardsStr);
+                        }
+                        catch(Exception e)
+                        {
+                            // Case DRWS CARDS #
+                            for(int i = 1; i < ls.length-1; i++)
+                                cardsStr += String.valueOf(ls[i]) + " ";
+                            m.cards = NetworkSource.cardsFromCodeString(cardsStr);
+                        }                       
+                    }
                 }
 
                 client.getSource().sendMove(m);

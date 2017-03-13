@@ -235,7 +235,7 @@ public class NetworkSource implements Source {
                 packets[0] = new Packet(Network.Command.DRAW_SERVER);
                 // Create a list of arguments as follows: 2C 3H 4D '2'
                 packets[0].putField("cards", cardsToCodeString(move.cards));
-                packets[0].putField("number", move.dealer);
+                packets[0].putField("number", move.cards.length);
                 break;
 
             case SHOW:
@@ -275,7 +275,7 @@ public class NetworkSource implements Source {
     /**
      * Convert an array of cards to a String of card codes separated by " "
      */
-    public static String cardsToCodeString(Card[] cards) {
+    public static String cardsToCodeString(Card[] cards) {        
         String[] codes = new String[cards.length];
 
         for (int i = 0; i < cards.length; i++)

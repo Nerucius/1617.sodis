@@ -95,7 +95,7 @@ public class Game {
                 case COUNTER:
                     state.transitions.put(Action.CALL, State.DRAW);
                     state.transitions.put(Action.RAISE, State.COUNTER);
-                    state.transitions.put(Action.FOLD, State.QUIT);
+                    state.transitions.put(Action.FOLD, State.SHOWDOWN); // TODO to know: edited State.QUIT to SHOWDOWN
                     // 2nd time betting, exits to showdown
                     state.transitions.put(Action.SHOW, State.SHOWDOWN);
                     break;
@@ -159,8 +159,8 @@ public class Game {
                 data.setSecondRound(false); // set again to false after the second round 
             
             // We finish a round in the next cases: 
-            // 1) applying a PASS action being in a BETTING_DEALER state (finish 1st round, go to 2nd)
-            // 2) applying a CALL action being in a COUNTER state (finish 2nd round)
+            // 1) applying a PASS action being in a BETTING_DEALER state
+            // 2) applying a CALL action being in a COUNTER state
             if ((data.state == State.BETTING_DEALER && action == Action.PASS) ||
                 (data.state == State.COUNTER && action == Action.CALL)) 
             
@@ -200,6 +200,7 @@ public class Game {
         // TODO @sonia metode pq cmove sigui valid 
 
         Move sMove, cMove;
+        System.out.println("Game: [DEBUG] " + data);
 
         switch (data.state) {
 
@@ -224,9 +225,9 @@ public class Game {
                 sMove.action = Action.ANTE_STAKES;
                 
                 // set the required parameters
-                sMove.chips = data.getMinBet();     // ANTE parameter
-                sMove.cStakes = data.getcChips();   // STAKES parameter
-                sMove.sStakes = data.getsChips();   // STAKES parameter
+                sMove.chips = data.minBet;     // ANTE parameter
+                sMove.cStakes = data.cChips;   // STAKES parameter
+                sMove.sStakes = data.sChips;   // STAKES parameter
                 
                 // send the move to the client and apply it to the game
                 source.sendMove(sMove);
@@ -234,7 +235,7 @@ public class Game {
                 break;
 
             case ACCEPT_ANTE:
-                // Turn: CLIENT (SERVER last move: ANTE_STAKES)
+                // Turn: CLIENT (SERVER last move: ANTE_STAKES or STAKES)
                 // Expected move: ANTE_OK or QUIT
                 
                 // get the move from the client and apply it to the game
@@ -250,8 +251,8 @@ public class Game {
                 // Parameters: client hand
                
                 // the game is accepted, so set the minimum bet as the bet of each player
-                data.setcBet(data.getMinBet());
-                data.setsBet(data.getMinBet());
+                data.cBet = data.minBet;
+                data.sBet = data.minBet;
                 
                 // set the server next move to DEALER_HAND
                 sMove = new Move();
@@ -302,7 +303,17 @@ public class Game {
                     cMove = this.getClientValidMove(data.state);
 
                     if(cMove.action.equals(Action.BET))
-                        data.setcBet(++cMove.chips);
+                    {
+                        if(data.cChips >= cMove.chips)
+                        {
+                            data.cChips -= cMove.chips;
+                            data.cBet += cMove.chips;
+                        }
+                        else
+                        {
+                            // TODO send error message
+                        }
+                    }
                     
                     // apply the move to the game
                     apply(cMove.action);
@@ -342,7 +353,16 @@ public class Game {
 
                     if(cMove.action.equals(Action.BET))
                     {
-                        data.setcBet(++cMove.chips); // TODO disminuir els cChips i comprovar que pot apostar tant
+                        // check if the client has enough chips to bet
+                        if(data.cChips >= cMove.chips)
+                        {
+                            data.cChips -= cMove.chips;
+                            data.cBet += cMove.chips;
+                        }
+                        else
+                        {
+                            // TODO send error message
+                        }
                     }
                     
                     // apply the move to the game
@@ -366,7 +386,22 @@ public class Game {
                     cMove = this.getClientValidMove(data.state);
                     
                     if(cMove.action.equals(Action.RAISE)){
-                        data.setcBet(++cMove.chips); // TODO disminuir els cChips i comprovar que pot apostar tant
+                        if(data.cChips >= cMove.chips)
+                        {
+                            data.cChips -= cMove.chips;
+                            data.cBet += cMove.chips;
+                        }
+                        else
+                        {
+                            // TODO send error message
+                        }
+                    }
+                    
+                    if(cMove.action.equals(Action.FOLD)){
+                        data.setFold(true);
+                        data.sChips += data.sBet + data.cBet;
+                        data.cBet = 0;
+                        data.sBet = 0;
                     }
                     apply(cMove.action);
                 }
@@ -380,6 +415,7 @@ public class Game {
                 // get the move from the client
                 cMove = this.getClientValidMove(data.state);
                 
+                // TODO manage if the cards are correct (of the hand) and send an error message if not
                 if(cMove.cards.length != 0)
                 {
                     data.cHand.discard(cMove.cards);
@@ -401,24 +437,29 @@ public class Game {
                 sMove.cards = new Card[]{data.sHand.getCards().get(0)}; 
                 data.sHand.discard(data.sHand.getCards().get(0));
                 data.sHand.putNCards(data.deck, 1);
-                
+
                 source.sendMove(sMove);
-                apply(sMove.action);                
+                apply(sMove.action);   
                 break;
 
             case SHOWDOWN:
                 // Turn: SERVER
 
-                sMove = new Move();
-                sMove.action = Action.SHOW;
-                sMove.cards = new Card[Hand.SIZE];
-                data.sHand.getCards().toArray(sMove.cards);
-                source.sendMove(sMove);
-                
+                if(!data.isFold())
+                {
+                    sMove = new Move();
+                    sMove.action = Action.SHOW;
+                    sMove.cards = new Card[Hand.SIZE];
+                    data.sHand.getCards().toArray(sMove.cards);
+                    source.sendMove(sMove);
+                }
+                                    
+                data.setFold(false);
                 sMove = new Move();
                 sMove.action = Action.STAKES;
-                sMove.cStakes = data.getcChips();   // STAKES parameter
-                sMove.sStakes = data.getsChips();   // STAKES parameter
+                sMove.cStakes = data.cChips;   // STAKES parameter
+                sMove.sStakes = data.sChips;   // STAKES parameter
+                
                 
                 // send the move to the client and apply it to the game
                 source.sendMove(sMove);
@@ -434,14 +475,13 @@ public class Game {
 
     private Move getClientValidMove(State actualState)
     {        
-        System.out.println("DEBUG actualState: " +actualState);
         // get the next clients move
         Move cMove = source.getNextMove();
         // wait until the clients move is valid
         while (!data.state.transitions.containsKey(cMove.action))
         {
             // to debug: print an error message for the server -> TODO send a ERR message to the client
-            System.out.println("Game: ERRO Invalid move. Valid moves are now: " + actualState.transitions.values());
+            System.out.println("Game: ERRO Invalid move. Valid moves are now: " + actualState.transitions.keySet());
             cMove = source.getNextMove();
         }
         // return the clients valid move
