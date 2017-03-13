@@ -95,9 +95,11 @@ public class ComUtils {
             // Read first 4 bytes (4 chars) to identify code
             byte[] nextBytes = read_bytes(4);
 
+            System.out.println("[DEBUG ComUtils] recieved command: " + new String(nextBytes));
             // While the current 4 bytes are not a valid command, read one more byte
             while (!Network.Command.isValid(new String(nextBytes))) {
                 // Send an error packet every time this fails
+                System.out.println("[DEBUG ComUtils] invalid recieved command: " + new String(nextBytes));
                 send_error_packet("Invalid PROTOCOL Code");
                 // Move last 3 bytes back, and read one more
                 System.arraycopy(nextBytes, 1, nextBytes, 0, 3);

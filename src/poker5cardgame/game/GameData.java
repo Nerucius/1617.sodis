@@ -51,7 +51,7 @@ public class GameData {
 
     @Override
     public String toString() {
-        return "GameData{" + "sChips=" + sChips + ", cChips=" + cChips + ", minBet=" + minBet + ", sBet=" + sBet + ", cBet=" + cBet + ", state=" + state + '}';
+        return "GameData{" + "sChips=" + sChips + ", cChips=" + cChips + ", minBet=" + minBet + ", sBet=" + sBet + ", cBet=" + cBet + ", state=" + state + ", serverTurn=" + serverTurn + '}';
     }
     
     
