@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import poker5cardgame.game.Game;
+import poker5cardgame.game.GameState;
 import poker5cardgame.io.NetworkSource;
 
 /**
@@ -22,7 +23,8 @@ public class GameServer extends MultithreadServer{
     @Override
     public void handleConnection(Socket sock) {
         NetworkSource source = new NetworkSource(sock);
-        source.getCom().setTimeout(0); // Disable TimeOut
+        // TODO @alex 
+        source.getCom().setTimeout(0); 
         
         Game game = new Game(source);
         int id = 0;
@@ -33,7 +35,7 @@ public class GameServer extends MultithreadServer{
         }
         */
         
-        while(game.getState() != Game.State.QUIT){
+        while(game.getState() != GameState.State.QUIT){
             game.update();
         }
         

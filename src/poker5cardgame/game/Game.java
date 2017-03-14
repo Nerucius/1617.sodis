@@ -4,119 +4,18 @@ import java.util.Arrays;
 import poker5cardgame.io.Source;
 import java.util.HashMap;
 import java.util.Map;
+import poker5cardgame.game.GameState.Action;
+import poker5cardgame.game.GameState.State;
 
-// TODO URGENT solve error after sending DRAW_SERVER (comUtils sends a Protocol error in the second round betting)
 /**
  * Finite State Machine for the Game State
  */
 public class Game {
 
-    // Define all the game actions
-    public enum Action {
-        START,
-        ANTE_STAKES,
-        STAKES,
-        QUIT,
-        ANTE_OK,
-        DEALER_HAND,
-        PASS,
-        BET,
-        RAISE,
-        FOLD,
-        CALL,
-        DRAW,
-        DRAW_SERVER,
-        SHOW,
-        // Special no-operation command to do nothing
-        NOOP,
-        // Special command to send an error message to the client
-        ERROR,
-        // Special command to terminate the game anytime
-        TERMINATE;
-    }
-
-    // Define all the game states
-    public enum State {
-        INIT,
-        START,
-        ACCEPT_ANTE,
-        PLAY,
-        BETTING,
-        BETTING_DEALER,
-        COUNTER,
-        DRAW,
-        DRAW_SERVER,
-        SHOWDOWN,
-        QUIT;
-
-        // Define a map with the valid state -> action -> state combinations
-        // This map contains a Game.State as value (the next state after applying 
-        // a specific action) and a Game.Action as key (the specific applied action)
-        private Map<Game.Action, Game.State> transitions;
-
-        private State() {
-            transitions = new HashMap<>();
-        }
-    }
-
-    // Fill the transitions map
-    static {
-        for (State state : State.values())
-            switch (state) {
-
-                case INIT:
-                    state.transitions.put(Action.START, State.START);
-                    break;
-
-                case START:
-                    state.transitions.put(Action.ANTE_STAKES, State.ACCEPT_ANTE);
-                    break;
-                    
-                case ACCEPT_ANTE:
-                    state.transitions.put(Action.ANTE_OK, State.PLAY);
-                    state.transitions.put(Action.QUIT, State.QUIT);
-                    break;
-                    
-                case PLAY:
-                    state.transitions.put(Action.DEALER_HAND, State.BETTING);
-                    break;
-                    
-                case BETTING:
-                    state.transitions.put(Action.PASS, State.BETTING_DEALER);
-                    state.transitions.put(Action.BET, State.COUNTER);
-                    break;
-                    
-                case BETTING_DEALER:
-                    state.transitions.put(Action.PASS, State.DRAW);
-                    state.transitions.put(Action.BET, State.COUNTER);
-                    // 2nd time betting, exits to showdown
-                    state.transitions.put(Action.SHOW, State.SHOWDOWN);
-                    break;
-                    
-                case COUNTER:
-                    state.transitions.put(Action.CALL, State.DRAW);
-                    state.transitions.put(Action.RAISE, State.COUNTER);
-                    state.transitions.put(Action.FOLD, State.SHOWDOWN); // TODO to know: edited State.QUIT to SHOWDOWN
-                    // 2nd time betting, exits to showdown
-                    state.transitions.put(Action.SHOW, State.SHOWDOWN);
-                    break;
-                    
-                case DRAW:
-                    state.transitions.put(Action.DRAW, State.DRAW_SERVER);
-                    break;
-                    
-                case DRAW_SERVER:
-                    state.transitions.put(Action.DRAW_SERVER, State.BETTING);
-                    break;
-                    
-                case SHOWDOWN:
-                    state.transitions.put(Action.STAKES, State.ACCEPT_ANTE);
-                    break;
-            }
-    }
-
     private Source source;
-    private GameData data;
+    
+    private GameData gameData;
+    private GameState gameState;
 
     /**
      * Create a new Game Instance with the given source. Which is in charge of
@@ -127,61 +26,10 @@ public class Game {
      */
     public Game(Source source) {
         this.source = source;
-        this.data = new GameData();
+        this.gameData = new GameData();
     }
 
-    public Game.State getState()
-    {
-        return this.data.state;
-    }
-    
-    /**
-     * Set to the game state the next game state after applying a specific
-     * action to the actual game state.
-     *
-     * @param action Action that is applied to the actual game state
-     */
-    public void apply(Action action) {
-        // If the action is noop, do nothing
-        if (action == Action.NOOP)
-            return;
-
-        // If the action is terminate, finish the game
-        if (action == Action.TERMINATE) {
-            System.err.println("Game: Terminating Game now due to Error");
-            data.state = State.QUIT;
-            return;
-        }
-
-        // If the action we want to apply to the actual state is valid, set the next state as actual
-        if (data.state.transitions.containsKey(action)) {
-
-            if (action == Action.STAKES)
-                data.setSecondRound(false); // set again to false after the second round 
-            
-            // We finish a round in the next cases: 
-            // 1) applying a PASS action being in a BETTING_DEALER state
-            // 2) applying a CALL action being in a COUNTER state
-            if ((data.state == State.BETTING_DEALER && action == Action.PASS) ||
-                (data.state == State.COUNTER && action == Action.CALL)) 
-            {
-                if (!data.isSecondRound())
-                    data.setSecondRound(true);
-                else 
-                {
-                    System.out.println("[DEBUG Game] coses de showndowns");
-                    // Apply the action show after finishing the 2nd round
-                    this.apply(Action.SHOW); // TODO set data, better do that with a flag?
-                    return;
-                }
-            }
-
-            // Set the next state as actual
-            State nextState = data.state.transitions.get(action);
-            System.out.println("[DEBUG Game] " +data.state + " -> " + action + " -> " + nextState + " (2nd round: " + data.isSecondRound()+")"); // TODO delete print
-            data.state = nextState;
-        } 
-    }
+   
 
     /**
      * Run the game with the next iteration of commands
@@ -191,16 +39,16 @@ public class Game {
         // TODO @sonia metode pq cmove sigui valid 
 
         Move sMove, cMove;
-        System.out.println("[DEBUG Game] " + data);
+        System.out.println("[DEBUG Game] " + gameData);
 
-        switch (data.state) {
+        switch (getState()) {
 
             case INIT:
                 // Turn: CLIENT
                 // Expected move: START
                 
-                cMove = this.getClientValidMove(data.state);
-                apply(cMove.action);
+                cMove = this.getClientValidMove(gameState.state);
+                gameState.apply(cMove.action);
                 break;
 
             case START:
@@ -211,20 +59,20 @@ public class Game {
                 sMove = new Move();
                 sMove.action = Action.ANTE_STAKES;
                 
-                sMove.chips = data.minBet;     // ANTE parameter
-                sMove.cStakes = data.cChips;   // STAKES parameter
-                sMove.sStakes = data.sChips;   // STAKES parameter
+                sMove.chips = gameData.minBet;     // ANTE parameter
+                sMove.cStakes = gameData.cChips;   // STAKES parameter
+                sMove.sStakes = gameData.sChips;   // STAKES parameter
                 
                 source.sendMove(sMove);
-                apply(sMove.action);
+                gameState.apply(sMove.action);
                 break;
 
             case ACCEPT_ANTE:
                 // Turn: CLIENT
                 // Expected move: ANTE_OK or QUIT
                 
-                cMove = this.getClientValidMove(data.state);
-                apply(cMove.action);
+                cMove = this.getClientValidMove(gameState.state);
+                gameState.apply(cMove.action);
                 break;
 
             case PLAY:
@@ -233,32 +81,32 @@ public class Game {
                 // Parameters: '0' (dealer = server) or '1' (dealer = client), client hand
                
                 // the game is accepted, so set the minimum bet as the bet of each player
-                data.cBet = data.minBet;
-                data.sBet = data.minBet;
+                gameData.cBet = gameData.minBet;
+                gameData.sBet = gameData.minBet;
                 
                 sMove = new Move();
                 sMove.action = Action.DEALER_HAND;
                 
                 // choose the dealer randomly (0: server; 1: client)
                 sMove.dealer = Math.random() > 0.5 ? 1 : 0;
-                data.setServerTurn(sMove.dealer == 1); // the non dealer has the next turn
+                gameState.setServerTurn(sMove.dealer == 1); // the non dealer has the next turn
                 
                 // generate the server and the client hands
-                data.deck.generate();                
-                data.cHand.generate(data.deck);
-                data.sHand.generate(data.deck);
+                gameData.deck.generate();                
+                gameData.cHand.generate(gameData.deck);
+                gameData.sHand.generate(gameData.deck);
                 sMove.cards = new Card[Hand.SIZE];
-                data.cHand.getCards().toArray(sMove.cards);
+                gameData.cHand.getCards().toArray(sMove.cards);
 
                 source.sendMove(sMove);
-                apply(sMove.action);                
+                gameState.apply(sMove.action);                
                 break;
 
             case BETTING:                
                 // Turn: non dealer = SERVER
                 // Move to send: BET or PASS
                 // Parameters: CHIPS (if bet) or none (if PASS)     
-                if (data.isServerTurn()) 
+                if (gameState.isServerTurn()) 
                 {
                     System.out.println("[DEBUG GAME] Entra a BETTING server");
                     // TODO @sonia RandomIA(= no IA) and IntelligentIA
@@ -269,8 +117,8 @@ public class Game {
                     sMove.action = Action.PASS;
                                     
                     source.sendMove(sMove);                                        
-                    data.setServerTurn(!data.isServerTurn());
-                    apply(sMove.action);
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    gameState.apply(sMove.action);
                 }
                 // Turn: non dealer = CLIENT
                 // Expected move: BET or PASS
@@ -278,12 +126,12 @@ public class Game {
                 {
                     System.out.println("[DEBUG GAME] Entra a BETTING client");
 
-                    cMove = this.getClientValidMove(data.state);
+                    cMove = this.getClientValidMove(getState());
                     System.out.println("[DEBUG GAME] despres de getvalid move a betting");
 
                     this.manageBetAndRaise(cMove);
-                    data.setServerTurn(!data.isServerTurn());
-                    apply(cMove.action);
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    gameState.apply(cMove.action);
 
                 }
                 break;
@@ -294,7 +142,7 @@ public class Game {
                 // Turn: dealer = SERVER
                 // Move to send: BET or PASS
                 // Parameters: CHIPS (if bet) or none (if PASS)    
-                if (data.isServerTurn()) 
+                if (gameState.isServerTurn()) 
                 {
                     // TODO @sonia RandomIA(= no IA) and IntelligentIA
                     // sMove = ia.getMoveForGame(Game g)
@@ -304,22 +152,22 @@ public class Game {
                     sMove.action = Action.PASS;
                                     
                     source.sendMove(sMove);
-                    data.setServerTurn(!data.isServerTurn());
-                    apply(sMove.action);
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    gameState.apply(sMove.action);
                 }
                 // Turn: dealer = CLIENT
                 // Expected move: BET or PASS
                 else 
                 {
-                    cMove = this.getClientValidMove(data.state);
+                    cMove = this.getClientValidMove(gameState.state);
                     this.manageBetAndRaise(cMove);
-                    data.setServerTurn(!data.isServerTurn());
-                    apply(cMove.action);
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    gameState.apply(cMove.action);
                 }
                 break;
 
             case COUNTER:
-                if (data.isServerTurn())
+                if (gameState.isServerTurn())
                 {
                     // TODO ia
                     
@@ -327,16 +175,16 @@ public class Game {
                     sMove.action = Action.CALL;
                     
                     source.sendMove(sMove);
-                    data.setServerTurn(!data.isServerTurn());
-                    apply(sMove.action);
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    gameState.apply(sMove.action);
                 }
                 else
                 {
-                    cMove = this.getClientValidMove(data.state);
+                    cMove = this.getClientValidMove(gameState.state);
                     this.manageBetAndRaise(cMove);
                     this.manageFold(cMove);
-                    data.setServerTurn(!data.isServerTurn());
-                    apply(cMove.action);
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    gameState.apply(cMove.action);
                 }                
                 break;
 
@@ -344,16 +192,16 @@ public class Game {
                 // Turn: CLIENT
                 // Expected move: DRAW
                 
-                cMove = this.getClientValidMove(data.state);
+                cMove = this.getClientValidMove(gameState.state);
                 
                 // TODO manage if the cards are correct (of the hand) and send an error message if not
                 if(cMove.cards.length != 0)
                 {
-                    data.cHand.discard(cMove.cards);
-                    data.cHand.putNCards(data.deck, cMove.cards.length);
+                    gameData.cHand.discard(cMove.cards);
+                    gameData.cHand.putNCards(gameData.deck, cMove.cards.length);
                 }
                 
-                apply(cMove.action);
+                gameState.apply(cMove.action);
                 break;
 
             case DRAW_SERVER:
@@ -365,51 +213,51 @@ public class Game {
                 
                 // TODO ia
                 // Now change only the first card
-                sMove.cards = new Card[]{data.sHand.getCards().get(0), data.sHand.getCards().get(1)}; 
-                data.sHand.discard(sMove.cards);
-                data.sHand.putNCards(data.deck, 2);
+                sMove.cards = new Card[]{gameData.sHand.getCards().get(0), gameData.sHand.getCards().get(1)}; 
+                gameData.sHand.discard(sMove.cards);
+                gameData.sHand.putNCards(gameData.deck, 2);
 
                 source.sendMove(sMove);
-                apply(sMove.action);
+                gameState.apply(sMove.action);
                 break;
 
             case SHOWDOWN:
                 // Turn: SERVER
 
-                if (!data.isFold()) {
+                if (!gameState.isFold()) {
                     sMove = new Move();
                     sMove.action = Action.SHOW;
                     sMove.cards = new Card[Hand.SIZE];
-                    data.sHand.getCards().toArray(sMove.cards);
+                    gameData.sHand.getCards().toArray(sMove.cards);
                     source.sendMove(sMove);
                 }
 
-                data.setFold(false);
+                gameState.setFold(false);
                 sMove = new Move();
                 sMove.action = Action.STAKES;
-                sMove.cStakes = data.cChips;   // STAKES parameter
-                sMove.sStakes = data.sChips;   // STAKES parameter
+                sMove.cStakes = gameData.cChips;   // STAKES parameter
+                sMove.sStakes = gameData.sChips;   // STAKES parameter
 
                 source.sendMove(sMove);
-                apply(sMove.action);
+                gameState.apply(sMove.action);
                 break;
 
             case QUIT:
-                apply(Action.QUIT);
+                gameState.apply(Action.QUIT);
                 break;
         }
     }
 
     private void manageBetAndRaise(Move move) {
         if (move.action.equals(Action.BET) || move.action.equals(Action.RAISE)) {
-            if (data.isServerTurn()) {
-                if (data.sChips >= move.chips && move.chips > data.minBet) {
-                    data.sChips -= move.chips;
-                    data.sBet += move.chips;
+            if (gameState.isServerTurn()) {
+                if (gameData.sChips >= move.chips && move.chips > gameData.minBet) {
+                    gameData.sChips -= move.chips;
+                    gameData.sBet += move.chips;
                 }
-            } else if (data.cChips >= move.chips && move.chips > data.minBet) {
-                data.cChips -= move.chips;
-                data.cBet += move.chips;
+            } else if (gameData.cChips >= move.chips && move.chips > gameData.minBet) {
+                gameData.cChips -= move.chips;
+                gameData.cBet += move.chips;
             } else {
                 this.manageBetAndRaise(this.sentNotValidChipsValue());
             }
@@ -419,13 +267,13 @@ public class Game {
     private void manageFold(Move move)
     {
      if (move.action.equals(Action.FOLD)) {
-            data.setFold(true);
-            if(data.isServerTurn())
-                data.cChips += data.sBet + data.cBet;
+            gameState.setFold(true);
+            if(gameState.isServerTurn())
+                gameData.cChips += gameData.sBet + gameData.cBet;
             else
-                data.sChips += data.sBet + data.cBet;
-            data.cBet = 0;
-            data.sBet = 0;
+                gameData.sChips += gameData.sBet + gameData.cBet;
+            gameData.cBet = 0;
+            gameData.sBet = 0;
         }
     }
     
@@ -454,51 +302,16 @@ public class Game {
         Move cMove = source.getNextMove();
 
         // wait until the clients move is valid
-        while (!data.state.transitions.containsKey(cMove.action))
+        while (!gameState.state.transitions.containsKey(cMove.action))
             cMove = this.sendProtocolErrorMsg(actualState);
         
         // return the clients valid move
         return cMove;
     }
-    
-    /**
-     * Class defining a move made by either player, affecting the game.
-     */
-    public static class Move {
 
-        public Action action;
-        // Client Game ID
-        public int id = -1;
-        // Generic chips param for ANTE, BET or RAISE
-        public int chips = -1;
-        // Client and server Stakes
-        public int cStakes = -1, sStakes = -1;
-        // Dealer Flag, 1 for Client dealer, 0 for server dealer
-        public int dealer = -1;
-        // Array of cards to deal or discard
-        public Card[] cards = null;
-        // Number of cards discarded by the server
-        public int sDrawn = 0;
-        
-        // Error Message
-        public String error = null;
-
-
-        public Move() {
-            action = Action.NOOP;
-        }
-        
-        @Override
-        public String toString() {
-            String str = action.toString()
-                    + (id == -1 ? "" : " " + id)
-                    + (chips == -1 ? "" : " " + chips)
-                    + (cStakes == -1 ? "" : " " + cStakes)
-                    + (sStakes == -1 ? "" : " " + sStakes)
-                    + (dealer == -1 ? "" : " " + dealer)
-                    + (cards == null ? "" : " " + Arrays.toString(cards))
-                    + (error == null ? "" : " " + error);
-            return str;
-        }
+    public GameState.State getState() {
+        return gameState.state;
     }
+    
+    
 }

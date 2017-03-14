@@ -6,7 +6,7 @@
 package poker5cardgame;
 
 import poker5cardgame.game.Card;
-import poker5cardgame.game.Game;
+import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Game.Move;
 import poker5cardgame.network.Client;
 import poker5cardgame.network.EchoServer;
@@ -35,8 +35,8 @@ public class NetTester {
         cards[3] = Card.fromCode("4S");
         cards[4] = Card.fromCode("5S");
 
-        Move move = new Game.Move();
-        move.action = Game.Action.SHOW;
+        Move move = new Move();
+        move.action = Action.SHOW;
         move.cards = cards;
 
         c.getSource().sendMove(move);

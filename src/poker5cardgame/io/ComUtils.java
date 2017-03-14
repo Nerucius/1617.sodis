@@ -11,7 +11,9 @@ import poker5cardgame.network.Packet;
 
 public class ComUtils {
 
-    // TODO @alex Implement Socket Timeouts
+    private static final boolean DEBUG = false;
+    
+    // TODO @alex Test Socket Timeout
 
     /* Mida d'una cadena de caracters */
     private final int STRSIZE = 32;
@@ -31,6 +33,7 @@ public class ComUtils {
     private int expectedCards = 0;
 
     public ComUtils(Socket socket) {
+               
         try {
             this.socket = socket;
             dis = new DataInputStream(socket.getInputStream());
@@ -146,6 +149,7 @@ public class ComUtils {
             System.err.println("CU: Sent: " + packet);
             
             // Intercept DRAW message to get expected Cards
+            // TODO @sonia Test Draw <-> Draw Server
             if(packet.command == Command.DRAW)
                 expectedCards = packet.getField("number", Integer.class);
             
@@ -193,9 +197,6 @@ public class ComUtils {
                 }
                 break;
             case DRAW_SERVER:
-                // TODO @alex implement method to read DRWS msg
-                // PROBLEM : Needs to know if expects cards or not
-                // Sonia implemented the next lines to test (for the specific example: 2 cards)
                 packet.putField("cards", read_cards(expectedCards));
                 read_bytes(1); // Consume space
                 packet.putField("number", read_int32());
@@ -407,6 +408,11 @@ public class ComUtils {
         return String.join(" ", cards);
     }
 
+    /**
+     * Set the socket timeout time, and Max number of timeouts
+     * // TODO @alex add max timeout count argument
+     * @param timeout millisecods
+     */
     public void setTimeout(int timeout) {     
         if(socket == null || socket.isClosed()){
             System.err.println("CU: Can't set timeout with no connection.");

@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.Scanner;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Game;
+import poker5cardgame.game.GameState.Action;
+import poker5cardgame.game.GameState.State;
+import poker5cardgame.game.Move;
 
 /**
  * Simple Keyboard source to play the game on the same computer.
@@ -22,16 +25,16 @@ public class KeyboardSource implements Source {
         scan = new Scanner(System.in);
     }
 
-    public Game.Move getNextMove() {
-        Game.Move move = new Game.Move();
+    public Move getNextMove() {
+        Move move = new Move();
 
         String command = scan.nextLine();
         String[] args = command.split(" ");
         try {
-            move.action = Game.Action.valueOf(args[0]);
+            move.action = Action.valueOf(args[0]);
         } catch (Exception e) {
             System.err.println("INVALID ACTION");
-            move.action = Game.Action.NOOP;
+            move.action = Action.NOOP;
         }
 
         try{
@@ -55,13 +58,13 @@ public class KeyboardSource implements Source {
         }
         }catch(Exception e){
             System.err.println("SYNTAX ERROR");
-            move.action = Game.Action.NOOP;
+            move.action = Action.NOOP;
         }
 
         return move;
     }
 
-    public boolean sendMove(Game.Move move) {
+    public boolean sendMove(Move move) {
         // PRINTS SERVER REPLY TO Console
         System.out.println("SERVER: " + move.action);
 

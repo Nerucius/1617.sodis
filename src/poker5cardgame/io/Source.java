@@ -5,7 +5,7 @@
  */
 package poker5cardgame.io;
 
-import poker5cardgame.game.Game.Move;
+import poker5cardgame.game.Move;
 
 /**
  *

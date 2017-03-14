@@ -8,9 +8,8 @@ package poker5cardgame.io;
 import java.io.IOException;
 import java.net.Socket;
 import poker5cardgame.game.Card;
-import poker5cardgame.game.Game;
-import poker5cardgame.game.Game.Action;
-import poker5cardgame.game.Game.Move;
+import poker5cardgame.game.GameState.Action;
+import poker5cardgame.game.Move;
 import poker5cardgame.network.Network;
 import poker5cardgame.network.Packet;
 
@@ -37,7 +36,7 @@ public class NetworkSource implements Source {
     public Move getNextMove() {
         System.out.println("[DEBUG NetworkSource]: getNextMove");
         
-        Move move = new Game.Move();
+        Move move = new Move();
 
         if (comUtils == null) {
             // Connection has been closed. Notify the Game
@@ -50,9 +49,7 @@ public class NetworkSource implements Source {
         // breaks the packet will just say NET_ERROR.
         Packet packet = comUtils.read_NetworkPacket();
 
-        System.out.println("[DEBUG NETWORKSOURCE] read networkpacket: AQUI COMENCA EL PAKET[" + packet + "]AQUI ACABA EL PAKET");
         try {
-            // TODO @alex Fill in all cases
             switch (packet.command) {
                 case START:
                     move.action = Action.START;
@@ -118,8 +115,8 @@ public class NetworkSource implements Source {
                 case DRAW_SERVER:
                     move.action = Action.DRAW_SERVER;
                     move.cards = cardsFromCodeString(packet.getField("cards", String.class));
-                    // TODO Save this value and inform the client of how many cards the server requested
-                    packet.getField("number", Integer.class);
+                    // TODO @alex/client Save this value and inform the client of how many cards the server requested
+                    move.sDrawn = packet.getField("number", Integer.class);
                     break;
                     
                 case SHOWDOWN:
@@ -164,7 +161,7 @@ public class NetworkSource implements Source {
      *
      * @param move Move to send over the Network.
      */
-    public boolean sendMove(Game.Move move) {
+    public boolean sendMove(Move move) {
         System.out.println("[DEBUG NetworkSource]: sendMove");
 
                 

@@ -3,6 +3,7 @@ package poker5cardgame;
 import java.util.Scanner;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Game;
+import poker5cardgame.game.GameState.Action;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.network.Client;
 import poker5cardgame.network.GameServer;
@@ -77,7 +78,7 @@ public class Poker5CardGame {
                 Game.Move m = new Game.Move();
 
                 try {
-                    m.action = Game.Action.valueOf(ls[0]);
+                    m.action = Action.valueOf(ls[0]);
                 } catch (IllegalArgumentException e) {
                     System.err.println("Not a Move: " + ls[0]);
                     continue;
