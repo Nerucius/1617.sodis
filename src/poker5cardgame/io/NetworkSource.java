@@ -109,7 +109,8 @@ public class NetworkSource implements Source {
                 case DRAW:
                     // If any cards were requested, get the Card array
                     move.action = Action.DRAW;
-                    if (packet.getField("number", Integer.class) > 0)
+                    move.cDrawn = packet.getField("number", Integer.class);
+                    if (move.cDrawn > 0)
                         move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
                 case DRAW_SERVER:

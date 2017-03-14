@@ -106,7 +106,6 @@ public class Game {
                 // Parameters: CHIPS (if bet) or none (if PASS)     
                 if (gameState.isServerTurn()) 
                 {
-                    System.out.println("[DEBUG GAME] Entra a BETTING server");
                     // TODO @sonia RandomIA(= no IA) and IntelligentIA
                     // sMove = ia.getMoveForGame(Game g)
                     // NOW implemented with PASS example
@@ -122,15 +121,10 @@ public class Game {
                 // Expected move: BET or PASS
                 else 
                 {
-                    System.out.println("[DEBUG GAME] Entra a BETTING client");
-
                     cMove = this.getClientValidMove(getState());
-                    System.out.println("[DEBUG GAME] despres de getvalid move a betting");
-
                     this.manageBetAndRaise(cMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(cMove.action);
-
                 }
                 break;
 
@@ -191,14 +185,13 @@ public class Game {
                 // Expected move: DRAW
                 
                 cMove = this.getClientValidMove(gameState.state);
-                
+                gameData.cDrawn = cMove.cDrawn;
                 // TODO manage if the cards are correct (of the hand) and send an error message if not
-                if(cMove.cards.length != 0)
+                if(gameData.cDrawn != 0)
                 {
                     gameData.cHand.discard(cMove.cards);
-                    gameData.cHand.putNCards(gameData.deck, cMove.cards.length);
                 }
-                
+
                 gameState.apply(cMove.action);
                 break;
 
@@ -209,11 +202,14 @@ public class Game {
                 sMove = new Move();
                 sMove.action = Action.DRAW_SERVER;
                 
+                // send the client cards to the client
+                sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
+
                 // TODO ia
-                // Now change only the first card
-                sMove.cards = new Card[]{gameData.sHand.getCards().get(0), gameData.sHand.getCards().get(1)}; 
-                gameData.sHand.discard(sMove.cards);
-                gameData.sHand.putNCards(gameData.deck, 2);
+                // Now change only the first card                
+                gameData.sHand.discard(gameData.sHand.getCards().get(0));
+                gameData.sHand.putNCards(gameData.deck, 1);
+                sMove.sDrawn = 1;
 
                 source.sendMove(sMove);
                 gameState.apply(sMove.action);

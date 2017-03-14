@@ -8,6 +8,7 @@ public class GameData {
     protected int sChips = 10000, cChips = 1000;
     protected int minBet = 100;
     protected int sBet, cBet;
+    protected int sDrawn, cDrawn;
     
     /* Game flags */
     // sInteractive to know which way plays the server (1: auto without IA; 2: auto with IA)

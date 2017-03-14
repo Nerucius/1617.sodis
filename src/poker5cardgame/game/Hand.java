@@ -84,11 +84,15 @@ public class Hand implements Comparable<Hand> {
      * @param deck Deck that contains all the remaining cards
      * @param n int that is the number of cards to put into the hand
      */
-    public void putNCards(Deck deck, int n)
+    public Card[] putNCards(Deck deck, int n)
     {
+        Card[] cards = new Card[n];
         for (int i = 0; i < n; i++) {
-            putCard(deck.draw());
+            Card card = deck.draw();
+            putCard(card);
+            cards[i] = card;
         }
+        return cards;
     }
     
     /**
