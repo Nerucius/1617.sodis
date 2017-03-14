@@ -35,7 +35,7 @@ public class NetworkSource implements Source {
 
 
     public Move getNextMove() {
-        System.out.println("[DEBUG NetworkSource: getNextMove");
+        System.out.println("[DEBUG NetworkSource]: getNextMove");
         
         Move move = new Game.Move();
 
@@ -50,6 +50,7 @@ public class NetworkSource implements Source {
         // breaks the packet will just say NET_ERROR.
         Packet packet = comUtils.read_NetworkPacket();
 
+        System.out.println("[DEBUG NETWORKSOURCE] read networkpacket: AQUI COMENCA EL PAKET[" + packet + "]AQUI ACABA EL PAKET");
         try {
             // TODO @alex Fill in all cases
             switch (packet.command) {
@@ -117,7 +118,7 @@ public class NetworkSource implements Source {
                 case DRAW_SERVER:
                     move.action = Action.DRAW_SERVER;
                     move.cards = cardsFromCodeString(packet.getField("cards", String.class));
-                    // TODO Read Server's discarded cards
+                    // TODO Save this value and inform the client of how many cards the server requested
                     packet.getField("number", Integer.class);
                     break;
                     
@@ -164,7 +165,7 @@ public class NetworkSource implements Source {
      * @param move Move to send over the Network.
      */
     public boolean sendMove(Game.Move move) {
-        System.out.println("[DEBUG NetworkSource: sendMove");
+        System.out.println("[DEBUG NetworkSource]: sendMove");
 
                 
         // Define an array as large as the most packets sent by a single Move
@@ -239,9 +240,9 @@ public class NetworkSource implements Source {
 
             case DRAW_SERVER:
                 packets[0] = new Packet(Network.Command.DRAW_SERVER);
-                // Create a list of arguments as follows: 2C 3H 4D '2'
+                // Create a list of arguments as follows: DRWS 2C 3H 4D '2'
                 packets[0].putField("cards", cardsToCodeString(move.cards));
-                packets[0].putField("number", move.cards.length);
+                packets[0].putField("number", move.sDrawn);
                 break;
 
             case SHOW:

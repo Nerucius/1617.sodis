@@ -26,6 +26,9 @@ public class ComUtils {
     protected Socket socket;
     int maxTimeout = 5;
     int timeOutMillis = 2000;
+    
+    // Private State
+    private int expectedCards = 0;
 
     public ComUtils(Socket socket) {
         try {
@@ -141,6 +144,11 @@ public class ComUtils {
             packet.write(this);
             bos.flush();
             System.err.println("CU: Sent: " + packet);
+            
+            // Intercept DRAW message to get expected Cards
+            if(packet.command == Command.DRAW)
+                expectedCards = packet.getField("number", Integer.class);
+            
             return true;
         } catch (IOException e) {
             System.err.println("CU: Error sending Packet");
@@ -188,10 +196,9 @@ public class ComUtils {
                 // TODO @alex implement method to read DRWS msg
                 // PROBLEM : Needs to know if expects cards or not
                 // Sonia implemented the next lines to test (for the specific example: 2 cards)
-                packet.putField("cards", read_cards(2));
+                packet.putField("cards", read_cards(expectedCards));
                 read_bytes(1); // Consume space
-                packet.putField("number", 1);
-                System.out.println("[DEBUG comUtils] packet " + packet.toString());
+                packet.putField("number", read_int32());
                 break;
             case SHOWDOWN:
                 packet.putField("cards", read_cards(5));

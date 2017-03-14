@@ -29,6 +29,7 @@ public class Client {
     }
 
     public boolean isConnected(){
+        // TODO @alex This does not update correctly when the socket is closed (infinite errors)
         return (outSource != null);
     }
     

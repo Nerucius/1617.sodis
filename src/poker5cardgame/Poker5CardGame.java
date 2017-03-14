@@ -92,30 +92,51 @@ public class Poker5CardGame {
                     m.error = ls[1];
                 }
                 if (ls.length > 2) {
-                    
+                    try
+                    {
+                        String cardsStr = "";
+                        // CASE DRAW # CARDS
+                            for(int i = 2; i < ls.length; i++)
+                                cardsStr += String.valueOf(ls[i]) + " ";
+
+                            m.cards = NetworkSource.cardsFromCodeString(cardsStr);
+                            System.out.println("[DEBUG main] Fa el DRAW");
+                    }
+                    catch(Exception e){}
+                    /*System.out.println("[DEBUG main] Entra al ls > 2");
+
                     try {
+
                         // Case: STKS CHIPS CHIPS
                         m.sStakes = Integer.valueOf(ls[2]);
+                        System.out.println("[DEBUG main] Fa el STAKES");
+
                     } 
                     catch(NumberFormatException nfe)
                     {
                         String cardsStr = "";
                         try
-                        {   // CASE DRAW # CARDS
+                            
+                        {   
+                            // CASE DRAW # CARDS
                             for(int i = 2; i < ls.length; i++)
                                 cardsStr += String.valueOf(ls[i]) + " ";
 
                             m.cards = NetworkSource.cardsFromCodeString(cardsStr);
+                            System.out.println("[DEBUG main] Fa el DRAW");
+
                         }
                         catch(Exception e)
                         {
+                            System.out.println("[DEBUG main] Entra al DRAW_SERVER");
                             // Case DRWS CARDS #
                             for(int i = 1; i < ls.length-2; i++)
                                 cardsStr += String.valueOf(ls[i]) + " ";
                             cardsStr += String.valueOf(ls[ls.length-1]);
+                            System.out.println("[DEBUG main] Fa el DRAW_SERVER: cards = " + cardsStr + "SONIA");
                             m.cards = NetworkSource.cardsFromCodeString(cardsStr);
-                        }                       
-                    }
+                        }                   
+                    }*/
                 }
 
                 client.getSource().sendMove(m);

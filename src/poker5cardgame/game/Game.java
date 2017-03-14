@@ -260,6 +260,7 @@ public class Game {
                 // Parameters: CHIPS (if bet) or none (if PASS)     
                 if (data.isServerTurn()) 
                 {
+                    System.out.println("[DEBUG GAME] Entra a BETTING server");
                     // TODO @sonia RandomIA(= no IA) and IntelligentIA
                     // sMove = ia.getMoveForGame(Game g)
                     // NOW implemented with PASS example
@@ -275,7 +276,11 @@ public class Game {
                 // Expected move: BET or PASS
                 else 
                 {
+                    System.out.println("[DEBUG GAME] Entra a BETTING client");
+
                     cMove = this.getClientValidMove(data.state);
+                    System.out.println("[DEBUG GAME] despres de getvalid move a betting");
+
                     this.manageBetAndRaise(cMove);
                     data.setServerTurn(!data.isServerTurn());
                     apply(cMove.action);
@@ -472,8 +477,12 @@ public class Game {
         public int dealer = -1;
         // Array of cards to deal or discard
         public Card[] cards = null;
+        // Number of cards discarded by the server
+        public int sDrawn = 0;
+        
         // Error Message
         public String error = null;
+
 
         public Move() {
             action = Action.NOOP;
