@@ -151,7 +151,10 @@ public class ComUtils {
             // Intercept DRAW message to get expected Cards
             // TODO @sonia Test Draw <-> Draw Server
             if(packet.command == Command.DRAW)
+            {
                 expectedCards = packet.getField("number", Integer.class);
+                System.out.println("[DEBUG] DRAW number setting = " +expectedCards);
+            }
             
             return true;
         } catch (IOException e) {

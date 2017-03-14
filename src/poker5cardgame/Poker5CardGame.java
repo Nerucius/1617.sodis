@@ -4,6 +4,7 @@ import java.util.Scanner;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.Game;
 import poker5cardgame.game.GameState.Action;
+import poker5cardgame.game.Move;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.network.Client;
 import poker5cardgame.network.GameServer;
@@ -32,8 +33,9 @@ public class Poker5CardGame {
 
             if (ls[0].equals("quit")) {
                 client.close();
-                if (server != null)
+                if (server != null) {
                     server.close();
+                }
                 System.exit(0);
             }
 
@@ -46,8 +48,9 @@ public class Poker5CardGame {
             } else if (ls[0].equals("connect")) {
                 // Type "connect" to connecto to localhost
                 client.connect(ls[1], 1212);
-                if (!client.isConnected())
+                if (!client.isConnected()) {
                     continue;
+                }
 
                 // Begin our client
                 new Thread(new Runnable() {
@@ -55,7 +58,7 @@ public class Poker5CardGame {
                         ((NetworkSource) client.getSource()).getCom().setTimeout(0);
                         while (client.isConnected()) {
                             System.out.println("Client: Ready to recieve next Move...");
-                            Game.Move m = client.getSource().getNextMove();
+                            Move m = client.getSource().getNextMove();
                             System.out.println(m);
                         }
                     }
@@ -75,7 +78,7 @@ public class Poker5CardGame {
                 cards[3] = Card.fromCode("4S");
                 cards[4] = Card.fromCode("5S");
 
-                Game.Move m = new Game.Move();
+                Move m = new Move();
 
                 try {
                     m.action = Action.valueOf(ls[0]);
@@ -83,7 +86,7 @@ public class Poker5CardGame {
                     System.err.println("Not a Move: " + ls[0]);
                     continue;
                 }
-                
+
                 m.cards = cards;
                 if (ls.length > 1) {
                     m.id = Integer.valueOf(ls[1]);
@@ -93,57 +96,18 @@ public class Poker5CardGame {
                     m.error = ls[1];
                 }
                 if (ls.length > 2) {
-                    try
-                    {
-                        String cardsStr = "";
-                        // CASE DRAW # CARDS
-                            for(int i = 2; i < ls.length; i++)
-                                cardsStr += String.valueOf(ls[i]) + " ";
-
-                            m.cards = NetworkSource.cardsFromCodeString(cardsStr);
-                            System.out.println("[DEBUG main] Fa el DRAW");
-                    }
-                    catch(Exception e){}
-                    /*System.out.println("[DEBUG main] Entra al ls > 2");
-
                     try {
-
-                        // Case: STKS CHIPS CHIPS
-                        m.sStakes = Integer.valueOf(ls[2]);
-                        System.out.println("[DEBUG main] Fa el STAKES");
-
-                    } 
-                    catch(NumberFormatException nfe)
-                    {
+                        // CASE DRAW # CARDS
                         String cardsStr = "";
-                        try
-                            
-                        {   
-                            // CASE DRAW # CARDS
-                            for(int i = 2; i < ls.length; i++)
-                                cardsStr += String.valueOf(ls[i]) + " ";
-
-                            m.cards = NetworkSource.cardsFromCodeString(cardsStr);
-                            System.out.println("[DEBUG main] Fa el DRAW");
-
+                        for (int i = 2; i < ls.length; i++) {
+                            cardsStr += String.valueOf(ls[i]) + " ";
                         }
-                        catch(Exception e)
-                        {
-                            System.out.println("[DEBUG main] Entra al DRAW_SERVER");
-                            // Case DRWS CARDS #
-                            for(int i = 1; i < ls.length-2; i++)
-                                cardsStr += String.valueOf(ls[i]) + " ";
-                            cardsStr += String.valueOf(ls[ls.length-1]);
-                            System.out.println("[DEBUG main] Fa el DRAW_SERVER: cards = " + cardsStr + "SONIA");
-                            m.cards = NetworkSource.cardsFromCodeString(cardsStr);
-                        }                   
-                    }*/
+                        m.cards = NetworkSource.cardsFromCodeString(cardsStr);
+                    } catch (Exception e) {
+                    }
                 }
-
                 client.getSource().sendMove(m);
-
             }
         }
-
     }
 }

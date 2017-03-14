@@ -1,17 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.game;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author sbatllpa9.alumnes
- */
 public class GameState {
     
     public State state = State.INIT;
@@ -43,11 +34,12 @@ public class GameState {
         this.serverTurn = serverTurn;
     }
 
+    @Override
+    public String toString() {
+        return "GameState{" + "state=" + state + '}';
+    }
     
-
-    
-    
-       // Define all the game actions
+    // Define all the game actions
     public enum Action {
         START,
         ANTE_STAKES,

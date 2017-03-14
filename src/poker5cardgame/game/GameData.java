@@ -20,5 +20,9 @@ public class GameData {
       this.sHand = new Hand();
       this.cHand = new Hand();
     }
-    
+
+    @Override
+    public String toString() {
+        return "GameData{" + "sChips=" + sChips + ", cChips=" + cChips + ", minBet=" + minBet + ", sBet=" + sBet + ", cBet=" + cBet + '}';
+    }    
 }

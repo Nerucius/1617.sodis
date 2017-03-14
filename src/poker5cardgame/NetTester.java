@@ -7,7 +7,7 @@ package poker5cardgame;
 
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
-import poker5cardgame.game.Game.Move;
+import poker5cardgame.game.Move;
 import poker5cardgame.network.Client;
 import poker5cardgame.network.EchoServer;
 import poker5cardgame.network.Server;

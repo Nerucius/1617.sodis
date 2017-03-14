@@ -1,9 +1,6 @@
 package poker5cardgame.game;
 
-import java.util.Arrays;
 import poker5cardgame.io.Source;
-import java.util.HashMap;
-import java.util.Map;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.GameState.State;
 
@@ -13,7 +10,6 @@ import poker5cardgame.game.GameState.State;
 public class Game {
 
     private Source source;
-    
     private GameData gameData;
     private GameState gameState;
 
@@ -27,19 +23,21 @@ public class Game {
     public Game(Source source) {
         this.source = source;
         this.gameData = new GameData();
+        this.gameState = new GameState();
     }
 
-   
-
+    public GameState.State getState() {
+        return gameState.state;
+    }
+    
     /**
      * Run the game with the next iteration of commands
      */
     public void update() {
         // TODO @sonia Acabar la logica de tots els estats i comprovar que seguim el protocol
-        // TODO @sonia metode pq cmove sigui valid 
 
         Move sMove, cMove;
-        System.out.println("[DEBUG Game] " + gameData);
+        System.out.println("[DEBUG Game] " + gameData + gameState);
 
         switch (getState()) {
 
@@ -308,10 +306,4 @@ public class Game {
         // return the clients valid move
         return cMove;
     }
-
-    public GameState.State getState() {
-        return gameState.state;
-    }
-    
-    
 }
