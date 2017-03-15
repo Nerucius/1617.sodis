@@ -15,21 +15,16 @@ public class Hand implements Comparable<Hand> {
 
     public static final int SIZE = 5;
 
-    // <editor-fold defaultstate="collapsed" desc="Attributes">
     private final List<Card> cards; // List of the card that contains a hand
     private int suitId;             // Id of the hand to manage the case FLUSH in the hand ranker
     private int weight;             // Weight of the hand to manage the case STRAIGHT in the hand ranker
     private Map ocurDict;           // Map that contains <Rank,Occurrences> elements
     private Map rankDict;           // Map that contains <HandRank, Rank> elements
-    //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Constructors">
     public Hand() {
         this.cards = new ArrayList();
     }
-    //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Getters">
     public List<Card> getCards() {
         return this.cards;
     }
@@ -49,16 +44,17 @@ public class Hand implements Comparable<Hand> {
     public Map getRankDict() {
         return rankDict;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public Methods">
     /**
      * Generate a new hand (5 cards) from the deck.
      *
      * @param deck Deck that contains all the remaining cards
      * @return Hand
+     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    public Hand generate(Deck deck) {
+    // TODO test it
+    public Hand generate(Deck deck) throws Deck.EmptyDeckException, TooManyCardsException {
+        this.cards.clear();
         for (int i = 0; i < SIZE; i++) {
             putCard(deck.draw());
         }
@@ -69,12 +65,15 @@ public class Hand implements Comparable<Hand> {
      * Put a new card to the hand.
      *
      * @param card Card to add to the hand
+     * @throws poker5cardgame.game.Hand.TooManyCardsException
      */
-    public void putCard(Card card) {
+    // TODO test it
+    public void putCard(Card card) throws TooManyCardsException {
         if (cards.size() < SIZE) {
             cards.add(card);
         } else {
-            System.err.println("Too many cards added to the hand.");
+            throw new TooManyCardsException("Too many cards added to the hand.");
+            //System.err.println("Too many cards added to the hand.");
         }
     }
 
@@ -83,23 +82,32 @@ public class Hand implements Comparable<Hand> {
      * 
      * @param deck Deck that contains all the remaining cards
      * @param n int that is the number of cards to put into the hand
+     * @return Card[]
+     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    public void putNCards(Deck deck, int n)
+    public Card[] putNCards(Deck deck, int n) throws Deck.EmptyDeckException, TooManyCardsException
     {
+        Card[] cards = new Card[n];
         for (int i = 0; i < n; i++) {
-            putCard(deck.draw());
+            Card card = deck.draw();
+            putCard(card);
+            cards[i] = card;
         }
+        return cards;
     }
     
     /**
      * Remove one or more cards from the hand.
      *
      * @param cards Card or Cards to remove
+     * @throws poker5cardgame.game.Hand.NonExistingCardException
      */
-    public void discard(Card... cards) {
+    // TODO test it
+    public void discard(Card... cards) throws NonExistingCardException {
         for (Card c : cards) {
             if (!this.cards.remove(c)) {
-                System.err.println("Tried to remove a non existing card.");
+                throw new NonExistingCardException("Tried to remove a non existing card.");
+                //System.err.println("Tried to remove a non existing card.");
             }
         }
     }
@@ -245,9 +253,7 @@ public class Hand implements Comparable<Hand> {
     public String toString() {
         return this.cards.toString();
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Private Methods">
     /**
      * Compare my highest card with the highest card of the other. If they are
      * equal, compare the next highest cards. If all are equal, return tie.
@@ -432,5 +438,40 @@ public class Hand implements Comparable<Hand> {
         }
         return aux;
     }
-    // </editor-fold>
+    
+    public class NonExistingCardException extends Exception {
+        public NonExistingCardException() {
+            super();
+        }
+
+        public NonExistingCardException(String message) {
+            super(message);
+        }
+
+        public NonExistingCardException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public NonExistingCardException(Throwable cause) {
+            super(cause);
+        }
+    }
+    
+    public class TooManyCardsException extends Exception {
+        public TooManyCardsException() {
+            super();
+        }
+
+        public TooManyCardsException(String message) {
+            super(message);
+        }
+
+        public TooManyCardsException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public TooManyCardsException(Throwable cause) {
+            super(cause);
+        }
+    }
 }

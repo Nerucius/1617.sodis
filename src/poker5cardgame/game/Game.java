@@ -1,5 +1,6 @@
 package poker5cardgame.game;
 
+import java.util.Set;
 import poker5cardgame.io.Source;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.GameState.State;
@@ -9,6 +10,9 @@ import poker5cardgame.game.GameState.State;
  */
 public class Game {
 
+    // TODO Quit should stop the game?
+    // TODO manage when CALL i PASS sumen chips
+    
     private Source source;
     private GameData gameData;
     private GameState gameState;
@@ -30,6 +34,7 @@ public class Game {
         return gameState.state;
     }
     
+    
     /**
      * Run the game with the next iteration of commands
      */
@@ -37,7 +42,8 @@ public class Game {
         // TODO @sonia Acabar la logica de tots els estats i comprovar que seguim el protocol
 
         Move sMove, cMove;
-        System.out.println("[DEBUG Game] " + gameData + gameState);
+        
+        System.out.println("[DEBUG Game] " + gameState);
 
         switch (getState()) {
 
@@ -79,8 +85,9 @@ public class Game {
                 // Parameters: '0' (dealer = server) or '1' (dealer = client), client hand
                
                 // the game is accepted, so set the minimum bet as the bet of each player
-                gameData.cBet = gameData.minBet;
-                gameData.sBet = gameData.minBet;
+                this.setMinBetServer();
+                this.setMinBetClient();
+              
                 
                 sMove = new Move();
                 sMove.action = Action.DEALER_HAND;
@@ -90,9 +97,19 @@ public class Game {
                 gameState.setServerTurn(sMove.dealer == 1); // the non dealer has the next turn
                 
                 // generate the server and the client hands
-                gameData.deck.generate();                
-                gameData.cHand.generate(gameData.deck);
-                gameData.sHand.generate(gameData.deck);
+                if(gameData.newPlay)
+                {
+                    gameData.deck.generate();
+                    gameData.newPlay = false;
+                }                
+                 
+                try {
+                    gameData.cHand.generate(gameData.deck);
+                    gameData.sHand.generate(gameData.deck);
+                } catch (Exception ex) {
+                    this.sendErrorMsg(ex.getMessage());
+                }
+                
                 sMove.cards = new Card[Hand.SIZE];
                 gameData.cHand.getCards().toArray(sMove.cards);
 
@@ -106,15 +123,16 @@ public class Game {
                 // Parameters: CHIPS (if bet) or none (if PASS)     
                 if (gameState.isServerTurn()) 
                 {
-                    System.out.println("[DEBUG GAME] Entra a BETTING server");
                     // TODO @sonia RandomIA(= no IA) and IntelligentIA
                     // sMove = ia.getMoveForGame(Game g)
                     // NOW implemented with PASS example
                     
                     sMove = new Move();
-                    sMove.action = Action.PASS;
+                    sMove.action = Action.BET;
+                    sMove.chips = 125;
+                    this.manageBetServer(sMove);
                                     
-                    source.sendMove(sMove);                                        
+                    source.sendMove(sMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(sMove.action);
                 }
@@ -122,20 +140,14 @@ public class Game {
                 // Expected move: BET or PASS
                 else 
                 {
-                    System.out.println("[DEBUG GAME] Entra a BETTING client");
-
                     cMove = this.getClientValidMove(getState());
-                    System.out.println("[DEBUG GAME] despres de getvalid move a betting");
-
-                    this.manageBetAndRaise(cMove);
+                    if(cMove.action.equals(Action.BET)) this.manageBetClient(cMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(cMove.action);
-
                 }
                 break;
 
             case BETTING_DEALER:
-                // TODO same as BETTING? considero que ara mateix si pq no hi ha IA           
     
                 // Turn: dealer = SERVER
                 // Move to send: BET or PASS
@@ -144,10 +156,12 @@ public class Game {
                 {
                     // TODO @sonia RandomIA(= no IA) and IntelligentIA
                     // sMove = ia.getMoveForGame(Game g)
-                    // NOW implemented with PASS example
+                    // NOW implemented with BET example
                     
                     sMove = new Move();
-                    sMove.action = Action.PASS;
+                    sMove.action = Action.BET;
+                    sMove.chips = 125;
+                    this.manageBetServer(sMove);
                                     
                     source.sendMove(sMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
@@ -158,10 +172,12 @@ public class Game {
                 else 
                 {
                     cMove = this.getClientValidMove(gameState.state);
-                    this.manageBetAndRaise(cMove);
+                    if(cMove.action.equals(Action.BET)) this.manageBetClient(cMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(cMove.action);
                 }
+       
+                        
                 break;
 
             case COUNTER:
@@ -171,6 +187,7 @@ public class Game {
                     
                     sMove = new Move();
                     sMove.action = Action.CALL;
+                    this.manageCallServer();
                     
                     source.sendMove(sMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
@@ -179,26 +196,33 @@ public class Game {
                 else
                 {
                     cMove = this.getClientValidMove(gameState.state);
-                    this.manageBetAndRaise(cMove);
-                    this.manageFold(cMove);
+
+                    if(cMove.action.equals(Action.RAISE)) this.manageRaiseClient(cMove);
+                    if(cMove.action.equals(Action.CALL)) this.manageCallClient();
+                    if(cMove.action.equals(Action.FOLD)) this.manageFoldClient(cMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(cMove.action);
-                }                
+                }    
+              
                 break;
 
             case DRAW:
                 // Turn: CLIENT
                 // Expected move: DRAW
+                                
+                // TODO send protocol error if the client drawn number does not match with the cards lenght
+
+                cMove = this.getClientValidMove(gameState.state);              
+                gameData.cDrawn = cMove.cDrawn;
                 
-                cMove = this.getClientValidMove(gameState.state);
-                
-                // TODO manage if the cards are correct (of the hand) and send an error message if not
-                if(cMove.cards.length != 0)
-                {
-                    gameData.cHand.discard(cMove.cards);
-                    gameData.cHand.putNCards(gameData.deck, cMove.cards.length);
+                if (gameData.cDrawn > 0) {
+                    try {
+                        gameData.cHand.discard(cMove.cards);
+                    } catch (Exception ex) {
+                        this.sendErrorMsg(ex.getMessage());
+                    }
                 }
-                
+
                 gameState.apply(cMove.action);
                 break;
 
@@ -209,28 +233,52 @@ public class Game {
                 sMove = new Move();
                 sMove.action = Action.DRAW_SERVER;
                 
-                // TODO ia
-                // Now change only the first card
-                sMove.cards = new Card[]{gameData.sHand.getCards().get(0), gameData.sHand.getCards().get(1)}; 
-                gameData.sHand.discard(sMove.cards);
-                gameData.sHand.putNCards(gameData.deck, 2);
+                try {
+                    // send the client cards to the client
+                    sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
+
+                    // TODO ia
+                    // Now change only the first card                
+                    gameData.sHand.discard(gameData.sHand.getCards().get(0));
+                    gameData.sHand.putNCards(gameData.deck, 1);
+                } catch (Exception ex) {
+                    this.sendErrorMsg(ex.getMessage());
+                }
+
+                gameData.sDrawn = 1;
+                
+                sMove.sDrawn = gameData.sDrawn;
 
                 source.sendMove(sMove);
                 gameState.apply(sMove.action);
                 break;
 
             case SHOWDOWN:
-                // Turn: SERVER
-
-                if (!gameState.isFold()) {
+                // Turn: SERVER                    
+                
+                if(!gameState.isFold())
+                {
+                    if(!gameState.isShowTime())
+                        this.sendErrorMsg("Server can not show the cards now.");
                     sMove = new Move();
                     sMove.action = Action.SHOW;
                     sMove.cards = new Card[Hand.SIZE];
                     gameData.sHand.getCards().toArray(sMove.cards);
                     source.sendMove(sMove);
                 }
-
                 gameState.setFold(false);
+                gameState.setShowTime(false);
+                gameData.sDrawn = 0;
+                gameData.cDrawn = 0;
+                
+                // manage Winner with handranker
+                gameData.sHand.generateRankerInformation();
+                gameData.cHand.generateRankerInformation();
+                if(gameData.sHand.wins(gameData.cHand))            
+                    this.allChipsToServer();
+                else
+                    this.allChipsToClient();
+                
                 sMove = new Move();
                 sMove.action = Action.STAKES;
                 sMove.cStakes = gameData.cChips;   // STAKES parameter
@@ -244,22 +292,118 @@ public class Game {
                 gameState.apply(Action.QUIT);
                 break;
         }
+        System.out.println("[DEBUG Game] " + gameData);
     }
 
     private void manageBetAndRaise(Move move) {
         if (move.action.equals(Action.BET) || move.action.equals(Action.RAISE)) {
             if (gameState.isServerTurn()) {
-                if (gameData.sChips >= move.chips && move.chips > gameData.minBet) {
+                if (gameData.sChips >= move.chips && move.chips >= gameData.minBet) {
                     gameData.sChips -= move.chips;
                     gameData.sBet += move.chips;
                 }
-            } else if (gameData.cChips >= move.chips && move.chips > gameData.minBet) {
+            } else if (gameData.cChips >= move.chips && move.chips >= gameData.minBet) {
                 gameData.cChips -= move.chips;
                 gameData.cBet += move.chips;
             } else {
-                this.manageBetAndRaise(this.sentNotValidChipsValue());
+                this.manageBetAndRaise(this.sendErrorMsg("Logic Error. Not valid chips value."));
             }
         }
+    }
+    
+    private void setMinBetServer()
+    {
+        if (gameData.sChips >= gameData.minBet) {
+            gameData.sBet += gameData.minBet;
+            gameData.sChips -= gameData.minBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips for the minimum bet.");
+        }
+    }
+    
+    private void setMinBetClient()
+    {
+        if (gameData.cChips >= gameData.minBet) {
+            gameData.cChips -= gameData.minBet;
+            gameData.cBet += gameData.minBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips for the minimum bet.");
+        }
+    }
+    
+    private void manageBetServer(Move move)
+    {
+        if (move.chips >= gameData.minBet && gameData.sChips >= move.chips) {
+            gameData.sChips -= move.chips;
+            gameData.sBet += move.chips;
+        } else {
+            this.sendErrorMsg("Logic Error. Not valid chips value.");
+        }
+    }
+    
+    private void manageBetClient(Move move)
+    {
+        if (move.chips >= gameData.minBet && gameData.cChips >= move.chips) {
+            gameData.cChips -= move.chips;
+            gameData.cBet += move.chips;
+        } else {
+            this.sendErrorMsg("Logic Error. Not valid chips value.");
+        }
+    }
+    
+    private void manageRaiseServer(Move move)
+    {
+        this._manageCallServer(move.chips);
+    }
+    private void manageRaiseClient(Move move)
+    {
+       this._manageCallClient(move.chips);
+    }
+    
+    private void manageCallServer()
+    {
+        this._manageCallServer(0);
+    }
+    
+    private void _manageCallServer(int raise)
+    {
+        int amountToBet = gameData.cBet - gameData.sBet + raise;
+        if(gameData.sChips >= amountToBet)
+        {
+            gameData.sChips -= amountToBet;
+            gameData.sBet += amountToBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips to call.");
+        }
+    }
+    
+    private void manageCallClient()
+    {
+        this._manageCallClient(0);
+    }
+    
+    private void _manageCallClient(int raise)
+    {
+        int amountToBet = gameData.sBet - gameData.cBet + raise;
+        if(gameData.cChips >= amountToBet)
+        {
+            gameData.cChips -= amountToBet;
+            gameData.cBet += amountToBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips to call.");
+        }
+    }
+    
+    private void manageFoldServer(Move move)
+    {
+        gameState.setFold(true);
+        this.allChipsToClient();
+    }
+    
+    private void manageFoldClient(Move move)
+    {
+        gameState.setFold(true);
+        this.allChipsToServer();
     }
     
     private void manageFold(Move move)
@@ -267,31 +411,34 @@ public class Game {
      if (move.action.equals(Action.FOLD)) {
             gameState.setFold(true);
             if(gameState.isServerTurn())
-                gameData.cChips += gameData.sBet + gameData.cBet;
+                this.allChipsToClient();
             else
-                gameData.sChips += gameData.sBet + gameData.cBet;
-            gameData.cBet = 0;
-            gameData.sBet = 0;
+                this.allChipsToServer();
         }
     }
     
-    private Move sentNotValidChipsValue()
-    {
-        Move errMove = new Move();
-        errMove.action = Action.ERROR;
-        errMove.error = "Logic Error. Not valid chips value.";
-        source.sendMove(errMove);
-        return source.getNextMove();
+    private void allChipsToServer() {
+        gameData.sChips += gameData.sBet + gameData.cBet;
+        this.resetBets();
+    }
+
+    private void allChipsToClient() {
+        gameData.cChips += gameData.sBet + gameData.cBet;
+        this.resetBets();
+    }
+
+    private void resetBets() {
+        gameData.cBet = 0;
+        gameData.sBet = 0;
     }
     
-    private Move sendProtocolErrorMsg(State actualState)
+    private Move sendErrorMsg(String msg)
     {
         Move errMove = new Move();
         errMove.action = Action.ERROR;
-        errMove.error = "Protocol Error. Expecting for: " + actualState.transitions.keySet();
+        errMove.error = msg;
         source.sendMove(errMove);
         return source.getNextMove();
-
     }
     
     private Move getClientValidMove(State actualState)
@@ -300,8 +447,12 @@ public class Game {
         Move cMove = source.getNextMove();
 
         // wait until the clients move is valid
-        while (!gameState.state.transitions.containsKey(cMove.action))
-            cMove = this.sendProtocolErrorMsg(actualState);
+        while (!gameState.state.transitions.containsKey(cMove.action) || cMove.action == Action.SHOW)
+        {
+            Set validActions = getState().transitions.keySet();
+            if (validActions.contains(Action.SHOW)) validActions.remove(Action.SHOW);
+            cMove = this.sendErrorMsg("Protocol Error. Expecting for: " + validActions);
+        }
         
         // return the clients valid move
         return cMove;

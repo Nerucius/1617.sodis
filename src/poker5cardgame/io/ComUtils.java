@@ -10,8 +10,6 @@ import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
 
 public class ComUtils {
-
-    private static final boolean DEBUG = false;
     
     // TODO @alex Test Socket Timeout
 
@@ -101,11 +99,9 @@ public class ComUtils {
             // Read first 4 bytes (4 chars) to identify code
             byte[] nextBytes = read_bytes(4);
 
-            System.out.println("[DEBUG ComUtils] recieved command: " + new String(nextBytes));
             // While the current 4 bytes are not a valid command, read one more byte
             while (!Network.Command.isValid(new String(nextBytes))) {
                 // Send an error packet every time this fails
-                System.out.println("[DEBUG ComUtils] invalid recieved command: " + new String(nextBytes));
                 send_error_packet("Invalid PROTOCOL Code");
                 // Move last 3 bytes back, and read one more
                 System.arraycopy(nextBytes, 1, nextBytes, 0, 3);
@@ -149,14 +145,12 @@ public class ComUtils {
             System.err.println("CU: Sent: " + packet);
             
             // Intercept DRAW message to get expected Cards
-            // TODO @sonia Test Draw <-> Draw Server
-            if(packet.command == Command.DRAW)
-            {
-                expectedCards = packet.getField("number", Integer.class);
-                System.out.println("[DEBUG] DRAW number setting = " +expectedCards);
+            if(packet.command == Command.DRAW){
+                expectedCards = packet.getField("number", Integer.class);                 
             }
             
             return true;
+            
         } catch (IOException e) {
             System.err.println("CU: Error sending Packet");
             return false;
@@ -200,12 +194,16 @@ public class ComUtils {
                 }
                 break;
             case DRAW_SERVER:
-                packet.putField("cards", read_cards(expectedCards));
-                read_bytes(1); // Consume space
+                if(expectedCards > 0)
+                {
+                    packet.putField("cards", read_cards(expectedCards));
+                    read_bytes(1); // Consume space
+                }
                 packet.putField("number", read_int32());
                 break;
             case SHOWDOWN:
                 packet.putField("cards", read_cards(5));
+                break;
             case ERROR:
                 packet.putField("error", read_string_variable(2));
                 break;

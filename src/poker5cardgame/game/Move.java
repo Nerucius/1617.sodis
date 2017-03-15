@@ -25,12 +25,11 @@ public class Move {
     public int dealer = -1;
     // Array of cards to deal or discard
     public Card[] cards = null;
-    // Number of cards discarded by the server
-    public int sDrawn = 0;
+    // Number of cards discarded
+    public int cDrawn = -1, sDrawn = -1;
 
     // Error Message
     public String error = null;
-
 
     public Move() {
         action = Action.NOOP;
@@ -42,7 +41,9 @@ public class Move {
                 + (id == -1 ? "" : " " + id)
                 + (chips == -1 ? "" : " " + chips)
                 + (cStakes == -1 ? "" : " " + cStakes)
-                + (sStakes == -1 ? "" : " " + sStakes)
+                + (sStakes == -1 ? "" : " " + sStakes)                
+                + (cDrawn == -1 ? "" : " " + cDrawn)
+                + (sDrawn == -1 ? "" : " " + sDrawn)
                 + (dealer == -1 ? "" : " " + dealer)
                 + (cards == null ? "" : " " + Arrays.toString(cards))
                 + (error == null ? "" : " " + error);

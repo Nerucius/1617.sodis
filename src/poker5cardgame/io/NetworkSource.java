@@ -1,12 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.io;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
@@ -34,7 +31,6 @@ public class NetworkSource implements Source {
 
 
     public Move getNextMove() {
-        System.out.println("[DEBUG NetworkSource]: getNextMove");
         
         Move move = new Move();
 
@@ -51,10 +47,12 @@ public class NetworkSource implements Source {
 
         try {
             switch (packet.command) {
+                
                 case START:
                     move.action = Action.START;
                     move.id = packet.getField("id", Integer.class);
                     break;
+                    
                 case ANTE:
                     move.chips = packet.getField("chips", Integer.class);
                     
@@ -70,17 +68,21 @@ public class NetworkSource implements Source {
                     move.cStakes = stks.cStakes;
                     move.sStakes = stks.sStakes;
                     break;
+                    
                 case STAKES:
                     move.action = Action.STAKES;
                     move.cStakes = packet.getField("stakes_client", Integer.class);
                     move.sStakes = packet.getField("stakes_server", Integer.class);
                     break;
+                    
                 case ANTE_OK:
                     move.action = Action.ANTE_OK;
                     break;
+                    
                 case QUIT:
                     move.action = Action.QUIT;
                     break;
+                    
                 case DEALER:
                     move.action = Action.DEALER_HAND;
                     move.dealer = packet.getField("dealer", Integer.class);
@@ -109,14 +111,17 @@ public class NetworkSource implements Source {
                 case DRAW:
                     // If any cards were requested, get the Card array
                     move.action = Action.DRAW;
-                    if (packet.getField("number", Integer.class) > 0)
+                    move.cDrawn = packet.getField("number", Integer.class);
+                    if(move.cDrawn > 0)
                         move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
+                    
                 case DRAW_SERVER:
                     move.action = Action.DRAW_SERVER;
-                    move.cards = cardsFromCodeString(packet.getField("cards", String.class));
-                    // TODO @alex/client Save this value and inform the client of how many cards the server requested
                     move.sDrawn = packet.getField("number", Integer.class);
+                    if(move.sDrawn > 0)
+                        move.cards = cardsFromCodeString(packet.getField("cards", String.class));
+                    // TODO @alex/client Save this value and inform the client of how many cards the server requested
                     break;
                     
                 case SHOWDOWN:
@@ -162,8 +167,6 @@ public class NetworkSource implements Source {
      * @param move Move to send over the Network.
      */
     public boolean sendMove(Move move) {
-        System.out.println("[DEBUG NetworkSource]: sendMove");
-
                 
         // Define an array as large as the most packets sent by a single Move
         // Some moves send more than one packet.
@@ -231,14 +234,18 @@ public class NetworkSource implements Source {
             case DRAW:
                 packets[0] = new Packet(Network.Command.DRAW);
                 // Create a list of arguments as follows: '2' 2C 3H
-                packets[0].putField("number", move.cards.length);
-                packets[0].putField("cards", cardsToCodeString(move.cards));
+                // TODO manage somewhere the case the client enters a different number as the cards lenght? (send error msg)
+                if (move.cDrawn == move.cards.length) packets[0].putField("number", move.cDrawn);
+                else packets[0].putField("number", move.cards.length);
+                if(move.cards.length > 0)
+                    packets[0].putField("cards", cardsToCodeString(move.cards));
                 break;
 
             case DRAW_SERVER:
                 packets[0] = new Packet(Network.Command.DRAW_SERVER);
                 // Create a list of arguments as follows: DRWS 2C 3H 4D '2'
-                packets[0].putField("cards", cardsToCodeString(move.cards));
+                if(move.cDrawn > 0)
+                    packets[0].putField("cards", cardsToCodeString(move.cards));
                 packets[0].putField("number", move.sDrawn);
                 break;
 
@@ -279,7 +286,10 @@ public class NetworkSource implements Source {
     /**
      * Convert an array of cards to a String of card codes separated by " "
      */
-    public static String cardsToCodeString(Card[] cards) {        
+    public static String cardsToCodeString(Card[] cards) { 
+        if(cards.length == 0)
+            return null;
+        
         String[] codes = new String[cards.length];
 
         for (int i = 0; i < cards.length; i++)
@@ -292,6 +302,8 @@ public class NetworkSource implements Source {
      * Convert an array of cards to an array of card codes
      */
     public static Card[] cardsFromCodeString(String cards) {
+        if(cards == null) return null;
+        
         String[] cardsplits = cards.split(" ");
         
         // Returns zero lenght arrays some times -> its OK
