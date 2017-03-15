@@ -6,19 +6,15 @@ import java.util.List;
 
 public final class Deck {
 
-    // <editor-fold defaultstate="collapsed" desc="Attributes">
     private List<Card> deck;
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Constructors">
     public Deck() {
         this.deck = new ArrayList<>();
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public Methods">
     /**
      * Generate a new deck.
+     *
      * @return Deck
      */
     public Deck generate() {
@@ -37,15 +33,41 @@ public final class Deck {
 
     /**
      * Draw a card from the deck.
-     *
      * @return Card
+     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    public Card draw() {
+    // TODO test it
+    public Card draw() throws EmptyDeckException {
         if (deck.size() > 0) {
             return this.deck.remove(deck.size() - 1);
         }
-        System.err.println("Deck is empty.");
-        return null;
+        //System.err.println("Deck is empty.");
+        throw new EmptyDeckException("Deck is empty.");
     }
-    // </editor-fold>
+
+    /**
+     * Get the size of the deck.
+     * @return int
+     */
+    public int getSize() {
+        return this.deck.size();
+    }
+    
+    public class EmptyDeckException extends Exception {
+        public EmptyDeckException() {
+            super();
+        }
+
+        public EmptyDeckException(String message) {
+            super(message);
+        }
+
+        public EmptyDeckException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public EmptyDeckException(Throwable cause) {
+            super(cause);
+        }
+    }
 }

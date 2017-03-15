@@ -97,19 +97,14 @@ public class Card implements Comparable<Card> {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Attributes">
     private Suit suit;
     private Rank rank;
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Constructors">
     public Card(Suit suit, Rank rank) {
         this.suit = suit;
         this.rank = rank;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Getters">
     public Rank getRank() {
         return this.rank;
     }
@@ -121,9 +116,7 @@ public class Card implements Comparable<Card> {
     public int getSuitId() {
         return this.suit.id;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Public Methods">
     /**
      * Get the card code from a real card.
      *
@@ -173,5 +166,4 @@ public class Card implements Comparable<Card> {
     public String toString() {
         return this.getCode();
     }
-    // </editor-fold>
 }

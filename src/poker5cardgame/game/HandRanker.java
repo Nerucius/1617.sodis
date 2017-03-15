@@ -30,7 +30,6 @@ public class HandRanker {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Public Methods">
     public static HandRank getHandRank(Hand hand) {
         int hSuitId = hand.getSuitId();
         int hWeight = hand.getWeight();
@@ -110,9 +109,7 @@ public class HandRanker {
                 return null;
         }
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Private Methods">
     private static boolean areSuccessive(int hWeight) {
         return Card.SUCCESSIVE_CARDS.contains(hWeight);
     }
@@ -133,5 +130,4 @@ public class HandRanker {
         }
         return product;
     }
-    // </editor-fold>
 }

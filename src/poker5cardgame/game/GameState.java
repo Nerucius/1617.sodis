@@ -9,6 +9,7 @@ public class GameState {
     private boolean fold = false;
     private boolean secondRound = false;
     private boolean serverTurn;
+    private boolean showTime = false;
 
     public boolean isFold() {
         return fold;
@@ -32,6 +33,14 @@ public class GameState {
 
     public void setServerTurn(boolean serverTurn) {
         this.serverTurn = serverTurn;
+    }
+
+    public boolean isShowTime() {
+        return showTime;
+    }
+
+    public void setShowTime(boolean showTime) {
+        this.showTime = showTime;
     }
 
     @Override
@@ -87,7 +96,7 @@ public class GameState {
         }
     }
     
-        /**
+    /**
      * Set to the game state the next game state after applying a specific
      * action to the actual game state.
      *
@@ -121,16 +130,15 @@ public class GameState {
                     secondRound = true;
                 else 
                 {
-                    System.out.println("[DEBUG Game] coses de showndowns");
                     // Apply the action show after finishing the 2nd round
-                    this.apply(Action.SHOW); // TODO set data, better do that with a flag?
+                    showTime = true;
+                    this.apply(Action.SHOW);
                     return;
                 }
             }
 
             // Set the next state as actual
             State nextState = state.transitions.get(action);
-            System.out.println("[DEBUG Game] " +state + " -> " + action + " -> " + nextState + " (2nd round: " + secondRound+")"); // TODO delete print
             state = nextState;
         } 
     }
@@ -189,9 +197,5 @@ public class GameState {
                     state.transitions.put(Action.STAKES, State.ACCEPT_ANTE);
                     break;
             }
-    }
-
-    
-    
-    
+    }    
 }

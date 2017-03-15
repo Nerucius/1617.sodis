@@ -71,12 +71,13 @@ public class Poker5CardGame {
             } else if (client.isConnected()) {
 
                 // test card array
-                Card[] cards = new Card[5];
+                Card[] cardsEmpty = new Card[0];
+                /*Card[] cards = new Card[5];
                 cards[0] = Card.fromCode("10S");
                 cards[1] = Card.fromCode("2S");
                 cards[2] = Card.fromCode("3S");
                 cards[3] = Card.fromCode("4S");
-                cards[4] = Card.fromCode("5S");
+                cards[4] = Card.fromCode("5S");*/
 
                 Move m = new Move();
 
@@ -87,15 +88,18 @@ public class Poker5CardGame {
                     continue;
                 }
 
-                m.cards = cards;
+                m.cards = cardsEmpty;
                 if (ls.length > 1) {
                     m.id = Integer.valueOf(ls[1]);
                     m.chips = Integer.valueOf(ls[1]);
                     m.dealer = 1;
                     m.cStakes = Integer.valueOf(ls[1]);
                     m.error = ls[1];
+                    m.cDrawn = 0;
                 }
                 if (ls.length > 2) {
+                    Card[] cards = new Card[5];
+                    m.cards = cards;
                     try {
                         // CASE DRAW # CARDS
                         String cardsStr = "";
@@ -103,6 +107,7 @@ public class Poker5CardGame {
                             cardsStr += String.valueOf(ls[i]) + " ";
                         }
                         m.cards = NetworkSource.cardsFromCodeString(cardsStr);
+                        m.cDrawn = Integer.valueOf(ls[1]);
                     } catch (Exception e) {
                     }
                 }
