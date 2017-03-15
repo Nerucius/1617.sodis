@@ -34,6 +34,7 @@ public class Game {
         return gameState.state;
     }
     
+    
     /**
      * Run the game with the next iteration of commands
      */
@@ -41,6 +42,7 @@ public class Game {
         // TODO @sonia Acabar la logica de tots els estats i comprovar que seguim el protocol
 
         Move sMove, cMove;
+        
         System.out.println("[DEBUG Game] " + gameState);
 
         switch (getState()) {
@@ -83,17 +85,9 @@ public class Game {
                 // Parameters: '0' (dealer = server) or '1' (dealer = client), client hand
                
                 // the game is accepted, so set the minimum bet as the bet of each player
-                // TODO fer un metode per aixo
-                if(gameData.cChips >= gameData.minBet)
-                {                
-                    gameData.cChips -= gameData.minBet;
-                    gameData.cBet += gameData.minBet;
-                } else { this.sendErrorMsg("Logic Error. Not valid chips value.");}
-                if(gameData.sChips >= gameData.minBet)
-                {
-                gameData.sBet += gameData.minBet;
-                gameData.sChips -= gameData.minBet;
-                } else { this.sendErrorMsg("Logic Error. Not valid chips value.");}
+                this.setMinBetServer();
+                this.setMinBetClient();
+              
                 
                 sMove = new Move();
                 sMove.action = Action.DEALER_HAND;
@@ -136,7 +130,7 @@ public class Game {
                     sMove = new Move();
                     sMove.action = Action.BET;
                     sMove.chips = 125;
-                    this.manageBetAndRaise(sMove);
+                    this.manageBetServer(sMove);
                                     
                     source.sendMove(sMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
@@ -147,14 +141,13 @@ public class Game {
                 else 
                 {
                     cMove = this.getClientValidMove(getState());
-                    this.manageBetAndRaise(cMove);
+                    if(cMove.action.equals(Action.BET)) this.manageBetClient(cMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(cMove.action);
                 }
                 break;
 
             case BETTING_DEALER:
-                // TODO same as BETTING? considero que ara mateix si pq no hi ha IA           
     
                 // Turn: dealer = SERVER
                 // Move to send: BET or PASS
@@ -168,7 +161,7 @@ public class Game {
                     sMove = new Move();
                     sMove.action = Action.BET;
                     sMove.chips = 125;
-                    this.manageBetAndRaise(sMove);
+                    this.manageBetServer(sMove);
                                     
                     source.sendMove(sMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
@@ -179,7 +172,7 @@ public class Game {
                 else 
                 {
                     cMove = this.getClientValidMove(gameState.state);
-                    this.manageBetAndRaise(cMove);
+                    if(cMove.action.equals(Action.BET)) this.manageBetClient(cMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(cMove.action);
                 }
@@ -194,6 +187,7 @@ public class Game {
                     
                     sMove = new Move();
                     sMove.action = Action.CALL;
+                    this.manageCallServer();
                     
                     source.sendMove(sMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
@@ -202,8 +196,10 @@ public class Game {
                 else
                 {
                     cMove = this.getClientValidMove(gameState.state);
-                    this.manageBetAndRaise(cMove);
-                    this.manageFold(cMove);
+
+                    if(cMove.action.equals(Action.RAISE)) this.manageRaiseClient(cMove);
+                    if(cMove.action.equals(Action.CALL)) this.manageCallClient();
+                    if(cMove.action.equals(Action.FOLD)) this.manageFoldClient(cMove);
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(cMove.action);
                 }    
@@ -271,13 +267,14 @@ public class Game {
                     source.sendMove(sMove);
                 }
                 gameState.setFold(false);
+                gameState.setShowTime(false);
                 gameData.sDrawn = 0;
                 gameData.cDrawn = 0;
                 
                 // manage Winner with handranker
                 gameData.sHand.generateRankerInformation();
                 gameData.cHand.generateRankerInformation();
-                if(gameData.sHand.wins(gameData.cHand))
+                if(gameData.sHand.wins(gameData.cHand))            
                     this.allChipsToServer();
                 else
                     this.allChipsToClient();
@@ -312,6 +309,101 @@ public class Game {
                 this.manageBetAndRaise(this.sendErrorMsg("Logic Error. Not valid chips value."));
             }
         }
+    }
+    
+    private void setMinBetServer()
+    {
+        if (gameData.sChips >= gameData.minBet) {
+            gameData.sBet += gameData.minBet;
+            gameData.sChips -= gameData.minBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips for the minimum bet.");
+        }
+    }
+    
+    private void setMinBetClient()
+    {
+        if (gameData.cChips >= gameData.minBet) {
+            gameData.cChips -= gameData.minBet;
+            gameData.cBet += gameData.minBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips for the minimum bet.");
+        }
+    }
+    
+    private void manageBetServer(Move move)
+    {
+        if (move.chips >= gameData.minBet && gameData.sChips >= move.chips) {
+            gameData.sChips -= move.chips;
+            gameData.sBet += move.chips;
+        } else {
+            this.sendErrorMsg("Logic Error. Not valid chips value.");
+        }
+    }
+    
+    private void manageBetClient(Move move)
+    {
+        if (move.chips >= gameData.minBet && gameData.cChips >= move.chips) {
+            gameData.cChips -= move.chips;
+            gameData.cBet += move.chips;
+        } else {
+            this.sendErrorMsg("Logic Error. Not valid chips value.");
+        }
+    }
+    
+    private void manageRaiseServer(Move move)
+    {
+        this._manageCallServer(move.chips);
+    }
+    private void manageRaiseClient(Move move)
+    {
+       this._manageCallClient(move.chips);
+    }
+    
+    private void manageCallServer()
+    {
+        this._manageCallServer(0);
+    }
+    
+    private void _manageCallServer(int raise)
+    {
+        int amountToBet = gameData.cBet - gameData.sBet + raise;
+        if(gameData.sChips >= amountToBet)
+        {
+            gameData.sChips -= amountToBet;
+            gameData.sBet += amountToBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips to call.");
+        }
+    }
+    
+    private void manageCallClient()
+    {
+        this._manageCallClient(0);
+    }
+    
+    private void _manageCallClient(int raise)
+    {
+        int amountToBet = gameData.sBet - gameData.cBet + raise;
+        if(gameData.cChips >= amountToBet)
+        {
+            gameData.cChips -= amountToBet;
+            gameData.cBet += amountToBet;
+        } else {
+            this.sendErrorMsg("Logic Error. Not enough chips to call.");
+        }
+    }
+    
+    private void manageFoldServer(Move move)
+    {
+        gameState.setFold(true);
+        this.allChipsToClient();
+    }
+    
+    private void manageFoldClient(Move move)
+    {
+        gameState.setFold(true);
+        this.allChipsToServer();
     }
     
     private void manageFold(Move move)
