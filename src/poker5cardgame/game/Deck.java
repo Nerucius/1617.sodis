@@ -8,8 +8,12 @@ public final class Deck {
 
     private List<Card> deck;
 
+    /**
+     * Returns an empty Deck. Use Deck.generate() to fill with cards.
+     */
     public Deck() {
         this.deck = new ArrayList<>();
+        this.generate();
     }
 
     /**
@@ -17,7 +21,7 @@ public final class Deck {
      *
      * @return Deck
      */
-    public Deck generate() {
+    private void generate() {
         deck.clear();
 
         // generate the deck
@@ -28,21 +32,20 @@ public final class Deck {
         }
         // shuffle the deck
         Collections.shuffle(deck);
-        return this;
     }
 
     /**
      * Draw a card from the deck.
      * @return Card
-     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
     // TODO test it
-    public Card draw() throws EmptyDeckException {
-        if (deck.size() > 0) {
+    public Card draw() /*throws EmptyDeckException*/ {
+        // TODO @sonia disabled exception (really necesary?) -> will never empty a deck inside a single game
+        //if (deck.size() > 0) {
             return this.deck.remove(deck.size() - 1);
-        }
+        //}
         //System.err.println("Deck is empty.");
-        throw new EmptyDeckException("Deck is empty.");
+        //throw new EmptyDeckException("Deck is empty.");
     }
 
     /**

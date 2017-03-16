@@ -146,7 +146,7 @@ public class ComUtils {
             
             // Intercept DRAW message to get expected Cards
             if(packet.command == Command.DRAW){
-                expectedCards = packet.getField("number", Integer.class);                 
+                expectedCards = Integer.valueOf(packet.getField("number", String.class));                 
             }
             
             return true;

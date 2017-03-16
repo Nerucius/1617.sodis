@@ -87,7 +87,6 @@ public class Game {
                 // the game is accepted, so set the minimum bet as the bet of each player
                 this.setMinBetServer();
                 this.setMinBetClient();
-              
                 
                 sMove = new Move();
                 sMove.action = Action.DEALER_HAND;
@@ -95,20 +94,12 @@ public class Game {
                 // choose the dealer randomly (0: server; 1: client)
                 sMove.dealer = Math.random() > 0.5 ? 1 : 0;
                 gameState.setServerTurn(sMove.dealer == 1); // the non dealer has the next turn
-                
-                // generate the server and the client hands
-                if(gameData.newPlay)
-                {
-                    gameData.deck.generate();
-                    gameData.newPlay = false;
-                }                
-                 
-                try {
-                    gameData.cHand.generate(gameData.deck);
-                    gameData.sHand.generate(gameData.deck);
-                } catch (Exception ex) {
-                    this.sendErrorMsg(ex.getMessage());
-                }
+                           
+                // TODO msg@sonia: Every game needs a new deck -> never exhaust the Deck
+                gameData.deck = new Deck();
+                gameData.cHand.draw5FromDeck(gameData.deck);
+                gameData.sHand.draw5FromDeck(gameData.deck);
+
                 
                 sMove.cards = new Card[Hand.SIZE];
                 gameData.cHand.getCards().toArray(sMove.cards);
@@ -136,6 +127,7 @@ public class Game {
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(sMove.action);
                 }
+                
                 // Turn: non dealer = CLIENT
                 // Expected move: BET or PASS
                 else 
@@ -167,6 +159,7 @@ public class Game {
                     gameState.setServerTurn(!gameState.isServerTurn());
                     gameState.apply(sMove.action);
                 }
+                
                 // Turn: dealer = CLIENT
                 // Expected move: BET or PASS
                 else 
@@ -233,6 +226,8 @@ public class Game {
                 sMove = new Move();
                 sMove.action = Action.DRAW_SERVER;
                 
+                // TODO @alex DRWS eror originates here
+                
                 try {
                     // send the client cards to the client
                     sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
@@ -241,7 +236,7 @@ public class Game {
                     // Now change only the first card                
                     gameData.sHand.discard(gameData.sHand.getCards().get(0));
                     gameData.sHand.putNCards(gameData.deck, 1);
-                } catch (Exception ex) {
+                } catch (Deck.EmptyDeckException | Hand.TooManyCardsException | Hand.NonExistingCardException ex) {
                     this.sendErrorMsg(ex.getMessage());
                 }
 

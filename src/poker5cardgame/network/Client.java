@@ -24,6 +24,7 @@ public class Client {
 
         } catch (Exception ex) {
             System.err.println("Client: Failed to connect to Server on IP:" + IP + ".");
+            ex.printStackTrace();
         }
 
     }
