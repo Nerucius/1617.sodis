@@ -146,7 +146,8 @@ public class ComUtils {
             
             // Intercept DRAW message to get expected Cards
             if(packet.command == Command.DRAW){
-                expectedCards = packet.getField("number", Integer.class);                 
+                // Now reading a 'X' string
+                expectedCards = Integer.valueOf(packet.getField("number", String.class));
             }
             
             return true;
@@ -174,7 +175,8 @@ public class ComUtils {
                 packet.putField("stakes_server", read_int32());
                 break;
             case DEALER:
-                packet.putField("dealer", read_int32());
+                int dealer = read_byte_as_int();
+                packet.putField("dealer", dealer);
                 break;
             case HAND:
                 packet.putField("cards", read_cards(5));
@@ -186,7 +188,7 @@ public class ComUtils {
                 packet.putField("chips", read_int32());
                 break;
             case DRAW:
-                int drawCount = read_int32();
+                int drawCount = read_byte_as_int();
                 packet.putField("number", drawCount);
                 if (drawCount > 0) {
                     read_bytes(1); // Consume space
@@ -199,7 +201,7 @@ public class ComUtils {
                     packet.putField("cards", read_cards(expectedCards));
                     read_bytes(1); // Consume space
                 }
-                packet.putField("number", read_int32());
+                packet.putField("number", read_byte_as_int());
                 break;
             case SHOWDOWN:
                 packet.putField("cards", read_cards(5));
@@ -215,6 +217,10 @@ public class ComUtils {
         Packet p = new Packet(Command.ERROR);
         p.putWrittable(new Writable.VariableString(2, str));
         write_NetworkPacket(p);
+    }
+    
+    private int read_byte_as_int() throws IOException{
+        return Integer.valueOf(new String(read_bytes(1)));
     }
 
     /* Llegir un enter de 32 bits */

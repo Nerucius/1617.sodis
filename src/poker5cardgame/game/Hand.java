@@ -53,12 +53,12 @@ public class Hand implements Comparable<Hand> {
      * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
     // TODO test it
-    public Hand generate(Deck deck) throws Deck.EmptyDeckException, TooManyCardsException {
+
+    public void draw5FromDeck(Deck deck) /*throws Deck.EmptyDeckException, TooManyCardsException*/ {
         this.cards.clear();
         for (int i = 0; i < SIZE; i++) {
             putCard(deck.draw());
         }
-        return this;
     }
     
     /**
@@ -68,12 +68,14 @@ public class Hand implements Comparable<Hand> {
      * @throws poker5cardgame.game.Hand.TooManyCardsException
      */
     // TODO test it
-    public void putCard(Card card) throws TooManyCardsException {
+
+    public void putCard(Card card) /*throws TooManyCardsException*/ {
         if (cards.size() < SIZE) {
             cards.add(card);
         } else {
-            throw new TooManyCardsException("Too many cards added to the hand.");
-            //System.err.println("Too many cards added to the hand.");
+            // TODO msg@sonia Disabled exceptions
+            //throw new TooManyCardsException("Too many cards added to the hand.");
+            System.err.println("Too many cards added to the hand. Ignored card");
         }
     }
 

@@ -2,6 +2,7 @@ package poker5cardgame;
 
 import java.util.Scanner;
 import poker5cardgame.game.Card;
+import poker5cardgame.game.Deck;
 import poker5cardgame.game.Game;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
@@ -98,7 +99,11 @@ public class Poker5CardGame {
                     m.cDrawn = 0;
                 }
                 if (ls.length > 2) {
-                    Card[] cards = new Card[5];
+
+                    Deck d = new Deck();
+                    Card[] cards = {};
+                    for(int i=0;i<5;i++) cards[i] = d.draw();    
+
                     m.cards = cards;
                     try {
                         // CASE DRAW # CARDS
