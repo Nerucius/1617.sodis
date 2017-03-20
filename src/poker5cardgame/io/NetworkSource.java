@@ -237,6 +237,7 @@ public class NetworkSource implements Source {
                 packets[0] = new Packet(Network.Command.DRAW);
                 // Create a list of arguments as follows: '2' 2C 3H
                 // TODO manage somewhere the case the client enters a different number as the cards lenght? (send error msg)
+
                 if (move.cDrawn == move.cards.length)
                     // Changed to 1 byte char
                     packets[0].putField("number", move.cDrawn+"");
@@ -248,7 +249,7 @@ public class NetworkSource implements Source {
                 
                 if(move.cards.length > 0)
                     packets[0].putField("cards", cardsToCodeString(move.cards));
-                
+
                 break;
 
             case DRAW_SERVER:
@@ -256,6 +257,7 @@ public class NetworkSource implements Source {
                 // Create a list of arguments as follows: DRWS 2C 3H 4D '2'
                 if(move.cDrawn > 0)
                     packets[0].putField("cards", cardsToCodeString(move.cards));
+
                 // Changed to 1 byte char
                 packets[0].putField("number", move.sDrawn+"");
                 break;

@@ -8,6 +8,7 @@ public final class Deck {
 
     private List<Card> deck;
 
+
     /**
      * Returns an empty Deck. Use Deck.generate() to fill with cards.
      */
@@ -37,6 +38,7 @@ public final class Deck {
     /**
      * Draw a card from the deck.
      * @return Card
+     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
     // TODO test it
     public Card draw() /*throws EmptyDeckException*/ {
@@ -46,6 +48,32 @@ public final class Deck {
         //}
         //System.err.println("Deck is empty.");
         //throw new EmptyDeckException("Deck is empty.");
+    }
+
+    /**
+     * Get the size of the deck.
+     * @return int
+     */
+    public int getSize() {
+        return this.deck.size();
+    }
+    
+    public class EmptyDeckException extends Exception {
+        public EmptyDeckException() {
+            super();
+        }
+
+        public EmptyDeckException(String message) {
+            super(message);
+        }
+
+        public EmptyDeckException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public EmptyDeckException(Throwable cause) {
+            super(cause);
+        }
     }
 
     /**

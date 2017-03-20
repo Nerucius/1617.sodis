@@ -99,10 +99,11 @@ public class Poker5CardGame {
                     m.cDrawn = 0;
                 }
                 if (ls.length > 2) {
+
                     Deck d = new Deck();
                     Card[] cards = {};
                     for(int i=0;i<5;i++) cards[i] = d.draw();    
-                    
+
                     m.cards = cards;
                     try {
                         // CASE DRAW # CARDS

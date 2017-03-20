@@ -100,7 +100,6 @@ public class Game {
                 gameData.cHand.draw5FromDeck(gameData.deck);
                 gameData.sHand.draw5FromDeck(gameData.deck);
 
-                
                 sMove.cards = new Card[Hand.SIZE];
                 gameData.cHand.getCards().toArray(sMove.cards);
 
@@ -226,8 +225,9 @@ public class Game {
                 sMove = new Move();
                 sMove.action = Action.DRAW_SERVER;
                 
+
                 // TODO @alex DRWS eror originates here
-                
+
                 try {
                     // send the client cards to the client
                     sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
@@ -236,7 +236,7 @@ public class Game {
                     // Now change only the first card                
                     gameData.sHand.discard(gameData.sHand.getCards().get(0));
                     gameData.sHand.putNCards(gameData.deck, 1);
-                } catch (Deck.EmptyDeckException | Hand.TooManyCardsException | Hand.NonExistingCardException ex) {
+                } catch (Exception ex) {
                     this.sendErrorMsg(ex.getMessage());
                 }
 
