@@ -5,7 +5,7 @@ import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import poker5cardgame.io.NetworkSource;
-import poker5cardgame.network.Client;
+import poker5cardgame.network.GameClient;
 import poker5cardgame.network.GameServer;
 import poker5cardgame.network.Server;
 
@@ -18,7 +18,7 @@ public class Poker5CardGame {
         // Read console input
         Scanner sc = new Scanner(System.in);
         String line;
-        final Client client = new Client();
+        final GameClient client = new GameClient();
         Server server = null;
 
         // Commands

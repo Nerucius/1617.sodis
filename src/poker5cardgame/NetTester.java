@@ -8,7 +8,7 @@ package poker5cardgame;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
-import poker5cardgame.network.Client;
+import poker5cardgame.network.GameClient;
 import poker5cardgame.network.EchoServer;
 import poker5cardgame.network.Server;
 
@@ -24,7 +24,7 @@ public class NetTester {
         s.bind(1212);
         s.start();
 
-        Client c = new Client();
+        GameClient c = new GameClient();
         c.connect("localhost", 1212);
 
         // Test Array
