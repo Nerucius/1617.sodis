@@ -75,4 +75,30 @@ public final class Deck {
             super(cause);
         }
     }
+
+    /**
+     * Get the size of the deck.
+     * @return int
+     */
+    public int getSize() {
+        return this.deck.size();
+    }
+    
+    public class EmptyDeckException extends Exception {
+        public EmptyDeckException() {
+            super();
+        }
+
+        public EmptyDeckException(String message) {
+            super(message);
+        }
+
+        public EmptyDeckException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public EmptyDeckException(Throwable cause) {
+            super(cause);
+        }
+    }
 }
