@@ -6,10 +6,10 @@ public class GameData {
     public boolean newPlay = true;
     public Deck deck;
     public Hand sHand, cHand;
-    protected int sChips = 10000, cChips = 1000;
-    protected int minBet = 100;
-    protected int sBet = 0, cBet = 0;
-    protected int sDrawn, cDrawn;
+    public int sChips = 10000, cChips = 1000;
+    public int minBet = 100;
+    public int sBet = 0, cBet = 0;
+    public int sDrawn, cDrawn;
     
     /* Game flags */
     // sInteractive to know which way plays the server (1: auto without IA; 2: auto with IA)

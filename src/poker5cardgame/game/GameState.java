@@ -3,6 +3,9 @@ package poker5cardgame.game;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Finite State Machine for the Game State
+ */
 public class GameState {
     
     public State state = State.INIT;
