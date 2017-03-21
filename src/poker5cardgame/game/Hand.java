@@ -28,6 +28,10 @@ public class Hand implements Comparable<Hand> {
     public List<Card> getCards() {
         return this.cards;
     }
+    
+    public int getSize() {
+        return this.cards.size();
+    }
 
     public int getSuitId() {
         return suitId;
