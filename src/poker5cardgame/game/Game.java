@@ -224,10 +224,8 @@ public class Game {
                 
                 sMove = new Move();
                 sMove.action = Action.DRAW_SERVER;
+                sMove.cDrawn = gameData.cDrawn;
                 
-
-                // TODO @alex DRWS eror originates here
-
                 try {
                     // send the client cards to the client
                     sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
@@ -240,8 +238,7 @@ public class Game {
                     this.sendErrorMsg(ex.getMessage());
                 }
 
-                gameData.sDrawn = 1;
-                
+                gameData.sDrawn = 1;                
                 sMove.sDrawn = gameData.sDrawn;
 
                 source.sendMove(sMove);

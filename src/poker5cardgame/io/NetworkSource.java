@@ -2,8 +2,6 @@ package poker5cardgame.io;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
@@ -259,7 +257,7 @@ public class NetworkSource implements Source {
                     packets[0].putField("cards", cardsToCodeString(move.cards));
 
                 // Changed to 1 byte char
-                packets[0].putField("number", move.sDrawn+"");
+                packets[0].putField("number", ""+move.sDrawn);
                 break;
 
             case SHOW:
@@ -321,6 +319,7 @@ public class NetworkSource implements Source {
         
         // Returns zero lenght arrays some times -> its OK
         Card[] arr = new Card[cardsplits.length];
+
         for (int i = 0; i < cardsplits.length; i++) {
             arr[i] = Card.fromCode(cardsplits[i]);
         }

@@ -2,8 +2,6 @@ package poker5cardgame;
 
 import java.util.Scanner;
 import poker5cardgame.game.Card;
-import poker5cardgame.game.Deck;
-import poker5cardgame.game.Game;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import poker5cardgame.io.NetworkSource;
@@ -71,15 +69,7 @@ public class Poker5CardGame {
 
             } else if (client.isConnected()) {
 
-                // test card array
-                Card[] cardsEmpty = new Card[0];
-                /*Card[] cards = new Card[5];
-                cards[0] = Card.fromCode("10S");
-                cards[1] = Card.fromCode("2S");
-                cards[2] = Card.fromCode("3S");
-                cards[3] = Card.fromCode("4S");
-                cards[4] = Card.fromCode("5S");*/
-
+                Card[] cardsEmpty = {};
                 Move m = new Move();
 
                 try {
@@ -99,12 +89,6 @@ public class Poker5CardGame {
                     m.cDrawn = 0;
                 }
                 if (ls.length > 2) {
-
-                    Deck d = new Deck();
-                    Card[] cards = {};
-                    for(int i=0;i<5;i++) cards[i] = d.draw();    
-
-                    m.cards = cards;
                     try {
                         // CASE DRAW # CARDS
                         String cardsStr = "";
@@ -113,8 +97,8 @@ public class Poker5CardGame {
                         }
                         m.cards = NetworkSource.cardsFromCodeString(cardsStr);
                         m.cDrawn = Integer.valueOf(ls[1]);
-                    } catch (Exception e) {
-                    }
+
+                    } catch (Exception e) {}
                 }
                 client.getSource().sendMove(m);
             }
