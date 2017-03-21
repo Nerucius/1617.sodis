@@ -53,14 +53,15 @@ public class Client {
 
         startClient();
         
-        return;
     }
    
     
     /** Connect to a server and play */
     private static void startClient(){
-        
-        
+        System.out.println("Starting Client...");
+        System.out.println("Remote Addr: "+ remoteAddr.getHostAddress());
+        System.out.println("Port: "+ remotePort);
+        System.out.println("Interactive: " + mode);
         
     }
 

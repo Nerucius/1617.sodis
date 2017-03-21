@@ -1,9 +1,14 @@
 package poker5cardgame;
 
+import poker5cardgame.network.GameServer;
+import poker5cardgame.network.Server;
+
 /**
  * Server launcher class
  */
 public class Server {
+
+    static poker5cardgame.network.Server server;
     
     static int bindPort = 1212;
     static int mode = 1;
@@ -41,10 +46,16 @@ public class Server {
 
         startServer();
 
-        return;
     }
 
     public static void startServer() {
+        System.out.println("Starting Server...");
+        System.out.println("Port: " + bindPort);
+        System.out.println("Interactive: " + mode);
+        
+        server = new GameServer();
+        server.bind(bindPort);
+        server.getGame();
 
     }
 }
