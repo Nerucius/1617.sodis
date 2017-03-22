@@ -53,12 +53,8 @@ public class Hand implements Comparable<Hand> {
      * Generate a new hand (5 cards) from the deck.
      *
      * @param deck Deck that contains all the remaining cards
-     * @return Hand
-     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    // TODO test it
-
-    public void draw5FromDeck(Deck deck) /*throws Deck.EmptyDeckException, TooManyCardsException*/ {
+    public void draw5FromDeck(Deck deck) {
         this.cards.clear();
         for (int i = 0; i < SIZE; i++) {
             putCard(deck.draw());
@@ -69,11 +65,8 @@ public class Hand implements Comparable<Hand> {
      * Put a new card to the hand.
      *
      * @param card Card to add to the hand
-     * @throws poker5cardgame.game.Hand.TooManyCardsException
      */
-    // TODO test it
-
-    public void putCard(Card card) /*throws TooManyCardsException*/ {
+    public void putCard(Card card) {
         if (cards.size() < SIZE) {
             cards.add(card);
         } else {
@@ -89,10 +82,8 @@ public class Hand implements Comparable<Hand> {
      * @param deck Deck that contains all the remaining cards
      * @param n int that is the number of cards to put into the hand
      * @return Card[]
-     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    public Card[] putNCards(Deck deck, int n) /*throws Deck.EmptyDeckException, TooManyCardsException*/
-    {
+    public Card[] putNCards(Deck deck, int n) {
         Card[] cards = new Card[n];
         for (int i = 0; i < n; i++) {
             Card card = deck.draw();
@@ -106,13 +97,10 @@ public class Hand implements Comparable<Hand> {
      * Remove one or more cards from the hand.
      *
      * @param cards Card or Cards to remove
-     * @throws poker5cardgame.game.Hand.NonExistingCardException
      */
-    // TODO test it
-    public void discard(Card... cards) /*throws NonExistingCardException*/ {
+    public void discard(Card... cards) {
         for (Card c : cards) {
             if (!this.cards.remove(c)) {
-                //throw new NonExistingCardException("Tried to remove a non existing card.");
                 System.err.println("Tried to remove a non existing card.");
             }
         }
@@ -445,39 +433,9 @@ public class Hand implements Comparable<Hand> {
         return aux;
     }
     
-    public class NonExistingCardException extends Exception {
-        public NonExistingCardException() {
-            super();
-        }
-
-        public NonExistingCardException(String message) {
-            super(message);
-        }
-
-        public NonExistingCardException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public NonExistingCardException(Throwable cause) {
-            super(cause);
-        }
-    }
     
-    public class TooManyCardsException extends Exception {
-        public TooManyCardsException() {
-            super();
-        }
-
-        public TooManyCardsException(String message) {
-            super(message);
-        }
-
-        public TooManyCardsException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public TooManyCardsException(Throwable cause) {
-            super(cause);
-        }
+    // TODO temp for AI
+    public Card getHigh(List<Card> cards) {
+        return Collections.max(cards);
     }
 }

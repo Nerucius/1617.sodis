@@ -5,10 +5,10 @@ import java.util.List;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState;
-import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 
-public class RandomClientAI implements ArtificialIntelligence {
+// TODO @sonia change it, now it is random
+public class IntelligentClientAI implements ArtificialIntelligence {
 
     // Fix the max bet to 500 to be realistic
     private static final int MAX_BET = 500;
@@ -33,7 +33,7 @@ public class RandomClientAI implements ArtificialIntelligence {
      * @return GameState.Action
      */
     public GameState.Action randomAction(GameData gameData, GameState gameState) {
-        List<Action> validActions = new ArrayList();
+        List<GameState.Action> validActions = new ArrayList();
         validActions.addAll(gameState.state.transitions.keySet());
 
         // Avoid the option QUIT
@@ -42,8 +42,8 @@ public class RandomClientAI implements ArtificialIntelligence {
         }
 
         // The case SHOW can not be choosen, it is automatically applied in the apply method
-        if (validActions.contains(Action.SHOW)) {
-            validActions.remove(Action.SHOW);
+        if (validActions.contains(GameState.Action.SHOW)) {
+            validActions.remove(GameState.Action.SHOW);
         }
 
         return validActions.get(random(0, validActions.size() - 1));
@@ -92,5 +92,5 @@ public class RandomClientAI implements ArtificialIntelligence {
                 break;
         }
         return cMove;
-    }
+    }    
 }

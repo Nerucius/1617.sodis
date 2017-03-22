@@ -13,8 +13,8 @@ public class GameData {
     public int minBet = 100;
     public int sBet = 0;
     public int sDrawn;
-    // sInteractive to know which way plays the server (1: auto without IA; 2: auto with IA)
     public int sInteractive = MODE_RANDOM_AI; 
+    //public int sInteractive = MODE_INTELLIGENT_AI; 
     
     // Client data
     public Hand cHand;

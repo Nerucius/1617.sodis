@@ -7,15 +7,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import poker5cardgame.ai.ArtificialIntelligence;
+import poker5cardgame.ai.IntelligentClientAI;
+import poker5cardgame.ai.IntelligentServerAI;
 import poker5cardgame.ai.RandomClientAI;
 import poker5cardgame.ai.RandomServerAI;
 import poker5cardgame.io.Source;
 import poker5cardgame.game.GameState.Action;
 
 public class Game {
-
-    // TODO Quit should stop the game?
-    // TODO manage when CALL i PASS sumen chips
     
     private Source source;
     private GameData gameData;
@@ -45,15 +44,16 @@ public class Game {
     {
         switch(gameData.sInteractive) {
             case GameData.MODE_RANDOM_AI: this.sAI = new RandomServerAI(); break;
-            case GameData.MODE_INTELLIGENT_AI: /* this.sAI = new IntelligentServerAI();*/ break;
+            case GameData.MODE_INTELLIGENT_AI: this.sAI = new IntelligentServerAI(); break;
         }
        
         switch (gameData.cInteractive) {
             case GameData.MODE_RANDOM_AI: this.cAI = new RandomClientAI(); break;
-            case GameData.MODE_INTELLIGENT_AI: /* this.cAI = new IntelligentServerAI(); */ break;
+            case GameData.MODE_INTELLIGENT_AI: this.cAI = new IntelligentClientAI(); break;
         }
     }
     
+    // TODO delete or sthg
     private void wait(int seconds)
     {
         try {
@@ -68,7 +68,7 @@ public class Game {
      */
     public void update()
     {
-        //System.out.println("\n[DEBUG Game] " + gameState);
+        System.out.println("\n[DEBUG Game] " + gameState);
         this.wait(1);
 
         Move move = new Move();
@@ -132,12 +132,10 @@ public class Game {
 
         } catch (Exception e) {
             this.sendErrorMsg(e.getMessage());
-            if(getState().equals(GameState.State.QUIT))
-            {
+            if (getState().equals(GameState.State.QUIT)) {
                 gameState.apply(Action.TERMINATE);
                 this.sendErrorMsg("QUIT GAME due to ERROR: " + e.getMessage());
-                
-                        }
+            }
         }
         System.out.println("[DEBUG Game] " + gameData +'\n');
         this.wait(1);
