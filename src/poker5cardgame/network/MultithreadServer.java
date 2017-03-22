@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import static poker5cardgame.Log.*;
 
 /**
  * Abstract Implementation of a MultiThreaded server. Extend and Implement the
@@ -20,14 +21,14 @@ public abstract class MultithreadServer implements Server {
 
     public final void bind(int port) {
         if (serverSocket != null && serverSocket.isBound()) {
-            System.err.println("Server: Already bound to a port");
+            NET_ERROR("Server: Already bound to a port");
             return;
         }
 
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException ex) {
-            System.err.println("Server: Failed to Open Socket.");
+            NET_ERROR("Server: Failed to Open Socket.");
         }
     }
 
@@ -36,7 +37,7 @@ public abstract class MultithreadServer implements Server {
         if (serverSocket != null)
             new Thread(this).start();
         else
-            System.err.println("Server: Not bound to any port.");
+            NET_ERROR("Server: Not bound to any port.");
     }
 
     /**
@@ -49,13 +50,13 @@ public abstract class MultithreadServer implements Server {
 
     @Override
     public final void run() {
-        System.out.println("Server: Started on port " + serverSocket.getLocalPort());
+        NET_DEBUG("Server: Started on port " + serverSocket.getLocalPort());
         try {
 
             // Main loop for accepting new Connections
             while (!serverSocket.isClosed()) {
                 Socket client = serverSocket.accept();
-                System.out.println("Server: New Client connected from " + client.getInetAddress());
+                NET_DEBUG("Server: New Client connected from " + client.getInetAddress());
                 new Thread(() -> {
                     handleConnection(client);
                 }).start();
@@ -63,16 +64,16 @@ public abstract class MultithreadServer implements Server {
 
         } catch (SocketException e) {
             // Thrown when the server socket is closed();
-            System.err.println("Server: Closed");
-            
+            NET_ERROR("Server: Closed");
+
         } catch (IOException e) {
-            System.err.println("Server: Failed to accept(). Server Terminated");
-            
-        } catch (Exception e){
-            System.err.println("Server: Unknown exception. Server Terminated");
-            e.printStackTrace();   
-            
-        } finally {            
+            NET_ERROR("Server: Failed to accept(). Server Terminated");
+
+        } catch (Exception e) {
+            NET_ERROR("Server: Unknown exception. Server Terminated");
+            e.printStackTrace();
+
+        } finally {
             // Delete ServerSocket
             serverSocket = null;
         }
@@ -80,7 +81,7 @@ public abstract class MultithreadServer implements Server {
 
     public final void close() {
         if (serverSocket == null) {
-            System.err.println("Server: Can't close server. Not started.");
+            NET_ERROR("Server: Can't close server. Not started.");
             return;
         }
 

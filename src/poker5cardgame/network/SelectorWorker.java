@@ -3,6 +3,7 @@ package poker5cardgame.network;
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
+import static poker5cardgame.Log.*;
 
 public abstract class SelectorWorker implements Runnable {
 
@@ -11,7 +12,8 @@ public abstract class SelectorWorker implements Runnable {
     public abstract void handleData(ServerDataEvent data);
 
     /**
-     * Insert an incoming data stream onto our processing queue.
+     * Insert an incoming data stream onto our processing queue. Copy
+     * data and wake up sleeping Threads.
      */
     public final void processData(SelectorServer server, SocketChannel socket, byte[] data, int count) {
         byte[] dataCopy = new byte[count];
@@ -43,7 +45,7 @@ public abstract class SelectorWorker implements Runnable {
             }
             
         } catch (InterruptedException e) {
-            System.err.println("Worker: Thread interrupted. Worker stopped.");
+            NET_ERROR("Worker: Thread interrupted. Worker stopped.");
             e.printStackTrace();
         }
     }

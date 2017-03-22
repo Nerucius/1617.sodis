@@ -2,6 +2,7 @@ package poker5cardgame.io;
 
 import java.io.IOException;
 import java.net.Socket;
+import static poker5cardgame.Log.*;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
@@ -149,7 +150,7 @@ public class NetworkSource implements Source {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Network Source: Problem reading next Move arguments");
+            NET_ERROR("Network Source: Problem reading next Move arguments");
             move.action = Action.NOOP;
         }
 
@@ -281,7 +282,7 @@ public class NetworkSource implements Source {
                     try {
                         comUtils.getSocket().close();
                     } catch (IOException ex) {
-                        System.err.println("Network: Error while closing connection.");
+                        NET_ERROR("Network: Error while closing connection.");
                     }
                     comUtils = null;
                     return false;

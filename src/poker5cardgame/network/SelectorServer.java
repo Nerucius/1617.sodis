@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import static poker5cardgame.Log.*;
 
 /**
  * @author German Dempere
@@ -40,9 +41,9 @@ public abstract class SelectorServer implements Server {
         this.port = port;
         this.selector = this.initSelector();
         if (this.selector == null)
-            System.err.println("Server: Failed to Bind Selector.");
+            NET_ERROR("Server: Failed to Bind Selector.");
         else
-            System.out.println("Server: Bound to port: " + port);
+            NET_DEBUG("Server: Bound to port: " + port);
     }
 
     @Override
@@ -50,9 +51,9 @@ public abstract class SelectorServer implements Server {
         if (selector != null) {
             new Thread(this).start();
             new Thread(worker).start();
-            System.out.println("Server: Started on port " + port);
+            NET_DEBUG("Server: Started on port " + port);
         } else
-            System.err.println("Server: Not bound to any port.");
+            NET_ERROR("Server: Not bound to any port.");
     }
 
     @Override
@@ -83,29 +84,29 @@ public abstract class SelectorServer implements Server {
                     SelectionKey key = (SelectionKey) selectedKeys.next();
                     selectedKeys.remove();
 
-                    if (!key.isValid()) 
-                        continue;                    
+                    if (!key.isValid())
+                        continue;
 
                     // New Connection
                     if (key.isAcceptable())
                         this.accept(key);
-                    
+
                     // Incoming Data Stream
                     else if (key.isReadable())
                         this.read(key);
-                    
+
                     // Outgoing Data Stream
                     else if (key.isWritable())
                         this.write(key);
-                    
+
                 }
             } catch (Exception e) {
-                System.err.println("Server: Error Selecting Keys");
+                NET_ERROR("Server: Error Selecting Keys");
                 e.printStackTrace();
                 break;
             }
         }
-        
+
         this.close();
     }
 
@@ -118,7 +119,6 @@ public abstract class SelectorServer implements Server {
      */
     public void send(SocketChannel socket, byte[] data) {
 
-        System.out.println("Server: send()");
         synchronized (this.changeRequests) {
             // Indicate we want the interest ops set changed
             this.changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
@@ -130,7 +130,6 @@ public abstract class SelectorServer implements Server {
                     queue = new ArrayList();
                     this.pendingData.put(socket, queue);
                 }
-                System.out.println("Server: append to queue");
                 queue.add(ByteBuffer.wrap(data));
             }
         }
@@ -150,7 +149,7 @@ public abstract class SelectorServer implements Server {
             pendingData.clear();
             changeRequests.clear();
         } catch (IOException ex) {
-            System.err.println("Server: Error while closing down server.");
+            NET_ERROR("Server: Error while closing down server.");
         }
     }
 
@@ -202,6 +201,8 @@ public abstract class SelectorServer implements Server {
         // Register the new SocketChannel with our Selector, indicating
         // we'd like to be notified when there's data waiting to be read
         socketChannel.register(this.selector, SelectionKey.OP_READ);
+
+        NET_DEBUG("Server: New Connection: " + serverSocketChannel.getLocalAddress());
     }
 
     /**

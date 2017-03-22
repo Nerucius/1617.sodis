@@ -3,6 +3,7 @@ package poker5cardgame;
 import poker5cardgame.game.GameState;
 import poker5cardgame.game.Move;
 import poker5cardgame.network.GameClient;
+import static poker5cardgame.Log.*;
 
 /**
  * Client launcher class
@@ -46,7 +47,7 @@ public class Client {
 
             }
         } catch (Exception e) {
-            System.err.println("Client: Exception reading paramenters:");
+            NET_ERROR("Client: Exception reading paramenters:");
             e.printStackTrace();
             System.exit(1);
         }
@@ -71,9 +72,8 @@ public class Client {
         move.action = GameState.Action.START;
         move.id = 1234;
         client.getSource().sendMove(move);
-        
-        System.out.println(client.getSource().getNextMove());
 
+        System.out.println(client.getSource().getNextMove());
 
     }
 

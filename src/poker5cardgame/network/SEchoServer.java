@@ -1,5 +1,7 @@
 package poker5cardgame.network;
 
+import static poker5cardgame.Log.*;
+
 /**
  *
  * @author Akira
@@ -15,11 +17,11 @@ public class SEchoServer extends SelectorServer {
         @Override
         public void handleData(ServerDataEvent event) {
             String rawData = new String(event.data);
-            System.out.println("Server: Received " + rawData);
-            
+            NET_TRACE("Server: Received " + rawData);
+
             event.server.send(event.socket, event.data);
-            
+
         }
-        
+
     }
 }

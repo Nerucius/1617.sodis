@@ -1,6 +1,7 @@
 package poker5cardgame.game;
 
 import java.util.Set;
+import static poker5cardgame.Log.*;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.RandomServerAI;
 import poker5cardgame.io.Source;
@@ -51,7 +52,7 @@ public class Game {
 
         Move sMove, cMove;
         
-        System.out.println("[DEBUG Game] " + gameState);
+        GAME_DEBUG("[DEBUG Game] " + gameState);
 
         switch (getState()) {
 
@@ -303,7 +304,7 @@ public class Game {
                 gameState.apply(Action.QUIT);
                 break;
         }
-        System.out.println("[DEBUG Game] " + gameData);
+        GAME_DEBUG("[DEBUG Game] " + gameData);
     }
     
     private void setMinBetServer()

@@ -21,8 +21,8 @@ public class NetTester {
     static public void main(String... args) throws Exception {
 
         Server s = new MTEchoServer();
-        s.bind(1212);
-        s.start();
+        //s.bind(1212);
+        //s.start();
 
         GameClient c = new GameClient();
         c.connect("localhost", 1212);
@@ -40,10 +40,12 @@ public class NetTester {
         move.cards = cards;
 
         c.getSource().sendMove(move);
-        //Move reply = c.getSource().getNextMove();
-        //System.out.println(reply);
-
-        Thread.sleep(100000);
+        while (c.isConnected()) {
+            Move reply = c.getSource().getNextMove();
+            if(reply.action == Action.TERMINATE)
+                break;
+            System.out.println(reply);
+        }
 
         c.close();
         s.close();
