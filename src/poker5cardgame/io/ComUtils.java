@@ -9,8 +9,10 @@ import poker5cardgame.network.Network;
 import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
 
+import static poker5cardgame.Log.*;
+
 public class ComUtils {
-    
+
     // TODO @alex Test Socket Timeout
 
     /* Mida d'una cadena de caracters */
@@ -26,7 +28,7 @@ public class ComUtils {
     protected Socket socket;
     int maxTimeout = 5;
     int timeOutMillis = 2000;
-    
+
     // Private State
     private int expectedCards = -1;
 
@@ -43,7 +45,7 @@ public class ComUtils {
             //bis = new BufferedInputStream(dis);
             bos = new BufferedOutputStream(dos);
         } catch (IOException ex) {
-            System.err.println("CU: Failed to Open Socket");
+            IO_ERROR("CU: Failed to Open Socket");
         }
     }
 
@@ -55,7 +57,7 @@ public class ComUtils {
      * Packet Reading wrapper for real reading function. Deals with timeouts.
      */
     public Packet read_NetworkPacket() {
-        // System.err.println("CU: Waiting for next Packet");
+        IO_TRACE("CU: Waiting for next Packet");
 
         int toCount = 0;
         Packet packet = null;
@@ -70,11 +72,11 @@ public class ComUtils {
             } catch (SocketTimeoutException e) {
                 // Timing out allowed for a number of tries
                 toCount++;
-                System.err.println("CU: Timed out " + toCount + " times.");
+                IO_ERROR("CU: Timed out " + toCount + " times.");
 
                 // Upon reaching max timeout times, stop trying to read
                 if (toCount >= maxTimeout) {
-                    System.out.println("CU: Max timeout reached. Disconnecting");
+                    NET_ERROR("CU: Max timeout reached. Disconnecting");
                     send_error_packet("Max Timeout Reached.");
 
                     packet = new Packet(Command.NET_ERROR);
@@ -100,6 +102,9 @@ public class ComUtils {
 
             // While the current 4 bytes are not a valid command, read one more byte
             while (!Network.Command.isValid(new String(nextBytes))) {
+                // Log invalid packet code
+                IO_TRACE("CU: Invalid packet: " + new String(nextBytes));
+
                 // Send an error packet every time this fails
                 send_error_packet("Invalid PROTOCOL Code");
                 // Move last 3 bytes back, and read one more
@@ -111,19 +116,18 @@ public class ComUtils {
             opCode = opCode.toUpperCase();
 
             packet.command = Network.Command.identifyCode(opCode);
-            // System.out.println("COM: detected packet: "+packet.command);
+            IO_TRACE("CU: detected packet: " + packet.command);
             // Read arguments from Stream if applicable
             if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
-            
-            
-            System.err.println("CU: Received: " + packet);
+
+            IO_TRACE("CU: Received: " + packet);
 
         } catch (SocketTimeoutException e) {
             // TODO do something with exception ? see current read bytes
             throw e;
         } catch (IOException e) {
-            System.err.println("CU: Socket Error (closed?)");
+            IO_ERROR("CU: Socket Error (closed?)");
             packet.command = Command.NET_ERROR;
         }
 
@@ -141,17 +145,17 @@ public class ComUtils {
             // Packet knows how to write itself. yay
             packet.write(this);
             bos.flush();
-            System.err.println("CU: Sent: " + packet);
-            
+            IO_TRACE("CU: Sent: " + packet);
+
             // Intercept DRAW message to get expected Cards
             if (packet.command == Command.DRAW) {
                 // Now reading a 'X' string
                 expectedCards = Integer.valueOf(packet.getField("number", String.class));
             }
             return true;
-            
+
         } catch (IOException e) {
-            System.err.println("CU: Error sending Packet");
+            IO_ERROR("CU: Error sending Packet");
             return false;
         }
     }
@@ -195,8 +199,7 @@ public class ComUtils {
                 }
                 break;
             case DRAW_SERVER:
-                if(expectedCards > 0)
-                {
+                if (expectedCards > 0) {
                     packet.putField("cards", read_cards(expectedCards));
                     read_bytes(1); // Consume space
                 }
@@ -218,17 +221,14 @@ public class ComUtils {
         p.putWrittable(new Writable.VariableString(2, str));
         write_NetworkPacket(p);
     }
-    
-    private int read_byte_as_int() throws IOException{
+
+    private int read_byte_as_int() throws IOException {
         return Integer.valueOf(new String(read_bytes(1)));
     }
 
     /* Llegir un enter de 32 bits */
     public int read_int32() throws IOException {
-        byte bytes[] = new byte[4];
-        bytes = read_bytes(4);
-
-        return bytesToInt32(bytes, "be");
+        return bytesToInt32(read_bytes(4), "be");
     }
 
     /* Escriure un enter de 32 bits */
@@ -335,6 +335,10 @@ public class ComUtils {
         return bStr;
     }
 
+    public void flushBuffer() throws IOException {
+        bos.flush();
+    }
+
     /* Llegir un string  mida variable size = nombre de bytes especifica la longitud*/
     public String read_string_variable(int size) throws IOException {
         byte bHeader[] = new byte[size];
@@ -416,16 +420,17 @@ public class ComUtils {
     }
 
     /**
-     * Set the socket timeout time, and Max number of timeouts
-     * // TODO @alex add max timeout count argument
+     * Set the socket timeout time, and Max number of timeouts // TODO @alex add
+     * max timeout count argument
+     *
      * @param timeout millisecods
      */
-    public void setTimeout(int timeout) {     
-        if(socket == null || socket.isClosed()){
-            System.err.println("CU: Can't set timeout with no connection.");
+    public void setTimeout(int timeout) {
+        if (socket == null || socket.isClosed()) {
+            IO_ERROR("CU: Can't set timeout with no connection.");
             return;
         }
-        
+
         try {
             socket.setSoTimeout(timeout);
         } catch (SocketException ex) {

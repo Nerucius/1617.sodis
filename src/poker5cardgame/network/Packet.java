@@ -41,15 +41,20 @@ public class Packet implements Writable {
                 return type.cast(e.object);
         return null;
     }
-    
-    /** Returns the list of entries inside this packet. A copy, not the real list. */
-    public List<Entry> getFields(){
+
+    /**
+     * Returns the list of entries inside this packet. A copy, not the real
+     * list.
+     */
+    public List<Entry> getFields() {
         return new ArrayList<>(entries);
     }
 
-    /** Pad the output with the given number of spaces */
+    /**
+     * Pad the output with the given number of spaces
+     */
     public void pad(int n) {
-        while(n-- > 0)
+        while (n-- > 0)
             entries.add(new Entry("-", " "));
     }
 
@@ -66,28 +71,27 @@ public class Packet implements Writable {
     public void write(ComUtils out) throws IOException {
         // Write command code
         out.write_string_pure(command.code);
-        //System.out.print("Packet: "+command.code);
 
         // Write a list of arguments
         for (Entry e : entries) {
             out.write_string_pure(" ");
             e.writable.write(out);
-            //System.out.print(" "+e.writable.toString());
         }
-        
-        //System.out.print("\n");
+
     }
-    
-    /** Packet to Syntax string method */
+
+    /**
+     * Packet to Syntax string method
+     */
     @Override
-    public java.lang.String toString(){
+    public java.lang.String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(command.code);
-        for(Entry e: entries){
+        for (Entry e : entries) {
             sb.append(" ");
             sb.append(e.writable.toString());
-        }        
-        return sb.toString();        
+        }
+        return sb.toString();
     }
 
     /**

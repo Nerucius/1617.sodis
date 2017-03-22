@@ -8,8 +8,8 @@ package poker5cardgame;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
-import poker5cardgame.network.Client;
-import poker5cardgame.network.EchoServer;
+import poker5cardgame.network.GameClient;
+import poker5cardgame.network.MTEchoServer;
 import poker5cardgame.network.Server;
 
 /**
@@ -20,11 +20,11 @@ public class NetTester {
 
     static public void main(String... args) throws Exception {
 
-        Server s = new EchoServer();
-        s.bind(1212);
-        s.start();
+        Server s = new MTEchoServer();
+        //s.bind(1212);
+        //s.start();
 
-        Client c = new Client();
+        GameClient c = new GameClient();
         c.connect("localhost", 1212);
 
         // Test Array
@@ -40,10 +40,12 @@ public class NetTester {
         move.cards = cards;
 
         c.getSource().sendMove(move);
-        //Move reply = c.getSource().getNextMove();
-        //System.out.println(reply);
-
-        Thread.sleep(100000);
+        while (c.isConnected()) {
+            Move reply = c.getSource().getNextMove();
+            if(reply.action == Action.TERMINATE)
+                break;
+            System.out.println(reply);
+        }
 
         c.close();
         s.close();

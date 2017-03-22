@@ -6,6 +6,7 @@
 package poker5cardgame.network;
 
 import java.net.Socket;
+import static poker5cardgame.Log.*;
 import poker5cardgame.io.ComUtils;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Writable;
@@ -16,7 +17,7 @@ import poker5cardgame.io.Writable;
  *
  * @author German Dempere
  */
-public class EchoServer extends MultithreadServer {
+public class MTEchoServer extends MultithreadServer {
 
     NetworkSource source;
     Socket client;
@@ -33,7 +34,7 @@ public class EchoServer extends MultithreadServer {
             Packet packet = com.read_NetworkPacket();
 
             if (packet.command == Network.Command.NET_ERROR) {
-                System.out.println("Server: Network Error for " + client.getInetAddress());
+                NET_ERROR("Server: Network Error for " + client.getInetAddress());
                 break;
             }
 
@@ -49,7 +50,7 @@ public class EchoServer extends MultithreadServer {
             // Send Packet
             com.write_NetworkPacket(reply);
 
-            System.out.println("EchoServer: Replied to packet " + packet + ": " + reply);
+            NET_DEBUG("EchoServer: Replied to packet " + packet + ": " + reply);
 
 
             /* Move Testing Code

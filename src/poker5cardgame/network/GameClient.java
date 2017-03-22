@@ -6,12 +6,12 @@ import java.net.Socket;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
 
-public class Client {
+public class GameClient {
 
     //Source inSource;
     Source outSource;
 
-    public Client() {
+    public GameClient() {
     }
     
     public void connect(String IP, int port) {
