@@ -15,7 +15,7 @@ import poker5cardgame.io.NetworkSource;
 /**
  * 
  */
-public class GameServer extends MultithreadServer{
+public class MTGameServer extends MultithreadServer{
     
     Map<Integer, Game> savedGames = new ConcurrentHashMap<>();
 
@@ -27,7 +27,7 @@ public class GameServer extends MultithreadServer{
         
         Game game = new Game(source);
         int id = 0;
-        // TODO Add persistence
+        // TODO @alex Add persistence
         /*int id = game.getPlayerID();
         if(savedGames.containsKey(id)){
             game = savedGames.get(id);
@@ -39,7 +39,6 @@ public class GameServer extends MultithreadServer{
         }
         
         savedGames.put(id, game);
-        
     }
     
 }

@@ -16,7 +16,7 @@ import poker5cardgame.io.Writable;
  *
  * @author German Dempere
  */
-public class EchoServer extends MultithreadServer {
+public class MTEchoServer extends MultithreadServer {
 
     NetworkSource source;
     Socket client;

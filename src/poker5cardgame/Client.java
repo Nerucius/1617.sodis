@@ -1,6 +1,7 @@
 package poker5cardgame;
 
-import java.net.InetAddress;
+import poker5cardgame.game.GameState;
+import poker5cardgame.game.Move;
 import poker5cardgame.network.GameClient;
 
 /**
@@ -8,10 +9,10 @@ import poker5cardgame.network.GameClient;
  */
 public class Client {
 
-    static InetAddress remoteAddr = null;
+    static String remoteAddr = "localhost";
     static int remotePort = 1212;
     static int mode = 0;
-    
+
     static GameClient client;
 
     public static void main(String... args) {
@@ -28,8 +29,7 @@ public class Client {
 
                 // Server address argument
                 if (arg.equals("-s")) {
-                    String arg2 = args[++i];
-                    remoteAddr = InetAddress.getByName(arg2);
+                    remoteAddr = args[++i];
                 }
 
                 // Port Argument
@@ -37,7 +37,7 @@ public class Client {
                     String arg2 = args[++i];
                     remotePort = Integer.valueOf(arg2);
                 }
-                
+
                 // AI Mode Argument
                 if (arg.equals("-i")) {
                     String arg2 = args[++i];
@@ -52,17 +52,29 @@ public class Client {
         }
 
         startClient();
-        
+
     }
-   
-    
-    /** Connect to a server and play */
-    private static void startClient(){
+
+    /**
+     * Connect to a server and play
+     */
+    private static void startClient() {
         System.out.println("Starting Client...");
-        System.out.println("Remote Addr: "+ remoteAddr.getHostAddress());
-        System.out.println("Port: "+ remotePort);
+        System.out.println("Remote Addr: " + remoteAddr);
+        System.out.println("Port: " + remotePort);
         System.out.println("Interactive: " + mode);
+
+        GameClient client = new GameClient();
+        client.connect(remoteAddr, remotePort);
+
+        Move move = new Move();
+        move.action = GameState.Action.START;
+        move.id = 1234;
+        client.getSource().sendMove(move);
         
+        System.out.println(client.getSource().getNextMove());
+
+
     }
 
 }

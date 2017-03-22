@@ -334,6 +334,10 @@ public class ComUtils {
         } while (len < numBytes);
         return bStr;
     }
+    
+    public void flushBuffer() throws IOException{
+        bos.flush();
+    }
 
     /* Llegir un string  mida variable size = nombre de bytes especifica la longitud*/
     public String read_string_variable(int size) throws IOException {

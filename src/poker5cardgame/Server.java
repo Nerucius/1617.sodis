@@ -1,7 +1,6 @@
 package poker5cardgame;
 
-import poker5cardgame.network.GameServer;
-import poker5cardgame.network.Server;
+import poker5cardgame.network.*;
 
 /**
  * Server launcher class
@@ -9,7 +8,7 @@ import poker5cardgame.network.Server;
 public class Server {
 
     static poker5cardgame.network.Server server;
-    
+
     static int bindPort = 1212;
     static int mode = 1;
 
@@ -52,10 +51,12 @@ public class Server {
         System.out.println("Starting Server...");
         System.out.println("Port: " + bindPort);
         System.out.println("Interactive: " + mode);
-        
-        server = new GameServer();
+
+        // Switch the Type of server here
+        //server = new MTGameServer();
+        server = new SEchoServer();
         server.bind(bindPort);
-        server.getGame();
+        server.start();
 
     }
 }

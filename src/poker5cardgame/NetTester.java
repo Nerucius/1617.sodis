@@ -9,7 +9,7 @@ import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import poker5cardgame.network.GameClient;
-import poker5cardgame.network.EchoServer;
+import poker5cardgame.network.MTEchoServer;
 import poker5cardgame.network.Server;
 
 /**
@@ -20,7 +20,7 @@ public class NetTester {
 
     static public void main(String... args) throws Exception {
 
-        Server s = new EchoServer();
+        Server s = new MTEchoServer();
         s.bind(1212);
         s.start();
 

@@ -6,7 +6,7 @@ import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.network.GameClient;
-import poker5cardgame.network.GameServer;
+import poker5cardgame.network.MTGameServer;
 import poker5cardgame.network.Server;
 
 public class Poker5CardGame {
@@ -40,7 +40,7 @@ public class Poker5CardGame {
 
             if (ls[0].equals("server")) {
                 // Type "server" to start a server
-                server = new GameServer();
+                server = new MTGameServer();
                 server.bind(1212);
                 server.start();
 
