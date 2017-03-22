@@ -29,7 +29,6 @@ public class NetworkSource implements Source {
 
 
     public Move getNextMove() {
-        
         Move move = new Move();
 
         if (comUtils == null) {
@@ -117,6 +116,7 @@ public class NetworkSource implements Source {
                 case DRAW_SERVER:
                     move.action = Action.DRAW_SERVER;
                     move.sDrawn = packet.getField("number", Integer.class);
+
                     if(move.sDrawn > 0)
                         move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     // TODO @alex/client Save this value and inform the client of how many cards the server requested
@@ -164,8 +164,7 @@ public class NetworkSource implements Source {
      *
      * @param move Move to send over the Network.
      */
-    public boolean sendMove(Move move) {
-                
+    public boolean sendMove(Move move) {                
         // Define an array as large as the most packets sent by a single Move
         // Some moves send more than one packet.
         Packet[] packets = new Packet[2];

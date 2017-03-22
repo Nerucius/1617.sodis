@@ -2,6 +2,7 @@ package poker5cardgame;
 
 import java.util.Scanner;
 import poker5cardgame.game.Card;
+import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import poker5cardgame.io.NetworkSource;
@@ -20,6 +21,7 @@ public class Poker5CardGame {
         String line;
         final Client client = new Client();
         Server server = null;
+        Integer mode = null;
 
         // Commands
         // quit         : terminate program
@@ -45,9 +47,11 @@ public class Poker5CardGame {
                 server.start();
 
             } else if (ls[0].equals("connect")) {
+                // TODO temp aquí read the mode type
+                mode = Integer.valueOf(ls[2]);
                 // Type "connect" to connecto to localhost
                 client.connect(ls[1], 1212);
-                if (!client.isConnected()) {
+                if (!client.isConnected()) {                    
                     continue;
                 }
 
@@ -67,7 +71,9 @@ public class Poker5CardGame {
                 // Type "close" to terminate client
                 client.close();
 
-            } else if (client.isConnected()) {
+            } 
+            // For manual mode, read the input
+            else if (client.isConnected() && mode == GameData.MODE_MANUAL) {
 
                 Card[] cardsEmpty = {};
                 Move m = new Move();

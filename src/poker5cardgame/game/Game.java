@@ -1,7 +1,13 @@
 package poker5cardgame.game;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import poker5cardgame.ai.ArtificialIntelligence;
+import poker5cardgame.ai.RandomClientAI;
 import poker5cardgame.ai.RandomServerAI;
 import poker5cardgame.io.Source;
 import poker5cardgame.game.GameState.Action;
@@ -14,7 +20,8 @@ public class Game {
     private Source source;
     private GameData gameData;
     private GameState gameState;
-    private ArtificialIntelligence ai;
+    private ArtificialIntelligence sAI;
+    private ArtificialIntelligence cAI;
 
     /**
      * Create a new Game Instance with the given source. Which is in charge of
@@ -27,67 +34,184 @@ public class Game {
         this.source = source;
         this.gameData = new GameData();
         this.gameState = new GameState();
-        this.ai = new RandomServerAI(); // TODO segons el que es vulgui,ara random per test
+        this.setAI();
     }
 
     public GameState.State getState() {
         return gameState.state;
     }
     
+    private void setAI()
+    {
+        switch(gameData.sInteractive) {
+            case GameData.MODE_RANDOM_AI: this.sAI = new RandomServerAI(); break;
+            case GameData.MODE_INTELLIGENT_AI: /* this.sAI = new IntelligentServerAI();*/ break;
+        }
+       
+        switch (gameData.cInteractive) {
+            case GameData.MODE_RANDOM_AI: this.cAI = new RandomClientAI(); break;
+            case GameData.MODE_INTELLIGENT_AI: /* this.cAI = new IntelligentServerAI(); */ break;
+        }
+    }
+    
+    private void wait(int seconds)
+    {
+        try {
+            Thread.sleep(seconds*000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     /**
      * Run the game with the next iteration of commands
      */
-    public void update() {
+    public void update()
+    {
+        //System.out.println("\n[DEBUG Game] " + gameState);
+        this.wait(1);
 
-        Move sMove, cMove;
+        Move move = new Move();
+        try {
+            
+            switch(getState())
+            {
+                case INIT:
+                    move = this.updateClient();
+                    break;
+                    
+                case START:                    
+                move = this.updateServer();
+                break;
+                    
+                case ACCEPT_ANTE:
+                    move = this.updateClient();
+                    break;
+                    
+                case PLAY:
+                    move = this.updateServer();
+                    break;
+                    
+                case BETTING:
+                    if(gameState.isServerTurn())
+                        move = this.updateServer();
+                    else
+                        move = this.updateClient();
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    break;
+                    
+                case BETTING_DEALER:
+                    if(gameState.isServerTurn())
+                        move = this.updateServer();
+                    else
+                        move = this.updateClient();
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    break;
+                    
+                case COUNTER:
+                    if(gameState.isServerTurn())
+                        move = this.updateServer();
+                    else
+                        move = this.updateClient();
+                    gameState.setServerTurn(!gameState.isServerTurn());
+                    break;
+                    
+                case DRAW:
+                    move = this.updateClient();
+                    break;
+                    
+                case DRAW_SERVER:
+                    move = this.updateServer();
+                    break;
+                    
+                case SHOWDOWN:
+                    move = this.updateServer();                    
+                    break;
+            }            
+            gameState.apply(move.action);
+
+        } catch (Exception e) {
+            this.sendErrorMsg(e.getMessage());
+            if(getState().equals(GameState.State.QUIT))
+            {
+                gameState.apply(Action.TERMINATE);
+                this.sendErrorMsg("QUIT GAME due to ERROR: " + e.getMessage());
+                
+                        }
+        }
+        System.out.println("[DEBUG Game] " + gameData +'\n');
+        this.wait(1);
+    }
+    
+    
+    
+    private Move updateClient() throws Exception {
+        Move cMove;
         
-        System.out.println("[DEBUG Game] " + gameState);
-
-        switch (getState()) {
-
-            case INIT:
-                // Turn: CLIENT
-                // Expected move: START
-                
-                cMove = this.getClientValidMove();
-                gameState.apply(cMove.action);
+        if(gameData.cInteractive == GameData.MODE_MANUAL)
+            cMove = this.getClientValidMove();
+        else
+            cMove = cAI.getMoveForGame(gameData, gameState);
+        
+        // manage the move information
+        switch(getState())
+        {
+            case BETTING:
+                    if (cMove.action.equals(Action.BET)) {
+                        this.manageBetClient(cMove);
+                    }             
                 break;
 
-            case START:
-                // Turn: SERVER
-                // Move to send: ANTE_STAKES
-                // Parameters: CHIPS (minimum bet), CHIPS (client chips), CHIPS (server chips)
-                
-                sMove = new Move();
-                sMove.action = Action.ANTE_STAKES;
-                
-                sMove.chips = gameData.minBet;     // ANTE parameter
-                sMove.cStakes = gameData.cChips;   // STAKES parameter
-                sMove.sStakes = gameData.sChips;   // STAKES parameter
-                
-                source.sendMove(sMove);
-                gameState.apply(sMove.action);
+            case BETTING_DEALER:
+                    if (cMove.action.equals(Action.BET)) {
+                        this.manageBetClient(cMove);
+                    }                
                 break;
 
-            case ACCEPT_ANTE:
-                // Turn: CLIENT
-                // Expected move: ANTE_OK or QUIT
-                
-                cMove = this.getClientValidMove();
-                gameState.apply(cMove.action);
+            case COUNTER:
+                    if (cMove.action.equals(Action.RAISE)) {
+                        this.manageRaiseClient(cMove);
+                    }
+                    if (cMove.action.equals(Action.CALL)) {
+                        this.manageCallClient();
+                    }
+                    if (cMove.action.equals(Action.FOLD)) {
+                        this.manageFoldClient();
+                    }                
                 break;
+                
+            case DRAW:
+                gameData.cDrawn = cMove.cDrawn;     
+                if (gameData.cDrawn > 0) {
+                    gameData.cHand.discard(cMove.cards);
+                }
+                break;
+                
+        }        
+        
+        if(gameData.cInteractive != GameData.MODE_MANUAL)
+            source.sendMove(cMove);
+        return cMove;      
+    }
+    
+    private Move updateServer() throws Exception {
 
-            case PLAY:
-                // Turn: SERVER
-                // Move to send: DEALER_HAND
-                // Parameters: '0' (dealer = server) or '1' (dealer = client), client hand
-               
+        Move sMove = new Move();
+        
+        switch(getState())
+        {
+            case START: // default behaviour independent of the AI
+                sMove.action = Action.ANTE_STAKES;                
+                sMove.chips = gameData.minBet;
+                sMove.cStakes = gameData.cChips;
+                sMove.sStakes = gameData.sChips;
+                break;
+                
+            case PLAY: // default behaviour independent of the AI
                 // the game is accepted, so set the minimum bet as the bet of each player
                 this.setMinBetServer();
                 this.setMinBetClient();
                 
-                sMove = new Move();
                 sMove.action = Action.DEALER_HAND;
                 
                 // choose the dealer randomly (0: server; 1: client)
@@ -100,174 +224,62 @@ public class Game {
 
                 sMove.cards = new Card[Hand.SIZE];
                 gameData.cHand.getCards().toArray(sMove.cards);
-
-                source.sendMove(sMove);
-                gameState.apply(sMove.action);                
-                break;
-
-            case BETTING:        
-                try{
-                // Turn: non dealer = SERVER
-                // Move to send: BET or PASS
-                // Parameters: CHIPS (if bet) or none (if PASS)     
-                if (gameState.isServerTurn()) 
-                {
-                    // TODO @sonia RandomIA(= no IA) and IntelligentIA
-                    // sMove = ia.getMoveForGame(Game g)
-                    // NOW implemented with PASS example
-                    
-                    /*sMove = new Move();
-                    sMove.action = Action.BET;
-                    sMove.chips = 125;
-                    this.manageBetServer(sMove);*/
-                    
-                    sMove = ai.getMoveForGame(gameData, gameState);
-                    if(sMove.action.equals(Action.BET)) this.manageBetServer(sMove);                                    
-                    source.sendMove(sMove);
-                    gameState.setServerTurn(!gameState.isServerTurn());
-                    gameState.apply(sMove.action);
-                }
                 
-                // Turn: non dealer = CLIENT
-                // Expected move: BET or PASS
-                else 
-                {
-                    cMove = this.getClientValidMove();
-                    if(cMove.action.equals(Action.BET)) this.manageBetClient(cMove);
-                    gameState.setServerTurn(!gameState.isServerTurn());
-                    gameState.apply(cMove.action);
-                }
-                } catch(Exception ex)
-                {
-                    this.sendErrorMsg(ex.getMessage());
+                break;
+                
+            case BETTING:
+                sMove = sAI.getMoveForGame(gameData, gameState);
+                if (sMove.action.equals(Action.BET)) {
+                    this.manageBetServer(sMove);
                 }
                 break;
 
             case BETTING_DEALER:
-    
-                try {
-                // Turn: dealer = SERVER
-                // Move to send: BET or PASS
-                // Parameters: CHIPS (if bet) or none (if PASS)    
-                if (gameState.isServerTurn()) 
-                {
-                    sMove = ai.getMoveForGame(gameData, gameState);
-                    if (sMove.action.equals(Action.BET)) this.manageBetServer(sMove);
-                    
-                    source.sendMove(sMove);
-                    gameState.setServerTurn(!gameState.isServerTurn());
-                    gameState.apply(sMove.action);
+                sMove = sAI.getMoveForGame(gameData, gameState);
+                if (sMove.action.equals(Action.BET)) {
+                    this.manageBetServer(sMove);
                 }
-                
-                // Turn: dealer = CLIENT
-                // Expected move: BET or PASS
-                else 
-                {
-                    cMove = this.getClientValidMove();
-                    if(cMove.action.equals(Action.BET)) this.manageBetClient(cMove);
-                    gameState.setServerTurn(!gameState.isServerTurn());
-                    gameState.apply(cMove.action);
-                }
-                } catch(Exception ex)
-                {
-                    this.sendErrorMsg(ex.getMessage());
-                }
-                        
                 break;
-
+                
             case COUNTER:
-                if (gameState.isServerTurn())
-                {
-                    // TODO ia
-                    
-                    sMove = new Move();
-                    sMove.action = Action.CALL;
+                sMove = sAI.getMoveForGame(gameData, gameState);
+                if (sMove.action.equals(Action.RAISE)) {
+                    this.manageRaiseServer(sMove);
+                }
+                if (sMove.action.equals(Action.CALL)) {
                     this.manageCallServer();
-                    
-                    source.sendMove(sMove);
-                    gameState.setServerTurn(!gameState.isServerTurn());
-                    gameState.apply(sMove.action);
                 }
-                else
-                {
-                    cMove = this.getClientValidMove();
-
-                    if(cMove.action.equals(Action.RAISE)) this.manageRaiseClient(cMove);
-                    if(cMove.action.equals(Action.CALL)) this.manageCallClient();
-                    if(cMove.action.equals(Action.FOLD)) this.manageFoldClient();
-                    gameState.setServerTurn(!gameState.isServerTurn());
-                    gameState.apply(cMove.action);
-                }    
-              
+                if (sMove.action.equals(Action.FOLD)) {
+                    this.manageFoldServer();
+                }
                 break;
-
-            case DRAW:
-                // Turn: CLIENT
-                // Expected move: DRAW
-                                
-                // TODO send protocol error if the client drawn number does not match with the cards lenght
-
-                cMove = this.getClientValidMove();              
-                gameData.cDrawn = cMove.cDrawn;
                 
-                if (gameData.cDrawn > 0) {
-                    try {
-                        gameData.cHand.discard(cMove.cards);
-                    } catch (Exception ex) {
-                        this.sendErrorMsg(ex.getMessage());
-                    }
-                }
-
-                gameState.apply(cMove.action);
-                break;
-
             case DRAW_SERVER:
-        {
-            try {
-                    // Turn: SERVER
-                    // Move to send: DRAW_SERVER
-
-                    sMove = ai.getMoveForGame(gameData, gameState);
-                    sMove.cDrawn = gameData.cDrawn;
-                    sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
-                    gameData.sDrawn = sMove.sDrawn;
-                    source.sendMove(sMove);
-                    gameState.apply(sMove.action);
-
-                } catch (Exception ex) {
-                    this.sendErrorMsg(ex.getMessage());
-                }
-            }
-                //sMove = new Move();
-                //sMove.action = Action.DRAW_SERVER;
+                // get the move from the ai (who decides which cards the server discards)
+                sMove = sAI.getMoveForGame(gameData, gameState);
                 
-                    // send the client cards to the client
-
-                    // TODO ia
-                    // Now change only the first card                
-                    /*gameData.sHand.discard(gameData.sHand.getCards().get(0));
-                    gameData.sHand.putNCards(gameData.deck, 1);*/
+                // complete the server hand with the missing cards
+                gameData.sDrawn = sMove.sDrawn;
+                gameData.sHand.putNCards(gameData.deck, gameData.sDrawn);
                 
-
-                //gameData.sDrawn = 1;                
-                //sMove.sDrawn = gameData.sDrawn;
-
-                
+                // set the client drawn cards
+                sMove.cDrawn = gameData.cDrawn;
+                //sMove.cards = new Card[sMove.cDrawn];                
+                sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
+               
                 break;
-
-            case SHOWDOWN:
-                // Turn: SERVER                    
                 
+            case SHOWDOWN: // Default behaviour independent of the AI
                 if(!gameState.isFold())
                 {
                     if(!gameState.isShowTime())
-                        this.sendErrorMsg("Server can not show the cards now.");
-                    sMove = new Move();
+                        throw new Exception("Server can not show the cards now.");
                     sMove.action = Action.SHOW;
                     sMove.cards = new Card[Hand.SIZE];
                     gameData.sHand.getCards().toArray(sMove.cards);
                     source.sendMove(sMove);
                 }
+                
                 gameState.setFold(false);
                 gameState.setShowTime(false);
                 gameData.sDrawn = 0;
@@ -286,72 +298,70 @@ public class Game {
                 sMove.cStakes = gameData.cChips;   // STAKES parameter
                 sMove.sStakes = gameData.sChips;   // STAKES parameter
 
-                source.sendMove(sMove);
-                gameState.apply(sMove.action);
-                break;
-
-            case QUIT:
-                gameState.apply(Action.QUIT);
                 break;
         }
-        System.out.println("[DEBUG Game] " + gameData);
+        source.sendMove(sMove);
+        return sMove;
+
     }
     
-    private void setMinBetServer()
+    private void setMinBetServer() throws Exception
     {
         if (gameData.sChips >= gameData.minBet) {
             gameData.sBet += gameData.minBet;
             gameData.sChips -= gameData.minBet;
         } else {
-            this.sendErrorMsg("Logic Error. Not enough chips for the minimum bet.");
+            gameState.state = GameState.State.QUIT;
+            throw new Exception("Logic Error. Not enough chips for the minimum bet.");
         }
     }
     
-    private void setMinBetClient()
+    private void setMinBetClient() throws Exception
     {
         if (gameData.cChips >= gameData.minBet) {
             gameData.cChips -= gameData.minBet;
             gameData.cBet += gameData.minBet;
         } else {
-            this.sendErrorMsg("Logic Error. Not enough chips for the minimum bet.");
+            gameState.state = GameState.State.QUIT;
+            throw new Exception("Logic Error. Not enough chips for the minimum bet.");
         }
     }
     
-    private void manageBetServer(Move move)
+    private void manageBetServer(Move move) throws Exception
     {
         if (move.chips >= gameData.minBet && gameData.sChips >= move.chips) {
             gameData.sChips -= move.chips;
             gameData.sBet += move.chips;
         } else {
-            this.sendErrorMsg("Logic Error. Not valid chips value.");
+            throw new Exception("Logic Error. Not valid chips value.");
         }
     }
     
-    private void manageBetClient(Move move)
+    private void manageBetClient(Move move) throws Exception
     {
         if (move.chips >= gameData.minBet && gameData.cChips >= move.chips) {
             gameData.cChips -= move.chips;
             gameData.cBet += move.chips;
         } else {
-            this.sendErrorMsg("Logic Error. Not valid chips value.");
+            throw new Exception("Logic Error. Not valid chips value.");
         }
     }
     
-    private void manageRaiseServer(Move move)
+    private void manageRaiseServer(Move move) throws Exception
     {
         this._manageCallServer(move.chips);
     }
-    private void manageRaiseClient(Move move)
+    private void manageRaiseClient(Move move) throws Exception
     {
        this._manageCallClient(move.chips);
     }
     
-    private void manageCallServer()
+    private void manageCallServer() throws Exception
     {
         this._manageCallServer(0);
     }
     
-    private void _manageCallServer(int raise)
+    private void _manageCallServer(int raise) throws Exception
     {
         int amountToBet = gameData.cBet - gameData.sBet + raise;
         if(gameData.sChips >= amountToBet)
@@ -359,16 +369,16 @@ public class Game {
             gameData.sChips -= amountToBet;
             gameData.sBet += amountToBet;
         } else {
-            this.sendErrorMsg("Logic Error. Not enough chips to call.");
+            throw new Exception("Logic Error. Not enough chips to call or raise.");
         }
     }
     
-    private void manageCallClient()
+    private void manageCallClient() throws Exception
     {
         this._manageCallClient(0);
     }
     
-    private void _manageCallClient(int raise)
+    private void _manageCallClient(int raise) throws Exception
     {
         int amountToBet = gameData.sBet - gameData.cBet + raise;
         if(gameData.cChips >= amountToBet)
@@ -376,7 +386,7 @@ public class Game {
             gameData.cChips -= amountToBet;
             gameData.cBet += amountToBet;
         } else {
-            this.sendErrorMsg("Logic Error. Not enough chips to call.");
+            throw new Exception("Logic Error. Not enough chips to call or raise.");
         }
     }
     
@@ -407,13 +417,12 @@ public class Game {
         gameData.sBet = 0;
     }
     
-    private Move sendErrorMsg(String msg)
+    private void sendErrorMsg(String msg)
     {
         Move errMove = new Move();
         errMove.action = Action.ERROR;
         errMove.error = msg;
         source.sendMove(errMove);
-        return source.getNextMove();
     }
     
     private Move getClientValidMove()
@@ -424,9 +433,11 @@ public class Game {
         // wait until the clients move is valid
         while (!getState().transitions.containsKey(cMove.action) || cMove.action == Action.SHOW)
         {
-            Set validActions = getState().transitions.keySet();
+            List<Action> validActions = new ArrayList();
+            validActions.addAll(gameState.state.transitions.keySet());
             if (validActions.contains(Action.SHOW)) validActions.remove(Action.SHOW);
-            cMove = this.sendErrorMsg("Protocol Error. Expecting for: " + validActions);
+            this.sendErrorMsg("Protocol Error. Expecting for: " + validActions);
+            cMove = source.getNextMove();
         }
         
         // return the clients valid move

@@ -91,7 +91,7 @@ public class Hand implements Comparable<Hand> {
      * @return Card[]
      * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    public Card[] putNCards(Deck deck, int n) throws Deck.EmptyDeckException, TooManyCardsException
+    public Card[] putNCards(Deck deck, int n) /*throws Deck.EmptyDeckException, TooManyCardsException*/
     {
         Card[] cards = new Card[n];
         for (int i = 0; i < n; i++) {
@@ -109,11 +109,11 @@ public class Hand implements Comparable<Hand> {
      * @throws poker5cardgame.game.Hand.NonExistingCardException
      */
     // TODO test it
-    public void discard(Card... cards) throws NonExistingCardException {
+    public void discard(Card... cards) /*throws NonExistingCardException*/ {
         for (Card c : cards) {
             if (!this.cards.remove(c)) {
-                throw new NonExistingCardException("Tried to remove a non existing card.");
-                //System.err.println("Tried to remove a non existing card.");
+                //throw new NonExistingCardException("Tried to remove a non existing card.");
+                System.err.println("Tried to remove a non existing card.");
             }
         }
     }
