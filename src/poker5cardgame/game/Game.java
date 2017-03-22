@@ -8,8 +8,8 @@ import poker5cardgame.game.GameState.Action;
 
 public class Game {
 
-    // TODO Quit should stop the game?
-    // TODO manage when CALL i PASS sumen chips
+    // TODO @sonia Quit should stop the game?
+    // TODO @sonia manage when CALL i PASS sumen chips
     
     private Source source;
     private GameData gameData;
@@ -21,13 +21,22 @@ public class Game {
      * providing the game with the means of communicating with the exterior
      * world in the language the game understands, Actions.
      *
-     * @param source
+     * @param source Source to get moves
+     * @param ai Artificial Intelligence to use
      */
-    public Game(Source source) {
+    public Game(Source source, ArtificialIntelligence ai){
         this.source = source;
         this.gameData = new GameData();
         this.gameState = new GameState();
-        this.ai = new RandomServerAI(); // TODO segons el que es vulgui,ara random per test
+        this.ai = ai; // TODO segons el que es vulgui,ara random per test
+    }
+    
+    /** 
+     * Source-only constructor, AI defaults to RandomAI
+     * @param source 
+     */
+    public Game(Source source) {
+        this(source, new RandomServerAI());
     }
 
     public GameState.State getState() {
