@@ -1,11 +1,6 @@
 
 package poker5cardgame.ai;
 
-import java.util.ArrayList;
-import java.util.List;
-import poker5cardgame.game.Card;
-import poker5cardgame.game.Card.Rank;
-import poker5cardgame.game.Card.Suit;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState;
 import poker5cardgame.game.Hand;
@@ -14,10 +9,14 @@ import poker5cardgame.game.HandRanker.HandRank;
 import poker5cardgame.game.Move;
 
 // TODO @sonia change it, now it is random
-public class IntelligentServerAI implements ArtificialIntelligence {
+public class IntelligentServerAI extends ArtificialIntelligence {
 
     // Fix the max bet to 500 to be realistic
     private static final int MAX_BET = 500;
+
+    public IntelligentServerAI(GameData gameData, GameState gameState) {
+        super(gameData, gameState);
+    }
 
     /**
      * Get a random number between min and max.
@@ -32,7 +31,7 @@ public class IntelligentServerAI implements ArtificialIntelligence {
     }
 
     @Override
-    public Move getMoveForGame(GameData gameData, GameState gameState) {
+    public Move getNextMove() {
 
         Move sMove = new Move();
         switch(gameState.state)
@@ -68,5 +67,11 @@ public class IntelligentServerAI implements ArtificialIntelligence {
         System.out.println("DEBUG BETTING AI cartes sueltes: " + leftoverCards);
 
         
+    }
+    
+    @Deprecated
+    @Override
+    public boolean sendMove(Move move) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

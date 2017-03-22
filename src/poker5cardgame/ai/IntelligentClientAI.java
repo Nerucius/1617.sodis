@@ -8,10 +8,15 @@ import poker5cardgame.game.GameState;
 import poker5cardgame.game.Move;
 
 // TODO @sonia change it, now it is random
-public class IntelligentClientAI implements ArtificialIntelligence {
+public class IntelligentClientAI extends ArtificialIntelligence {
 
     // Fix the max bet to 500 to be realistic
     private static final int MAX_BET = 500;
+
+    public IntelligentClientAI(GameData gameData, GameState gameState) {
+        super(gameData, gameState);
+    }
+    
 
     /**
      * Get a random number between min and max.
@@ -50,7 +55,7 @@ public class IntelligentClientAI implements ArtificialIntelligence {
     }
 
     @Override
-    public Move getMoveForGame(GameData gameData, GameState gameState) {
+    public Move getNextMove() {
 
         Move cMove = new Move();
         cMove.action = randomAction(gameData, gameState);
@@ -92,5 +97,12 @@ public class IntelligentClientAI implements ArtificialIntelligence {
                 break;
         }
         return cMove;
-    }    
+    }
+
+    @Deprecated
+    @Override
+    public boolean sendMove(Move move) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

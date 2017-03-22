@@ -110,4 +110,8 @@ public class Poker5CardGame {
             }
         }
     }
+
+    private static void GAME_DEBUG() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

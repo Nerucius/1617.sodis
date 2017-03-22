@@ -16,7 +16,7 @@ import poker5cardgame.game.GameState.Action;
 
 public class Game {
     
-    private Source source;
+    private Source netSource;
     private GameData gameData;
     private GameState gameState;
     private ArtificialIntelligence sAI;
@@ -30,10 +30,10 @@ public class Game {
      * @param source
      */
     public Game(Source source) {
-        this.source = source;
+        this.netSource = source;
         this.gameData = new GameData();
         this.gameState = new GameState();
-        this.setAI();
+        //this.setAI();
     }
 
     public GameState.State getState() {
@@ -188,7 +188,7 @@ public class Game {
         }        
         
         if(gameData.cInteractive != GameData.MODE_MANUAL)
-            source.sendMove(cMove);
+            netSource.sendMove(cMove);
         return cMove;      
     }
     
@@ -275,7 +275,7 @@ public class Game {
                     sMove.action = Action.SHOW;
                     sMove.cards = new Card[Hand.SIZE];
                     gameData.sHand.getCards().toArray(sMove.cards);
-                    source.sendMove(sMove);
+                    netSource.sendMove(sMove);
                 }
                 
                 gameState.setFold(false);
@@ -298,7 +298,7 @@ public class Game {
 
                 break;
         }
-        source.sendMove(sMove);
+        netSource.sendMove(sMove);
         return sMove;
 
     }
@@ -420,13 +420,13 @@ public class Game {
         Move errMove = new Move();
         errMove.action = Action.ERROR;
         errMove.error = msg;
-        source.sendMove(errMove);
+        netSource.sendMove(errMove);
     }
     
     private Move getClientValidMove()
     {        
         // get the next clients move
-        Move cMove = source.getNextMove();
+        Move cMove = netSource.getNextMove();
 
         // wait until the clients move is valid
         while (!getState().transitions.containsKey(cMove.action) || cMove.action == Action.SHOW)
@@ -435,7 +435,7 @@ public class Game {
             validActions.addAll(gameState.state.transitions.keySet());
             if (validActions.contains(Action.SHOW)) validActions.remove(Action.SHOW);
             this.sendErrorMsg("Protocol Error. Expecting for: " + validActions);
-            cMove = source.getNextMove();
+            cMove = netSource.getNextMove();
         }
         
         // return the clients valid move

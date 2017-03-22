@@ -8,10 +8,14 @@ import poker5cardgame.game.GameState;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 
-public class RandomServerAI implements ArtificialIntelligence {
+public class RandomServerAI extends ArtificialIntelligence {
 
     // Fix the max bet to 500 to be realistic
     private static final int MAX_BET = 500;
+
+    public RandomServerAI(GameData gameData, GameState gameState) {
+        super(gameData, gameState);
+    }
 
     /**
      * Get a random number between min and max.
@@ -45,7 +49,7 @@ public class RandomServerAI implements ArtificialIntelligence {
     }
 
     @Override
-    public Move getMoveForGame(GameData gameData, GameState gameState) {
+    public Move getNextMove() {
 
         Move sMove = new Move();
         sMove.action = randomAction(gameData, gameState);
@@ -83,5 +87,11 @@ public class RandomServerAI implements ArtificialIntelligence {
                 break;
         }
         return sMove;
+    }
+    
+    @Deprecated
+    @Override
+    public boolean sendMove(Move move) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

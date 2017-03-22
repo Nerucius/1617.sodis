@@ -64,6 +64,8 @@ public class Client {
         System.out.println("Remote Addr: " + remoteAddr);
         System.out.println("Port: " + remotePort);
         System.out.println("Interactive: " + mode);
+        
+        // TODO @sonia Passar els parametres 
 
         GameClient client = new GameClient();
         client.connect(remoteAddr, remotePort);
