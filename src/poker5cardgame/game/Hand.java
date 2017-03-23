@@ -77,8 +77,8 @@ public class Hand implements Comparable<Hand> {
         for (Card c : newCards) {
             if (this.cards.size() < SIZE) {
                 this.cards.add(c);
-            } else
-                GAME_ERROR("Hand: Too many cards added to the hand. Ignored card");
+            } else{}
+                //GAME_ERROR("Hand: Too many cards added to the hand. Ignored card");
         }
     }
 

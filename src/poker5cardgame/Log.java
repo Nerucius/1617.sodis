@@ -10,7 +10,7 @@ public class Log {
     public static /* final */ boolean NET_TRACE = false;
 
     public static /* final */ boolean GAME_ERROR = true;
-    public static /* final */ boolean GAME_DEBUG = false;
+    public static /* final */ boolean GAME_DEBUG = true;
     public static /* final */ boolean GAME_TRACE = false;
 
     public static /* final */ boolean IO_ERROR = true;
@@ -37,20 +37,26 @@ public class Log {
             System.out.println("NT-TRACE: " + msg);
     }
 
-    public static void GAME_ERROR(String msg) {
+    public static void GAME_ERROR(int id, String msg) {
         if (GAME_ERROR)
-            System.err.println(msg);
+            System.err.println(id+" | " +msg);
     }
 
+    public static void GAME_DEBUG(int id, String msg) {
+        if (GAME_DEBUG)
+            System.out.println(id+" | " +msg);
+
+    }
+    
     public static void GAME_DEBUG(String msg) {
         if (GAME_DEBUG)
             System.out.println(msg);
 
     }
 
-    public static void GAME_TRACE(String msg) {
+    public static void GAME_TRACE(int id, String msg) {
         if (GAME_TRACE)
-            System.out.println("GM-TRACE: " + msg);
+            System.out.println("GM-TRACE: "+id+" | " + msg);
     }
 
     public static void IO_ERROR(String msg) {

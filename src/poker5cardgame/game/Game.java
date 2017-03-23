@@ -47,7 +47,7 @@ public class Game {
                 playerSource = new RandomServerAI(gameData, gameState);
         }
 
-        GAME_DEBUG("Game: Creating new with AI " + aiType);
+        GAME_DEBUG(gameData.cId, "Game: Creating new with AI " + aiType);
     }
 
     /**
@@ -82,7 +82,7 @@ public class Game {
      * Run the game with the next iteration of commands
      */
     public void update() {
-        GAME_DEBUG("Game: Updating with state" + gameState);
+        GAME_DEBUG(gameData.cId, "Game: Updating with state" + gameState);
 
         Move move = new Move();
         move.action = Action.NOOP;
@@ -147,7 +147,7 @@ public class Game {
             }
 
             gameState.apply(move.action);
-            GAME_DEBUG("Game: Processed move " + move);
+            GAME_DEBUG(gameData.cId, "Game: Processed move " + move);
 
         } catch (Exception e) {
             this.sendErrorMsg(e.getMessage());
@@ -158,17 +158,21 @@ public class Game {
             }
         }
 
-        GAME_DEBUG("Game: Updated State: " + gameState.state + " | data: " + gameData + '\n');
+        GAME_DEBUG(gameData.cId, "Game: Updated State: " + gameState.state + " | data: " + gameData + '\n');
     }
 
     private Move updateClient() throws Exception {
-        GAME_DEBUG("Game: Updating Client");
+        GAME_DEBUG(gameData.cId, "Game: Updating Client");
 
         // Get next valid move from the other player
         Move cMove = getValidMove(IOSource);
 
         // manage the move information
         switch (getState()) {
+            case INIT:
+                gameData.cId = cMove.id;
+                break;
+                
             case BETTING:
                 if (cMove.action.equals(Action.BET)) {
                     this.manageBetClient(cMove);
@@ -202,12 +206,12 @@ public class Game {
 
         }
 
-        GAME_DEBUG("Game: Client Move: " + cMove);
+        GAME_DEBUG(gameData.cId, "Game: Client Move: " + cMove);
         return cMove;
     }
 
     private Move updateServer() throws Exception {
-        GAME_DEBUG("Game: Updating Server");
+        GAME_DEBUG(gameData.cId, "Game: Updating Server");
 
         Move sMove = new Move();
 
@@ -323,7 +327,7 @@ public class Game {
                 break;
         }
 
-        GAME_DEBUG("Game: Server Move: " + sMove);
+        GAME_DEBUG(gameData.cId, "Game: Server Move: " + sMove);
         IOSource.sendMove(sMove);
         return sMove;
 

@@ -19,6 +19,7 @@ public class GameData {
     //public int sInteractive = MODE_INTELLIGENT_AI; 
 
     // Client data
+    public int cId = -1;
     public Hand cHand;
     public int cChips = 1000;
     public int cBet = 0;
