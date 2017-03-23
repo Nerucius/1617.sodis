@@ -11,6 +11,9 @@ import static poker5cardgame.Log.*;
 
 public class Game {
 
+    // TODO manage cartes dolentes
+    // TODO manage all in
+    
     /**
      * Source to be used for receiving and sending data to another player.
      */
@@ -104,6 +107,7 @@ public class Game {
 
                 case PLAY:
                     move = this.updateServer();
+                    gameState.setServerTurn(gameData.dealer == 1);
                     break;
 
                 case BETTING:
@@ -139,6 +143,7 @@ public class Game {
 
                 case DRAW_SERVER:
                     move = this.updateServer();
+                    gameState.setServerTurn(gameData.dealer == 1);
                     break;
 
                 case SHOWDOWN:
@@ -235,8 +240,9 @@ public class Game {
                 this.setMinBetClient();
 
                 // choose the dealer randomly (0: server; 1: client)
-                sMove.dealer = Math.random() > 0.5 ? 1 : 0;
-                gameState.setServerTurn(sMove.dealer == 1); // the non dealer has the next turn
+                gameData.dealer = Math.random() > 0.5 ? 1 : 0;
+                sMove.dealer = gameData.dealer;
+               // gameState.setServerTurn(gameData.dealer == 1); // the non dealer has the next turn
 
                 // generate the server and client hands
                 gameData.deck = new Deck();
@@ -288,7 +294,6 @@ public class Game {
                 sMove.cDrawn = gameData.cDrawn;
                 //sMove.cards = new Card[sMove.cDrawn];                
                 sMove.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
-
                 break;
 
             case SHOWDOWN:

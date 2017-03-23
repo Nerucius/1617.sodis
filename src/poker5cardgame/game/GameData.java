@@ -8,6 +8,8 @@ public class GameData {
     //public static final int MODE_RANDOM_AI = 1;
     //public static final int MODE_INTELLIGENT_AI = 2;
 
+    public int dealer;
+    
     // Server data
     public Deck deck;
     public Hand sHand;
@@ -58,6 +60,7 @@ public class GameData {
 
             case DEALER_HAND:
                 this.cHand = new Hand(move.cards);
+                this.dealer = move.dealer;
                 break;
 
             case BET:

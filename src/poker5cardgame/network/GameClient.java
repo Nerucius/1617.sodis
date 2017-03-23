@@ -24,14 +24,15 @@ public class GameClient {
      */
     Source playerSource;
     Source IOSource;
-
-    GameState clientGameState; // TODO added to control if send or receive moves
-
+    
+    GameData clientGameData;
+    GameState clientGameState;
+    
     /**
      * Create a client With the given AI type
      */
     public GameClient(ArtificialIntelligence.Type aiType) {
-        GameData clientGameData = new GameData();
+        clientGameData = new GameData();
         clientGameState = new GameState();
 
         switch (aiType) {
@@ -49,7 +50,9 @@ public class GameClient {
      */
     public GameClient() {
         this(new KeyboardSource());
+        clientGameData = new GameData();
         clientGameState = new GameState();
+        
     }
 
     /**
@@ -57,6 +60,7 @@ public class GameClient {
      */
     public GameClient(Source playerSource) {
         this.playerSource = playerSource;
+        clientGameData = new GameData();
         clientGameState = new GameState();
     }
 
@@ -90,8 +94,9 @@ public class GameClient {
                     break;
 
                 case PLAY:
-                    move = this.updateReceive();
-                    clientGameState.setServerTurn(move.dealer == 1);
+                    move = this.updateReceive();          
+                    clientGameData.dealer = move.dealer;
+                    clientGameState.setServerTurn(clientGameData.dealer == 1);
                     break;
 
                 case BETTING:
@@ -127,6 +132,7 @@ public class GameClient {
 
                 case DRAW_SERVER:
                     move = this.updateReceive();
+                    clientGameState.setServerTurn(clientGameData.dealer == 1);
                     break;
 
                 case SHOWDOWN:

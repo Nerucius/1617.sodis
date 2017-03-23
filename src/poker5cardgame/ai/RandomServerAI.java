@@ -50,6 +50,14 @@ public class RandomServerAI extends ArtificialIntelligence {
                 break;
 
             case RAISE:
+                // Manage the case that the client has done an all in
+                if(gameData.cChips == 0)
+                {
+                    AI_DEBUG("SAI: Client has done an ALL IN");
+                    move = new Move();
+                    move.action = Action.CALL;
+                    break;
+                }
                 // Set a random raise if it is possible, if not raise the minimum bet
                 int raise = random(1, MAX_BET);
                 if (gameData.sChips >= raise) {
