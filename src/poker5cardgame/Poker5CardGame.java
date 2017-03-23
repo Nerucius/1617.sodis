@@ -2,9 +2,12 @@ package poker5cardgame;
 
 import java.util.Scanner;
 import poker5cardgame.game.Card;
+import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
+import poker5cardgame.io.KeyboardSource;
 import poker5cardgame.io.NetworkSource;
+import poker5cardgame.io.Source;
 import poker5cardgame.network.GameClient;
 import poker5cardgame.network.MTGameServer;
 import poker5cardgame.network.Server;
@@ -15,11 +18,23 @@ public class Poker5CardGame {
      * @param args the command line arguments
      */
     public static void main(String... args) {
+        
+        Source src = new KeyboardSource();
+        Move move;
+        
+        while((move = src.getNextMove()) != null){
+            System.out.println(move);
+        }
+        
+        if (true)
+            return;
+        
         // Read console input
         Scanner sc = new Scanner(System.in);
         String line;
         final GameClient client = new GameClient();
         Server server = null;
+        Integer mode = null;
 
         // Commands
         // quit         : terminate program
@@ -45,9 +60,11 @@ public class Poker5CardGame {
                 server.start();
 
             } else if (ls[0].equals("connect")) {
+                // TODO temp aquí read the mode type
+                mode = Integer.valueOf(ls[2]);
                 // Type "connect" to connecto to localhost
                 client.connect(ls[1], 1212);
-                if (!client.isConnected()) {
+                if (!client.isConnected()) {                    
                     continue;
                 }
 
@@ -67,7 +84,9 @@ public class Poker5CardGame {
                 // Type "close" to terminate client
                 client.close();
 
-            } else if (client.isConnected()) {
+            } 
+            // For manual mode, read the input
+            else if (client.isConnected() && mode == GameData.MODE_MANUAL) {
 
                 Card[] cardsEmpty = {};
                 Move m = new Move();
@@ -103,5 +122,8 @@ public class Poker5CardGame {
                 client.getSource().sendMove(m);
             }
         }
+        
+        
     }
+
 }

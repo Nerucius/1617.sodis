@@ -1,9 +1,8 @@
 package poker5cardgame;
 
-import poker5cardgame.game.GameState;
-import poker5cardgame.game.Move;
 import poker5cardgame.network.GameClient;
 import static poker5cardgame.Log.*;
+import poker5cardgame.ai.ArtificialIntelligence;
 
 /**
  * Client launcher class
@@ -65,16 +64,29 @@ public class Client {
         System.out.println("Port: " + remotePort);
         System.out.println("Interactive: " + mode);
 
-        GameClient client = new GameClient();
+        GameClient client;
+        
+        // Read AI type
+        ArtificialIntelligence.Type type = ArtificialIntelligence.Type.fromCode(mode);
+        if (type != null)
+            client = new GameClient(type);
+        else
+            client = new GameClient();
+
         client.connect(remoteAddr, remotePort);
 
+        while (client.isConnected()) {
+            client.update();
+        }
+
+        /*
         Move move = new Move();
         move.action = GameState.Action.START;
         move.id = 1234;
         client.getSource().sendMove(move);
 
         System.out.println(client.getSource().getNextMove());
-
+         */
     }
 
 }

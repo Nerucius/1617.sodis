@@ -6,7 +6,7 @@ package poker5cardgame;
 public class Log {
 
     public static /* final */ boolean NET_ERROR = true;
-    public static /* final */ boolean NET_DEBUG = true;
+    public static /* final */ boolean NET_DEBUG = false;
     public static /* final */ boolean NET_TRACE = false;
 
     public static /* final */ boolean GAME_ERROR = true;
@@ -15,7 +15,11 @@ public class Log {
 
     public static /* final */ boolean IO_ERROR = true;
     public static /* final */ boolean IO_DEBUG = true;
-    public static /* final */ boolean IO_TRACE = true;
+    public static /* final */ boolean IO_TRACE = false;
+
+    public static /* final */ boolean AI_ERROR = true;
+    public static /* final */ boolean AI_DEBUG = false;
+    public static /* final */ boolean AI_TRACE = false;
 
     public static void NET_ERROR(String msg) {
         if (NET_ERROR)
@@ -63,6 +67,22 @@ public class Log {
     public static void IO_TRACE(String msg) {
         if (IO_TRACE)
             System.out.println("IO-TRACE: " + msg);
+    }
+
+    public static void AI_ERROR(String msg) {
+        if (AI_ERROR)
+            System.err.println(msg);
+    }
+
+    public static void AI_DEBUG(String msg) {
+        if (AI_DEBUG)
+            System.out.println(msg);
+
+    }
+
+    public static void AI_TRACE(String msg) {
+        if (AI_TRACE)
+            System.out.println("AI-TRACE: " + msg);
     }
 
 }

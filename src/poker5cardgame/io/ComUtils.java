@@ -30,10 +30,9 @@ public class ComUtils {
     int timeOutMillis = 2000;
 
     // Private State
-    private int expectedCards = 0;
+    private int expectedCards = -1;
 
     public ComUtils(Socket socket) {
-
         try {
             this.socket = socket;
             dis = new DataInputStream(socket.getInputStream());
@@ -122,7 +121,7 @@ public class ComUtils {
             if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
 
-            IO_TRACE("CU: Received: " + packet);
+            IO_DEBUG("CU: Received: " + packet);
 
         } catch (SocketTimeoutException e) {
             // TODO do something with exception ? see current read bytes
@@ -146,14 +145,13 @@ public class ComUtils {
             // Packet knows how to write itself. yay
             packet.write(this);
             bos.flush();
-            IO_TRACE("CU: Sent: " + packet);
+            IO_DEBUG("CU: Sent: " + packet);
 
             // Intercept DRAW message to get expected Cards
             if (packet.command == Command.DRAW) {
                 // Now reading a 'X' string
                 expectedCards = Integer.valueOf(packet.getField("number", String.class));
             }
-
             return true;
 
         } catch (IOException e) {
@@ -193,6 +191,7 @@ public class ComUtils {
                 break;
             case DRAW:
                 int drawCount = read_byte_as_int();
+                expectedCards = drawCount; // Save the number of expected cards to read cards in DRAW_SERVER
                 packet.putField("number", drawCount);
                 if (drawCount > 0) {
                     read_bytes(1); // Consume space
@@ -204,7 +203,8 @@ public class ComUtils {
                     packet.putField("cards", read_cards(expectedCards));
                     read_bytes(1); // Consume space
                 }
-                packet.putField("number", read_byte_as_int());
+                int drawServerCount = read_byte_as_int();
+                packet.putField("number", drawServerCount);
                 break;
             case SHOWDOWN:
                 packet.putField("cards", read_cards(5));

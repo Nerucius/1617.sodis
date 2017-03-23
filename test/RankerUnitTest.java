@@ -29,11 +29,11 @@ public class RankerUnitTest {
     @Before
     public void setUp() {
         handA = new Hand();
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.TWO));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.THREE));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.FOUR));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.FIVE));
-        handA.putCard(new Card(Card.Suit.DIAMONDS, Card.Rank.SIX));
+        handA.putCards(new Card(Card.Suit.DIAMONDS, Card.Rank.TWO));
+        handA.putCards(new Card(Card.Suit.DIAMONDS, Card.Rank.THREE));
+        handA.putCards(new Card(Card.Suit.DIAMONDS, Card.Rank.FOUR));
+        handA.putCards(new Card(Card.Suit.DIAMONDS, Card.Rank.FIVE));
+        handA.putCards(new Card(Card.Suit.DIAMONDS, Card.Rank.SIX));
     }
 
     @After

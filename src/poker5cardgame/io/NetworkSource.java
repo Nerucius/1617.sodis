@@ -22,6 +22,10 @@ public class NetworkSource implements Source {
     public NetworkSource(Socket socket) {
         try {
             comUtils = new ComUtils(socket);
+            
+            // TODO @alex disable timeout
+            comUtils.setTimeout(0);
+            
         } catch (Exception ex) {
             System.err.println("NETWORK SORUCE: Could not Open Socket");
             ex.printStackTrace();
@@ -30,7 +34,6 @@ public class NetworkSource implements Source {
 
 
     public Move getNextMove() {
-        
         Move move = new Move();
 
         if (comUtils == null) {
@@ -118,6 +121,7 @@ public class NetworkSource implements Source {
                 case DRAW_SERVER:
                     move.action = Action.DRAW_SERVER;
                     move.sDrawn = packet.getField("number", Integer.class);
+
                     if(move.sDrawn > 0)
                         move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     // TODO @alex/client Save this value and inform the client of how many cards the server requested
@@ -165,8 +169,7 @@ public class NetworkSource implements Source {
      *
      * @param move Move to send over the Network.
      */
-    public boolean sendMove(Move move) {
-                
+    public boolean sendMove(Move move) {                
         // Define an array as large as the most packets sent by a single Move
         // Some moves send more than one packet.
         Packet[] packets = new Packet[2];
@@ -299,8 +302,8 @@ public class NetworkSource implements Source {
      * Convert an array of cards to a String of card codes separated by " "
      */
     public static String cardsToCodeString(Card[] cards) { 
-        if(cards.length == 0)
-            return null;
+        if(cards == null || cards.length == 0)
+            throw new IllegalArgumentException("Can't stringify empty or null array");
         
         String[] codes = new String[cards.length];
 

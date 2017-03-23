@@ -1,12 +1,14 @@
 package poker5cardgame.game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import static poker5cardgame.Log.*;
 import poker5cardgame.game.Card.Rank;
 import poker5cardgame.game.HandRanker.HandRank;
 import static poker5cardgame.game.HandRanker.getHandRank;
@@ -25,10 +27,15 @@ public class Hand implements Comparable<Hand> {
         this.cards = new ArrayList();
     }
 
+    public Hand(Card[] cards) {
+        this.cards = new ArrayList<>();
+        putCards(cards);
+    }
+
     public List<Card> getCards() {
         return this.cards;
     }
-    
+
     public int getSize() {
         return this.cards.size();
     }
@@ -53,67 +60,56 @@ public class Hand implements Comparable<Hand> {
      * Generate a new hand (5 cards) from the deck.
      *
      * @param deck Deck that contains all the remaining cards
-     * @return Hand
-     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    // TODO test it
-
-    public void draw5FromDeck(Deck deck) /*throws Deck.EmptyDeckException, TooManyCardsException*/ {
+    public void draw5FromDeck(Deck deck) {
         this.cards.clear();
         for (int i = 0; i < SIZE; i++) {
-            putCard(deck.draw());
+            putCards(deck.draw());
         }
     }
-    
-    /**
-     * Put a new card to the hand.
-     *
-     * @param card Card to add to the hand
-     * @throws poker5cardgame.game.Hand.TooManyCardsException
-     */
-    // TODO test it
 
-    public void putCard(Card card) /*throws TooManyCardsException*/ {
-        if (cards.size() < SIZE) {
-            cards.add(card);
-        } else {
-            // TODO msg@sonia Disabled exceptions
-            //throw new TooManyCardsException("Too many cards added to the hand.");
-            System.err.println("Too many cards added to the hand. Ignored card");
+    /**
+     * Put one or more cards into the hand. Does bound checks.
+     *
+     * @param newCards Cards to add to the hand
+     */
+    public void putCards(Card... newCards) {
+        for (Card c : newCards) {
+            if (this.cards.size() < SIZE) {
+                this.cards.add(c);
+            } else
+                GAME_ERROR("Hand: Too many cards added to the hand. Ignored card");
         }
     }
+
+
 
     /**
      * Put n new cards from the deck to the hand.
-     * 
+     *
      * @param deck Deck that contains all the remaining cards
      * @param n int that is the number of cards to put into the hand
      * @return Card[]
-     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
-    public Card[] putNCards(Deck deck, int n) throws Deck.EmptyDeckException, TooManyCardsException
-    {
+    public Card[] putNCards(Deck deck, int n) {
         Card[] cards = new Card[n];
         for (int i = 0; i < n; i++) {
             Card card = deck.draw();
-            putCard(card);
+            putCards(card);
             cards[i] = card;
         }
         return cards;
     }
-    
+
     /**
      * Remove one or more cards from the hand.
      *
      * @param cards Card or Cards to remove
-     * @throws poker5cardgame.game.Hand.NonExistingCardException
      */
-    // TODO test it
-    public void discard(Card... cards) throws NonExistingCardException {
+    public void discard(Card... cards) {
         for (Card c : cards) {
             if (!this.cards.remove(c)) {
-                throw new NonExistingCardException("Tried to remove a non existing card.");
-                //System.err.println("Tried to remove a non existing card.");
+                System.err.println("Tried to remove a non existing card.");
             }
         }
     }
@@ -444,40 +440,15 @@ public class Hand implements Comparable<Hand> {
         }
         return aux;
     }
-    
-    public class NonExistingCardException extends Exception {
-        public NonExistingCardException() {
-            super();
-        }
 
-        public NonExistingCardException(String message) {
-            super(message);
-        }
-
-        public NonExistingCardException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public NonExistingCardException(Throwable cause) {
-            super(cause);
-        }
+    // TODO temp for AI
+    public Card getHigh(List<Card> cards) {
+        return Collections.max(cards);
     }
-    
-    public class TooManyCardsException extends Exception {
-        public TooManyCardsException() {
-            super();
-        }
 
-        public TooManyCardsException(String message) {
-            super(message);
-        }
-
-        public TooManyCardsException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public TooManyCardsException(Throwable cause) {
-            super(cause);
-        }
+    void dumpArray(Card[] cards) {
+        for(int i = 0; i < 5; i++)
+            cards[i] = this.cards.get(i);
     }
+
 }

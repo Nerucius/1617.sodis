@@ -11,7 +11,7 @@ public class GameState {
     public State state = State.INIT;
     private boolean fold = false;
     private boolean secondRound = false;
-    private boolean serverTurn;
+    private boolean serverTurn; // to control the dealer round
     private boolean showTime = false;
 
     public boolean isFold() {
@@ -48,7 +48,7 @@ public class GameState {
 
     @Override
     public String toString() {
-        return "GameState{" + "state=" + state + '}';
+        return "GameState{" + "state=" + state + ", secondRound=" + secondRound + '}';
     }
     
     // Define all the game actions
@@ -109,10 +109,10 @@ public class GameState {
         // If the action is noop, do nothing
         if (action == Action.NOOP)
             return;
-
+        
         // If the action is terminate, finish the game
         if (action == Action.TERMINATE) {
-            System.err.println("Game: Terminating Game now due to Error");
+            System.err.println("TERMINATE You exit the game. Thanks for playing!");
             state = State.QUIT;
             return;
         }
@@ -129,12 +129,14 @@ public class GameState {
             if ((state == State.BETTING_DEALER && action == Action.PASS) ||
                 (state == State.COUNTER && action == Action.CALL)) 
             {
-                if (!secondRound)
+                if (!secondRound) // Case: next to DRAW               
+                {
                     secondRound = true;
-                else 
+                } else // Case: next to SHOWDOWN
                 {
                     // Apply the action show after finishing the 2nd round
                     showTime = true;
+                    //state = State.SHOWDOWN;
                     this.apply(Action.SHOW);
                     return;
                 }
