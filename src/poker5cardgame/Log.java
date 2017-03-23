@@ -6,20 +6,20 @@ package poker5cardgame;
 public class Log {
 
     public static /* final */ boolean NET_ERROR = true;
-    public static /* final */ boolean NET_DEBUG = true;
+    public static /* final */ boolean NET_DEBUG = false;
     public static /* final */ boolean NET_TRACE = false;
 
     public static /* final */ boolean GAME_ERROR = true;
-    public static /* final */ boolean GAME_DEBUG = true;
+    public static /* final */ boolean GAME_DEBUG = false;
     public static /* final */ boolean GAME_TRACE = false;
 
     public static /* final */ boolean IO_ERROR = true;
-    public static /* final */ boolean IO_DEBUG = false;
+    public static /* final */ boolean IO_DEBUG = true;
     public static /* final */ boolean IO_TRACE = false;
 
     public static /* final */ boolean AI_ERROR = true;
-    public static /* final */ boolean AI_DEBUG = true;
-    public static /* final */ boolean AI_TRACE = true;
+    public static /* final */ boolean AI_DEBUG = false;
+    public static /* final */ boolean AI_TRACE = false;
 
     public static void NET_ERROR(String msg) {
         if (NET_ERROR)

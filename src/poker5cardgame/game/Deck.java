@@ -38,16 +38,10 @@ public final class Deck {
     /**
      * Draw a card from the deck.
      * @return Card
-     * @throws poker5cardgame.game.Deck.EmptyDeckException
      */
     // TODO test it
-    public Card draw() /*throws EmptyDeckException*/ {
-        // TODO @sonia disabled exception (really necesary?) -> will never empty a deck inside a single game
-        //if (deck.size() > 0) {
-            return this.deck.remove(deck.size() - 1);
-        //}
-        //System.err.println("Deck is empty.");
-        //throw new EmptyDeckException("Deck is empty.");
+    public Card draw(){
+        return this.deck.remove(deck.size() - 1);
     }
 
     /**

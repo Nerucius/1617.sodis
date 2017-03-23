@@ -22,6 +22,10 @@ public class NetworkSource implements Source {
     public NetworkSource(Socket socket) {
         try {
             comUtils = new ComUtils(socket);
+            
+            // TODO @alex disable timeout
+            comUtils.setTimeout(0);
+            
         } catch (Exception ex) {
             System.err.println("NETWORK SORUCE: Could not Open Socket");
             ex.printStackTrace();

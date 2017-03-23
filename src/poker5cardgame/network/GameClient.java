@@ -4,6 +4,7 @@ import java.lang.IllegalStateException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import static poker5cardgame.Log.GAME_DEBUG;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentClientAI;
 import poker5cardgame.ai.RandomClientAI;
@@ -57,6 +58,7 @@ public class GameClient {
         // This local player might be the Keyboard or the AI
         // in the case of the AI, it will save the Game State
         Move reply = IOSource.getNextMove();
+        GAME_DEBUG("GC: Received Move: " + reply);
         playerSource.sendMove(reply);
         
     }

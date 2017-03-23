@@ -19,7 +19,7 @@ public class RandomClientAI extends ArtificialIntelligence {
         super(gameData, gameState);
     }
 
-    @Override
+    @Override   
     public Move getNextMove() {
         Move move = new Move();
         move.action = randomAction();

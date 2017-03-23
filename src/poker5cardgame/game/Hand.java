@@ -29,8 +29,7 @@ public class Hand implements Comparable<Hand> {
 
     public Hand(Card[] cards) {
         this.cards = new ArrayList<>();
-        for (Card c : cards)
-            this.cards.add(c);
+        putCards(cards);
     }
 
     public List<Card> getCards() {
@@ -72,12 +71,12 @@ public class Hand implements Comparable<Hand> {
     /**
      * Put one or more cards into the hand. Does bound checks.
      *
-     * @param card Card to add to the hand
+     * @param newCards Cards to add to the hand
      */
-    public void putCards(Card... card) {
-        for (Card c : cards) {
-            if (cards.size() < SIZE) {
-                cards.add(c);
+    public void putCards(Card... newCards) {
+        for (Card c : newCards) {
+            if (this.cards.size() < SIZE) {
+                this.cards.add(c);
             } else
                 GAME_ERROR("Hand: Too many cards added to the hand. Ignored card");
         }
@@ -445,6 +444,11 @@ public class Hand implements Comparable<Hand> {
     // TODO temp for AI
     public Card getHigh(List<Card> cards) {
         return Collections.max(cards);
+    }
+
+    void dumpArray(Card[] cards) {
+        for(int i = 0; i < 5; i++)
+            cards[i] = this.cards.get(i);
     }
 
 }

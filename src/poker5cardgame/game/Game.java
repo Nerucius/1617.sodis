@@ -32,8 +32,8 @@ public class Game {
      */
     public Game(Source IOSource, ArtificialIntelligence.Type aiType) {
         this.IOSource = IOSource;
-        
-        this.gameData = new GameData();        
+
+        this.gameData = new GameData();
         this.gameState = new GameState();
 
         switch (aiType) {
@@ -85,6 +85,8 @@ public class Game {
         GAME_DEBUG("Game: Updating with state" + gameState);
 
         Move move = new Move();
+        move.action = Action.NOOP;
+
         try {
 
             switch (getState()) {
@@ -140,9 +142,13 @@ public class Game {
                     move = this.updateServer();
                     break;
             }
+            
             gameState.apply(move.action);
+            GAME_DEBUG("Game: Processed move " + move);
 
         } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
             this.sendErrorMsg(e.getMessage());
             if (getState().equals(GameState.State.QUIT)) {
                 gameState.apply(Action.TERMINATE);
@@ -154,6 +160,7 @@ public class Game {
     }
 
     private Move updateClient() throws Exception {
+        GAME_DEBUG("Game: Updating Client");
 
         // Get next valid move from the other player
         Move cMove = getValidMove(IOSource);
@@ -193,12 +200,16 @@ public class Game {
 
         }
 
-        if (gameData.cInteractive != GameData.MODE_MANUAL)
-            IOSource.sendMove(cMove);
+        // TODO @sonia Que retrons es aixo? porto dos hores mirant perque collons
+        // el servido rebotaba tots els paquets
+        //if (gameData.cInteractive != GameData.MODE_MANUAL)
+        //    IOSource.sendMove(cMove);
+        GAME_DEBUG("Game: Client Move: " + cMove);
         return cMove;
     }
 
     private Move updateServer() throws Exception {
+        GAME_DEBUG("Game: Updating Server");
 
         Move sMove = new Move();
 
@@ -210,7 +221,8 @@ public class Game {
                 sMove.sStakes = gameData.sChips;
                 break;
 
-            case PLAY: // default behaviour independent of the AI
+            case PLAY:
+                // default behaviour independent of the AI
                 // the game is accepted, so set the minimum bet as the bet of each player
                 this.setMinBetServer();
                 this.setMinBetClient();
@@ -226,7 +238,7 @@ public class Game {
                 gameData.sHand.draw5FromDeck(gameData.deck);
 
                 sMove.cards = new Card[Hand.SIZE];
-                gameData.cHand.getCards().toArray(sMove.cards);
+                gameData.cHand.dumpArray(sMove.cards);
 
                 break;
 
@@ -302,6 +314,8 @@ public class Game {
 
                 break;
         }
+
+        GAME_DEBUG("Game: Server Move: " + sMove);
         IOSource.sendMove(sMove);
         return sMove;
 
