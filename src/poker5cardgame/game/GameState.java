@@ -1,7 +1,10 @@
 package poker5cardgame.game;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import static poker5cardgame.Log.GAME_DEBUG;
 
 /**
  * Finite State Machine for the Game State
@@ -48,7 +51,7 @@ public class GameState {
 
     @Override
     public String toString() {
-        return "GameState{" + "state=" + state + ", secondRound=" + secondRound + '}';
+        return "GameState{" + "state=" + state + ", serverTurn=" + serverTurn + '}';
     }
     
     // Define all the game actions
@@ -119,7 +122,6 @@ public class GameState {
 
         // If the action we want to apply to the actual state is valid, set the next state as actual
         if (state.transitions.containsKey(action)) {
-
             if (action == Action.STAKES)
                 secondRound = false; // set again to false after the second round 
             
@@ -148,6 +150,13 @@ public class GameState {
         } 
     }
 
+    public List<Action> getValidActions() {
+        List<Action> validActions = new ArrayList();
+        validActions.addAll(state.transitions.keySet());
+        validActions.remove(Action.SHOW);
+        return validActions;
+    }
+    
     // Fill the transitions map
     static {
         for (State state : State.values())

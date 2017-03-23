@@ -11,6 +11,7 @@ public class GameData {
     // Server data
     public Deck deck;
     public Hand sHand;
+    public int dealer;
     public int sChips = 10000;
     public int minBet = 100;
     public int sBet = 0;
@@ -57,6 +58,7 @@ public class GameData {
 
             case DEALER_HAND:
                 this.cHand = new Hand(move.cards);
+                this.dealer = move.dealer;
                 break;
 
             case BET:
@@ -70,6 +72,7 @@ public class GameData {
             case DRAW:
                 this.cHand.discard(move.cards);
                 break;
+                
             case DRAW_SERVER:
                 if (move.cards != null && move.cards.length > 0)
                     this.cHand.putCards(move.cards);

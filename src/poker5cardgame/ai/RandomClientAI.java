@@ -74,7 +74,7 @@ public class RandomClientAI extends ArtificialIntelligence {
     @Override
     public boolean sendMove(Move move) {
         AI_DEBUG("CAI: Saved: " + move);
-        gameState.apply(move.action);
+        //gameState.apply(move.action);
         gameData.save(move);
         return true;
     }

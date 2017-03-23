@@ -54,8 +54,7 @@ public class KeyboardSource implements Source {
                     move.cards = new Card[numCards];
                     for (int i = 0; i < numCards; i++)
                         move.cards[i] = Card.fromCode(args[2 + i]);
-                    break;
-                                      
+                    break;                                      
             }
         } catch (Exception e) {
             System.err.println("SYNTAX ERROR");
@@ -86,7 +85,7 @@ public class KeyboardSource implements Source {
                 System.out.println("" + move.chips);
                 break;
             case DRAW_SERVER:
-                System.out.println("DRAWN" + Arrays.toString(move.cards));
+                System.out.println("DRAWN " + Arrays.toString(move.cards));
                 break;
             case SHOW:
                 System.out.println("SHOW" + Arrays.toString(move.cards));
