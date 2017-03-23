@@ -298,8 +298,8 @@ public class NetworkSource implements Source {
      * Convert an array of cards to a String of card codes separated by " "
      */
     public static String cardsToCodeString(Card[] cards) { 
-        if(cards.length == 0)
-            return null;
+        if(cards == null || cards.length == 0)
+            throw new IllegalArgumentException("Can't stringify empty or null array");
         
         String[] codes = new String[cards.length];
 

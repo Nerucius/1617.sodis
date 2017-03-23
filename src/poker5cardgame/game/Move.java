@@ -38,15 +38,15 @@ public class Move {
     @Override
     public String toString() {
         String str = action.toString()
-                + (id == -1 ? "" : " " + id)
-                + (chips == -1 ? "" : " " + chips)
-                + (cStakes == -1 ? "" : " " + cStakes)
-                + (sStakes == -1 ? "" : " " + sStakes)                
-                + (cDrawn == -1 ? "" : " " + cDrawn)
-                + (sDrawn == -1 ? "" : " " + sDrawn)
-                + (dealer == -1 ? "" : " " + dealer)
-                + (cards == null ? "" : " " + Arrays.toString(cards))
-                + (error == null ? "" : " " + error);
+                + (id == -1 ? "" : " id:" + id)
+                + (chips == -1 ? "" : " chips:" + chips)
+                + (cStakes == -1 ? "" : " cStakes:" + cStakes)
+                + (sStakes == -1 ? "" : " sStakes:" + sStakes)                
+                + (cDrawn == -1 ? "" : " cDrawn:" + cDrawn)
+                + (sDrawn == -1 ? "" : " sDrawn:" + sDrawn)
+                + (dealer == -1 ? "" : " dealer:" + dealer)
+                + (cards == null ? "" : " cards:" + Arrays.toString(cards))
+                + (error == null ? "" : " err:" + error);
         return str;
     }
 }

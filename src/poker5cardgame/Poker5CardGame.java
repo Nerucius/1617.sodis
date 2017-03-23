@@ -5,7 +5,9 @@ import poker5cardgame.game.Card;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
+import poker5cardgame.io.KeyboardSource;
 import poker5cardgame.io.NetworkSource;
+import poker5cardgame.io.Source;
 import poker5cardgame.network.GameClient;
 import poker5cardgame.network.MTGameServer;
 import poker5cardgame.network.Server;
@@ -16,6 +18,17 @@ public class Poker5CardGame {
      * @param args the command line arguments
      */
     public static void main(String... args) {
+        
+        Source src = new KeyboardSource();
+        Move move;
+        
+        while((move = src.getNextMove()) != null){
+            System.out.println(move);
+        }
+        
+        if (true)
+            return;
+        
         // Read console input
         Scanner sc = new Scanner(System.in);
         String line;
@@ -109,9 +122,8 @@ public class Poker5CardGame {
                 client.getSource().sendMove(m);
             }
         }
+        
+        
     }
 
-    private static void GAME_DEBUG() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

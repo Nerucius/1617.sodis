@@ -1,5 +1,8 @@
 package poker5cardgame.game;
 
+
+// TODO @sonia: Maybe this class should've been for a single player, instead of
+// for both client and server.
 public class GameData {
     
     public static final int MODE_MANUAL = 0;
@@ -34,6 +37,48 @@ public class GameData {
     @Override
     public String toString() {
         return "GameData{" + "sHand=" + sHand + ", cHand=" + cHand + ", sChips=" + sChips + ", cChips=" + cChips + ", minBet=" + minBet + ", sBet=" + sBet + ", cBet=" + cBet + ", sDrawn=" + sDrawn + ", cDrawn=" + cDrawn + '}';
+    }
+
+    public void save(Move move) {
+        // TODO refine this method, will be used by AI        
+        
+        switch(move.action){
+            case START:
+                break;
+                
+            case ANTE_STAKES:
+                this.minBet = move.chips;
+                this.cChips = move.cStakes;
+                this.sChips = move.sStakes;                
+                break;
+                
+            case STAKES:
+                this.cChips = move.cStakes;
+                this.sChips = move.sStakes;    
+                break;
+                
+            case DEALER_HAND:
+                this.cHand = new Hand(move.cards);
+                break;
+
+            case BET:
+                this.cBet = move.chips;
+                break;
+                
+            case RAISE:
+                this.cBet = move.chips;
+                break;
+                
+            case DRAW:
+                this.cHand.discard(move.cards);
+                break;
+            case DRAW_SERVER:
+                this.cHand.putCards(move.cards);
+                break;
+            case SHOW:
+                break;
+            
+        }
     }
    
 }

@@ -1,6 +1,8 @@
 package poker5cardgame;
 
-import poker5cardgame.network.*;
+import static poker5cardgame.Client.mode;
+import poker5cardgame.network.MTGameServer;
+import poker5cardgame.ai.ArtificialIntelligence;
 
 /**
  * Server launcher class
@@ -53,8 +55,13 @@ public class Server {
         System.out.println("Interactive: " + mode);
 
         // Switch the Type of server here
-        //server = new MTGameServer();
-        server = new SEchoServer();
+        server = new MTGameServer();
+        
+        // Set AI Type from parameter
+        ArtificialIntelligence.Type type = ArtificialIntelligence.Type.fromCode(mode);
+        ((MTGameServer) server).setAIType(type);
+
+        //server = new SEchoServer();
         server.bind(bindPort);
         server.start();
 

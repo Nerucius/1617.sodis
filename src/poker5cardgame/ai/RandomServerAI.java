@@ -8,6 +8,8 @@ import poker5cardgame.game.GameState;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 
+import static poker5cardgame.Log.*;
+
 public class RandomServerAI extends ArtificialIntelligence {
 
     // Fix the max bet to 500 to be realistic
@@ -29,14 +31,56 @@ public class RandomServerAI extends ArtificialIntelligence {
         return (int) (Math.random() * range) + min;
     }
 
-    /**
-     * Get a random action for the server.
-     *
-     * @param gameData
-     * @param gameState
-     * @return GameState.Action
-     */
-    public GameState.Action randomAction(GameData gameData, GameState gameState) {
+    @Override
+    public Move getNextMove() {
+
+        Move move = new Move();
+        move.action = randomAction();
+
+        // set the required move parameters
+        switch (move.action) {
+            case BET:
+                // Set a random bet if it is possible, if not bet the minimum bet
+                int bet = random(gameData.minBet, MAX_BET);
+                if (gameData.sChips >= bet) {
+                    move.chips = bet;
+                } else {
+                    move.chips = random(gameData.minBet, gameData.sChips);
+                }
+                break;
+
+            case RAISE:
+                // Set a random raise if it is possible, if not raise the minimum bet
+                int raise = random(1, MAX_BET);
+                if (gameData.sChips >= raise) {
+                    move.chips = raise;
+                } else {
+                    move.chips = random(1, gameData.sChips);
+                }
+                break;
+
+            case DRAW_SERVER:
+                // Discard the first x random cards
+                move.sDrawn = random(0, 5);
+                Card[] cardsToDiscard = new Card[move.sDrawn];
+                for (int i = 0; i < move.sDrawn; i++) {
+                    cardsToDiscard[i] = gameData.sHand.getCards().get(i);
+                }
+                gameData.sHand.discard(cardsToDiscard);
+                break;
+        }
+
+        AI_DEBUG("SAI: Sent move " + move);
+        return move;
+    }
+
+    @Override
+    public boolean sendMove(Move move) {
+        AI_DEBUG("SAI: Recorded move " + move);
+        return true;
+    }
+
+    private GameState.Action randomAction() {
         List<Action> validActions = new ArrayList();
         validActions.addAll(gameState.state.transitions.keySet());
 
@@ -46,52 +90,5 @@ public class RandomServerAI extends ArtificialIntelligence {
         }
 
         return validActions.get(random(0, validActions.size() - 1));
-    }
-
-    @Override
-    public Move getNextMove() {
-
-        Move sMove = new Move();
-        sMove.action = randomAction(gameData, gameState);
-
-        // set the required move parameters
-        switch (sMove.action) {
-            case BET:
-                // Set a random bet if it is possible, if not bet the minimum bet
-                int bet = random(gameData.minBet, MAX_BET);
-                if (gameData.sChips >= bet) {
-                    sMove.chips = bet;
-                } else {
-                    sMove.chips = random(gameData.minBet, gameData.sChips);
-                }
-                break;
-
-            case RAISE:
-                // Set a random raise if it is possible, if not raise the minimum bet
-                int raise = random(1, MAX_BET);
-                if (gameData.sChips >= raise) {
-                    sMove.chips = raise;
-                } else {
-                    sMove.chips = random(1, gameData.sChips);
-                }
-                break;
-
-            case DRAW_SERVER:
-                // Discard the first x random cards
-                sMove.sDrawn = random(0, 5);
-                Card[] cardsToDiscard = new Card[sMove.sDrawn];
-                for (int i = 0; i < sMove.sDrawn; i++) {
-                    cardsToDiscard[i] = gameData.sHand.getCards().get(i);
-                }
-                gameData.sHand.discard(cardsToDiscard);
-                break;
-        }
-        return sMove;
-    }
-    
-    @Deprecated
-    @Override
-    public boolean sendMove(Move move) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -5,13 +5,10 @@
  */
 package poker5cardgame.io;
 
-import poker5cardgame.io.Source;
 import java.util.Arrays;
 import java.util.Scanner;
 import poker5cardgame.game.Card;
-import poker5cardgame.game.Game;
 import poker5cardgame.game.GameState.Action;
-import poker5cardgame.game.GameState.State;
 import poker5cardgame.game.Move;
 
 /**
@@ -37,26 +34,30 @@ public class KeyboardSource implements Source {
             move.action = Action.NOOP;
         }
 
-        try{
-        switch (move.action) {
-            case BET:
-                move.chips = Integer.valueOf(args[1]);
-                break;
+        try {
+            switch (move.action) {
+                case START:
+                    move.id = Integer.valueOf(args[1]);
+                    break;
+                    
+                case BET:
+                    move.chips = Integer.valueOf(args[1]);
+                    break;
 
-            case RAISE:
-                move.chips = Integer.valueOf(args[1]);
-                break;
+                case RAISE:
+                    move.chips = Integer.valueOf(args[1]);
+                    break;
 
-            case DRAW:
-                // Read a list of cards from console
-                int numCards = Integer.valueOf(args[1]);
-                move.cards = new Card[numCards];
-                for (int i = 0; i < numCards; i++)
-                    move.cards[i] = Card.fromCode(args[2 + i]);
-                break;
-
-        }
-        }catch(Exception e){
+                case DRAW:
+                    // Read a list of cards from console
+                    int numCards = Integer.valueOf(args[1]);
+                    move.cards = new Card[numCards];
+                    for (int i = 0; i < numCards; i++)
+                        move.cards[i] = Card.fromCode(args[2 + i]);
+                    break;
+                                      
+            }
+        } catch (Exception e) {
             System.err.println("SYNTAX ERROR");
             move.action = Action.NOOP;
         }
@@ -93,7 +94,7 @@ public class KeyboardSource implements Source {
             case NOOP:
                 break;
         }
-        
+
         return true;
     }
 

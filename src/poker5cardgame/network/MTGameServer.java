@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.network;
 
 import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.game.Game;
 import poker5cardgame.game.GameState;
 import poker5cardgame.io.NetworkSource;
@@ -18,6 +14,8 @@ import poker5cardgame.io.NetworkSource;
 public class MTGameServer extends MultithreadServer{
     
     Map<Integer, Game> savedGames = new ConcurrentHashMap<>();
+    
+    ArtificialIntelligence.Type AIType = ArtificialIntelligence.Type.AI_RANDOM;
 
     @Override
     public void handleConnection(Socket sock) {
@@ -25,7 +23,7 @@ public class MTGameServer extends MultithreadServer{
         // TODO @alex 
         source.getCom().setTimeout(0); 
         
-        Game game = new Game(source);
+        Game game = new Game(source, AIType);
         int id = 0;
         // TODO @alex Add persistence
         /*int id = game.getPlayerID();
@@ -39,6 +37,10 @@ public class MTGameServer extends MultithreadServer{
         }
         
         savedGames.put(id, game);
+    }
+    
+    public void setAIType(ArtificialIntelligence.Type type){
+        this.AIType = type;
     }
     
 }

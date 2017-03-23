@@ -121,7 +121,7 @@ public class ComUtils {
             if (Packet.hasArgs(packet))
                 read_PacketArgs(packet);
 
-            IO_TRACE("CU: Received: " + packet);
+            IO_DEBUG("CU: Received: " + packet);
 
         } catch (SocketTimeoutException e) {
             // TODO do something with exception ? see current read bytes
@@ -145,7 +145,7 @@ public class ComUtils {
             // Packet knows how to write itself. yay
             packet.write(this);
             bos.flush();
-            IO_TRACE("CU: Sent: " + packet);
+            IO_DEBUG("CU: Sent: " + packet);
 
             // Intercept DRAW message to get expected Cards
             if (packet.command == Command.DRAW) {
