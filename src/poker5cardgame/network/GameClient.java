@@ -3,8 +3,10 @@ package poker5cardgame.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import poker5cardgame.Log;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentClientAI;
 import poker5cardgame.ai.RandomClientAI;
@@ -15,10 +17,13 @@ import poker5cardgame.game.Move;
 import poker5cardgame.io.KeyboardSource;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
-import static poker5cardgame.Log.GAME_DEBUG;
+import static poker5cardgame.Log.*;
 
 public class GameClient {
 
+    
+     
+    
     /**
      * The client's source of moves to send.
      */
@@ -78,10 +83,13 @@ public class GameClient {
 
         Move move = new Move();
         move.action = Action.NOOP;
-
+        
         try {
-            switch (clientGameState.state) {
+            switch (getState()) {
                 case INIT:
+                    FANCY_CLIENT_RAINBOW(Log.SKULL);
+
+
                     move = this.updateSend();
                     break;
 
@@ -150,7 +158,7 @@ public class GameClient {
         } catch (Exception e) {
             GAME_DEBUG("GameClient: Exception");            
         }
-        GAME_DEBUG("GameClient: Updated State: " + clientGameState.state);
+        GAME_DEBUG("GameClient: Updated State: " + getState());
     }
 
     public Move updateSend() {        
@@ -214,4 +222,21 @@ public class GameClient {
         return IOSource;
     }
 
+    public GameState.State getState()
+    {
+        return clientGameState.state;
+    }
+    
+    private String getFancyMoves()
+    {
+        String fancyStr = "";
+        List<Action> validActions = clientGameState.getValidActions();
+        String[] array = new String[validActions.size()];
+        for(int i=0; i < validActions.size(); i++)
+        {
+            array[i] = validActions.get(i).name();
+        }
+        
+        return String.join(", ", array);
+    }
 }

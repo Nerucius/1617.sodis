@@ -1,7 +1,5 @@
 package poker5cardgame.game;
 
-import java.util.ArrayList;
-import java.util.List;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentServerAI;
 import poker5cardgame.ai.RandomServerAI;
@@ -12,7 +10,9 @@ import static poker5cardgame.Log.*;
 public class Game {
 
     // TODO manage cartes dolentes
-    // TODO manage all in
+    // TODO manage all in en general
+    // TODO maxbet i minbet per ia i que sempre jugui sense enviar errors
+    // TODO es pot fer BET 5 !!!
     
     /**
      * Source to be used for receiving and sending data to another player.
