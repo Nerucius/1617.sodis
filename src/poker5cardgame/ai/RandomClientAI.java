@@ -62,6 +62,7 @@ public class RandomClientAI extends ArtificialIntelligence {
                 }
                 break;
         }
+        System.out.println("GAMEDATA IA : " + gameData);
 
         AI_DEBUG("CAI: Sent: " + move);
         

@@ -86,7 +86,7 @@ public class Poker5CardGame {
 
             } 
             // For manual mode, read the input
-            else if (client.isConnected() && mode == GameData.MODE_MANUAL) {
+            else if (client.isConnected() && mode == 0) {
 
                 Card[] cardsEmpty = {};
                 Move m = new Move();

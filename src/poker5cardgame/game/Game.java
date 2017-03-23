@@ -107,26 +107,29 @@ public class Game {
                     break;
 
                 case BETTING:
-                    if (gameState.isServerTurn())
+                    if (gameState.isServerTurn()) {
                         move = this.updateServer();
-                    else
+                    } else {
                         move = this.updateClient();
+                    }
                     gameState.setServerTurn(!gameState.isServerTurn());
                     break;
 
                 case BETTING_DEALER:
-                    if (gameState.isServerTurn())
+                    if (gameState.isServerTurn()) {
                         move = this.updateServer();
-                    else
+                    } else {
                         move = this.updateClient();
+                    }
                     gameState.setServerTurn(!gameState.isServerTurn());
                     break;
 
                 case COUNTER:
-                    if (gameState.isServerTurn())
+                    if (gameState.isServerTurn()) {
                         move = this.updateServer();
-                    else
+                    } else {
                         move = this.updateClient();
+                    }
                     gameState.setServerTurn(!gameState.isServerTurn());
                     break;
 
@@ -142,13 +145,11 @@ public class Game {
                     move = this.updateServer();
                     break;
             }
-            
+
             gameState.apply(move.action);
             GAME_DEBUG("Game: Processed move " + move);
 
-        } catch (Exception e) {            
-            //e.printStackTrace();
-            //System.exit(1);
+        } catch (Exception e) {
             this.sendErrorMsg(e.getMessage());
             if (getState().equals(GameState.State.QUIT)) {
                 gameState.apply(Action.TERMINATE);
@@ -201,10 +202,6 @@ public class Game {
 
         }
 
-        // TODO @sonia Que retrons es aixo? porto dos hores mirant perque collons
-        // el servido rebotaba tots els paquets
-        //if (gameData.cInteractive != GameData.MODE_MANUAL)
-        //    IOSource.sendMove(cMove);
         GAME_DEBUG("Game: Client Move: " + cMove);
         return cMove;
     }
@@ -215,10 +212,10 @@ public class Game {
         Move sMove = new Move();
 
         switch (getState()) {
-            case START: 
+            case START:
                 // default behaviour independent of the AI
                 sMove.action = Action.ANTE_STAKES;
-                
+
                 // send the game conditions
                 sMove.chips = gameData.minBet;
                 sMove.cStakes = gameData.cChips;
@@ -290,11 +287,12 @@ public class Game {
 
                 break;
 
-            case SHOWDOWN: 
+            case SHOWDOWN:
                 // Default behaviour independent of the AI
                 if (!gameState.isFold()) {
-                    if (!gameState.isShowTime())
+                    if (!gameState.isShowTime()) {
                         throw new Exception("Server can not show the cards now.");
+                    }
                     sMove.action = Action.SHOW;
                     sMove.cards = new Card[Hand.SIZE];
                     //gameData.sHand.getCards().toArray(sMove.cards);
@@ -311,10 +309,11 @@ public class Game {
                 // manage Winner with handranker
                 gameData.sHand.generateRankerInformation();
                 gameData.cHand.generateRankerInformation();
-                if (gameData.sHand.wins(gameData.cHand))
+                if (gameData.sHand.wins(gameData.cHand)) {
                     this.allChipsToServer();
-                else
+                } else {
                     this.allChipsToClient();
+                }
 
                 sMove = new Move();
                 sMove.action = Action.STAKES;
@@ -356,16 +355,6 @@ public class Game {
             gameData.sBet += move.chips;
         } else {
             throw new Exception("Logic Error. Not valid chips value.");
-           /* if(move.chips < gameData.minBet)
-            {
-                //this.sendErrorMsg("Logic Error. To less chips for bet.");
-            }
-            else
-            {
-                //this.sendErrorMsg("Logic Error. Not enought chips to bet. I force you atomatically to PASS.");
-                move = new Move();
-                move.action = Action.PASS;
-            }*/
         }
     }
 
@@ -375,48 +364,19 @@ public class Game {
             gameData.cBet += move.chips;
         } else {
             throw new Exception("Logic Error. Not valid chips value.");
-            //this.sendErrorMsg("Logic Error. Not valid chips value.");
-            /*if(move.chips < gameData.minBet)
-            {
-                this.sendErrorMsg("Logic Error. To less chips for bet.");
-            }
-            else
-            {
-                this.sendErrorMsg("Logic Error. Not enought chips to bet. I force you atomatically to PASS.");
-                move = new Move();
-                move.action = Action.PASS;
-            }*/
         }
     }
 
-    private void manageRaiseServer(Move move) throws Exception{
-        //try{
+    private void manageRaiseServer(Move move) throws Exception {
         this._manageCallServer(move.chips);
-        /*} catch(Exception e){
-            //this.sendErrorMsg("Logic Error. Not enought chips to bet. I force you atomatically to FOLD.");
-            move = new Move();
-            move.action = Action.FOLD;
-        }*/
     }
 
     private void manageRaiseClient(Move move) throws Exception {
-        //try{
         this._manageCallClient(move.chips);
-        /*} catch(Exception e){
-            this.sendErrorMsg("Logic Error. Not enought chips to bet. I force you atomatically to FOLD.");
-            move = new Move();
-            move.action = Action.FOLD;
-        }*/
     }
 
     private void manageCallServer() throws Exception {
-        //try{
-            this._manageCallServer(0);
-        /*} catch(Exception e){
-            //this.sendErrorMsg("Logic Error. Not enought chips to bet. I force you atomatically to FOLD.");
-            move = new Move();
-            move.action = Action.FOLD;
-        }*/
+        this._manageCallServer(0);
     }
 
     private void _manageCallServer(int raise) throws Exception {
@@ -430,14 +390,7 @@ public class Game {
     }
 
     private void manageCallClient() throws Exception {
-        //try{
-            this._manageCallClient(0);
-        /*} catch(Exception e){
-            this.sendErrorMsg("Logic Error. Not enought chips to bet. I force you atomatically to FOLD.");
-            move = new Move();
-            move.action = Action.FOLD;
-        
-        }*/
+        this._manageCallClient(0);
     }
 
     private void _manageCallClient(int raise) throws Exception {
@@ -476,25 +429,22 @@ public class Game {
     }
 
     private void sendErrorMsg(String msg) {
-        
-        // TODO temp: prints
-       // System.out.println(msg);
-        
         try {
             Move errMove = new Move();
             errMove.action = Action.ERROR;
             errMove.error = msg;
             IOSource.sendMove(errMove);
-        } catch (Exception e) { /* Ignored */}
+        } catch (Exception e) {
+            /* Ignored */
+        }
     }
 
     private Move getValidMove(Source src) {
         // get the next  move
         Move move = src.getNextMove();
 
-        while(!gameState.getValidActions().contains(move.action))
-        {
-            this.sendErrorMsg("Protocol Error. Received move: " + move.action 
+        while (!gameState.getValidActions().contains(move.action)) {
+            this.sendErrorMsg("Protocol Error. Received move: " + move.action
                     + ". Expecting moves: " + gameState.getValidActions());
             move = src.getNextMove();
         }

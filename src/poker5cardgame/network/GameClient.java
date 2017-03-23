@@ -1,12 +1,10 @@
 package poker5cardgame.network;
 
-import java.lang.IllegalStateException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static poker5cardgame.Log.GAME_DEBUG;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentClientAI;
 import poker5cardgame.ai.RandomClientAI;
@@ -33,15 +31,15 @@ public class GameClient {
      * Create a client With the given AI type
      */
     public GameClient(ArtificialIntelligence.Type aiType) {
-        GameData gameData = new GameData();
+        GameData clientGameData = new GameData();
         clientGameState = new GameState();
 
         switch (aiType) {
             case AI_RANDOM:
-                playerSource = new RandomClientAI(gameData, clientGameState);
+                playerSource = new RandomClientAI(clientGameData, clientGameState);
                 break;
             case AI_INTELLIGENT:
-                playerSource = new IntelligentClientAI(gameData, clientGameState);
+                playerSource = new IntelligentClientAI(clientGameData, clientGameState);
                 break;
         }
     }
@@ -136,7 +134,7 @@ public class GameClient {
                     break;     
                     
                 case QUIT:
-                    close(); // TODO com tanco la connexio?
+                    close();
                     break;
             }
             
@@ -144,65 +142,25 @@ public class GameClient {
             GAME_DEBUG("GameClient: Processed move " + move);
             
         } catch (Exception e) {
-            GAME_DEBUG("GameClient: Exception");
-            
-            //this.sendErrorMsg(e.getMessage());
+            GAME_DEBUG("GameClient: Exception");            
         }
         GAME_DEBUG("GameClient: Updated State: " + clientGameState.state);
     }
 
-    public Move updateSend() {
-        
+    public Move updateSend() {        
         GAME_DEBUG("GameClient: Waiting for next client move...");
-        //Move next = this.getValidClientMove(playerSource);
         Move next = playerSource.getNextMove();
         IOSource.sendMove(next);
         return next;
     }
 
     public Move updateReceive() {
-      
-        //Move reply = this.getValidServerMove(IOSource);
         Move reply = IOSource.getNextMove();
         GAME_DEBUG("GameClient: Received Move: " + reply);
         playerSource.sendMove(reply);
         return reply;
     }
-
-    private void sendErrorMsg(String msg) {
-        try {
-            Move errMove = new Move();
-            errMove.action = Action.ERROR;
-            errMove.error = msg;
-            IOSource.sendMove(errMove);
-        } catch (Exception e) {
-            /* Ignored */ }
-    }
-
-    private Move getValidClientMove(Source src) {
-
-        Move move = src.getNextMove();
-        while (!clientGameState.getValidActions().contains(move.action)) {
-            // send client error message
-            this.sendErrorMsg("Protocol Error. Received move: " + move.action 
-                    + ". Expecting moves: " + clientGameState.getValidActions());
-            
-            // get the error response of the server
-            //this.updateReceive();
-            
-            GAME_DEBUG("GameClient: Waiting for next client move...");
-            move = src.getNextMove();
-        }
-        return move;
-    }
     
-    private Move getValidServerMove(Source src) throws Exception {
-        Move move = src.getNextMove();
-        if(move.action.equals(Action.ERROR))
-            throw new Exception();
-        return move;
-    }
-
     public void connect(String IP, int port) {
         try {
             InetAddress address = InetAddress.getByName(IP);

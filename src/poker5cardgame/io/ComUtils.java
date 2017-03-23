@@ -66,14 +66,7 @@ public class ComUtils {
 
             try {
                 // Try to read next packet
-                packet = _read_NetworkPacket();
-                
-                // Intercept and print Errors
-                if(packet.command == Command.ERROR){
-                    NET_ERROR(packet.getField("error", String.class));
-                    continue;
-                }
-                
+                packet = _read_NetworkPacket();                
                 return packet;
 
             } catch (SocketTimeoutException e) {
