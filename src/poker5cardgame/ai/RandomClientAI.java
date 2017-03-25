@@ -35,11 +35,11 @@ public class RandomClientAI extends ArtificialIntelligence {
 
             case BET:
                 // Set a random bet if it is possible, if not bet the minimum bet
-                int bet = random(gameData.minBet, MAX_BET);
+                int bet = random(gameData.initialBet, MAX_BET);
                 if (gameData.cChips >= bet) {
                     move.chips = bet;
                 } else {
-                    move.chips = random(gameData.minBet, gameData.cChips);
+                    move.chips = random(gameData.initialBet, gameData.cChips);
                 }
                 break;
 
@@ -62,8 +62,6 @@ public class RandomClientAI extends ArtificialIntelligence {
                 }
                 break;
         }
-        System.out.println("GAMEDATA IA : " + gameData);
-
         AI_DEBUG("CAI: Sent: " + move);
         
         // Save move to our own recording of the Game
@@ -76,7 +74,7 @@ public class RandomClientAI extends ArtificialIntelligence {
     public boolean sendMove(Move move) {
         AI_DEBUG("CAI: Saved: " + move);
         //gameState.apply(move.action);
-        gameData.save(move);
+        gameData.save(move, gameState.isServerTurn());
         return true;
     }
 

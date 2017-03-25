@@ -69,11 +69,11 @@ public class IntelligentClientAI extends ArtificialIntelligence {
 
             case BET:
                 // Set a random bet if it is possible, if not bet the minimum bet
-                int bet = random(gameData.minBet, MAX_BET);
+                int bet = random(gameData.initialBet, MAX_BET);
                 if (gameData.cChips >= bet) {
                     cMove.chips = bet;
                 } else {
-                    cMove.chips = random(gameData.minBet, gameData.cChips);
+                    cMove.chips = random(gameData.initialBet, gameData.cChips);
                 }
                 break;
 

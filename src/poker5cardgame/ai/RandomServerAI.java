@@ -2,6 +2,8 @@ package poker5cardgame.ai;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState;
@@ -41,11 +43,11 @@ public class RandomServerAI extends ArtificialIntelligence {
         switch (move.action) {
             case BET:
                 // Set a random bet if it is possible, if not bet the minimum bet
-                int bet = random(gameData.minBet, MAX_BET);
+                int bet = random(gameData.initialBet, MAX_BET);
                 if (gameData.sChips >= bet) {
                     move.chips = bet;
                 } else {
-                    move.chips = random(gameData.minBet, gameData.sChips);
+                    move.chips = random(gameData.initialBet, gameData.sChips);
                 }
                 break;
 
@@ -73,8 +75,13 @@ public class RandomServerAI extends ArtificialIntelligence {
                 Card[] cardsToDiscard = new Card[move.sDrawn];
                 for (int i = 0; i < move.sDrawn; i++) {
                     cardsToDiscard[i] = gameData.sHand.getCards().get(i);
+                }            
+                try {
+                    gameData.sHand.discard(cardsToDiscard);
+                } catch (Exception ex) {
+                    /* Ignored */
                 }
-                gameData.sHand.discard(cardsToDiscard);
+
                 break;
         }
 

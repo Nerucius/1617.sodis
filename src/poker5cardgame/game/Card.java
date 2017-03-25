@@ -51,8 +51,8 @@ public class Card implements Comparable<Card> {
         Suit(String code, int id) {
             this.code = code;
             this.id = id;
-        }
-                
+        }                
+        
         private static Suit fromCode(String code) {
             for(Suit s : Suit.values())
                 if(s.code.equals(code))
@@ -105,10 +105,18 @@ public class Card implements Comparable<Card> {
         this.rank = rank;
     }
 
+    public Suit getSuit() {
+        return this.suit;
+    }
+    
     public Rank getRank() {
         return this.rank;
     }
 
+    public String getRankCode() {
+        return this.rank.code;
+    }
+    
     public int getRankWeight() {
         return this.rank.weight;
     }

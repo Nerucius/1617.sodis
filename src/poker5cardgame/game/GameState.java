@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static poker5cardgame.Log.GAME_DEBUG;
+import static poker5cardgame.Log.*;
 
 /**
  * Finite State Machine for the Game State
@@ -148,6 +148,17 @@ public class GameState {
             State nextState = state.transitions.get(action);
             state = nextState;
         } 
+        else if(action != Action.ERROR && action != Action.SHOW)
+        {
+            // Show the error messages to the client before the server informs.
+            // We know the client did an error because of the state machine
+            // and we want to inform the client before he needs to read a server 
+            // mesage in order to tell him what happens right now
+            FANCY_CLIENT("PROTOCOL ERROR.\n", Format.BOLD, Format.RED);
+            FANCY_CLIENT("Oh! It looks like you did a ", Format.RED);
+            FANCY_CLIENT("protocol error", Format.UNDERLINE, Format.RED);
+            FANCY_CLIENT(". The action " + action.name() + " can't be applied now. Please try again.\n", Format.RED);
+        }
     }
 
     public List<Action> getValidActions() {

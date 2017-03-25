@@ -23,6 +23,8 @@ public class Move {
     public int cStakes = -1, sStakes = -1;
     // Dealer Flag, 1 for Client dealer, 0 for server dealer
     public int dealer = -1;
+    // Winner Flag, 1 for Client winner, 0 for server winner
+    public int winner = -1;
     // Array of cards to deal or discard
     public Card[] cards = null;
     // Number of cards discarded
@@ -45,6 +47,7 @@ public class Move {
                 + (cDrawn == -1 ? "" : " cDrawn:" + cDrawn)
                 + (sDrawn == -1 ? "" : " sDrawn:" + sDrawn)
                 + (dealer == -1 ? "" : " dealer:" + dealer)
+                + (winner == -1 ? "" : " winner:" + winner)
                 + (cards == null ? "" : " cards:" + Arrays.toString(cards))
                 + (error == null ? "" : " err:" + error);
         return str;

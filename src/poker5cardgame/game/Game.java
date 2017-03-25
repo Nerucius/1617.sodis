@@ -12,7 +12,7 @@ public class Game {
     // TODO manage cartes dolentes
     // TODO manage all in en general
     // TODO maxbet i minbet per ia i que sempre jugui sense enviar errors
-    // TODO es pot fer BET 5 !!!
+    // fet TODO es pot fer BET 5 !!!
     
     /**
      * Source to be used for receiving and sending data to another player.
@@ -175,7 +175,7 @@ public class Game {
         // manage the move information
         switch (getState()) {
             case INIT:
-                gameData.cId = cMove.id;
+                //gameData.cId = cMove.id;
                 break;
                 
             case BETTING:
@@ -203,19 +203,22 @@ public class Game {
                 break;
 
             case DRAW:
-                gameData.cDrawn = cMove.cDrawn;
-                if (gameData.cDrawn > 0) {
+                //gameData.cDrawn = cMove.cDrawn;
+                if(gameData.cDrawn > 0) {
                     gameData.cHand.discard(cMove.cards);
                 }
                 break;
 
         }
 
+        gameData.save(cMove, gameState.isServerTurn());
         GAME_DEBUG(gameData.cId, "Game: Client Move: " + cMove);
         return cMove;
     }
 
     private Move updateServer() throws Exception {
+        System.out.println("\nServer Data: " + gameData +"\n");
+
         GAME_DEBUG(gameData.cId, "Game: Updating Server");
 
         Move sMove = new Move();
@@ -226,7 +229,7 @@ public class Game {
                 sMove.action = Action.ANTE_STAKES;
 
                 // send the game conditions
-                sMove.chips = gameData.minBet;
+                sMove.chips = gameData.initialBet;
                 sMove.cStakes = gameData.cChips;
                 sMove.sStakes = gameData.sChips;
                 break;
@@ -236,8 +239,8 @@ public class Game {
                 sMove.action = Action.DEALER_HAND;
 
                 // the game is accepted, so set the minimum bet as the bet of each player
-                this.setMinBetServer();
-                this.setMinBetClient();
+                this.setInitialBetServer();
+                this.setInitialBetClient();
 
                 // choose the dealer randomly (0: server; 1: client)
                 gameData.dealer = Math.random() > 0.5 ? 1 : 0;
@@ -309,7 +312,7 @@ public class Game {
                     IOSource.sendMove(sMove);
                 }
 
-                // reset game (round) flags information
+                // reset game round flags information
                 gameState.setFold(false);
                 gameState.setShowTime(false);
                 gameData.sDrawn = 0;
@@ -320,14 +323,17 @@ public class Game {
                 gameData.cHand.generateRankerInformation();
                 if (gameData.sHand.wins(gameData.cHand)) {
                     this.allChipsToServer();
+                    gameData.winner = 0;                 
                 } else {
                     this.allChipsToClient();
+                    gameData.winner = 1;
                 }
 
                 sMove = new Move();
                 sMove.action = Action.STAKES;
                 sMove.cStakes = gameData.cChips;   // STAKES parameter
                 sMove.sStakes = gameData.sChips;   // STAKES parameter
+                sMove.winner = gameData.winner;
 
                 break;
         }
@@ -338,20 +344,20 @@ public class Game {
 
     }
 
-    private void setMinBetServer() throws Exception {
-        if (gameData.sChips >= gameData.minBet) {
-            gameData.sBet += gameData.minBet;
-            gameData.sChips -= gameData.minBet;
+    private void setInitialBetServer() throws Exception {
+        if (gameData.sChips >= gameData.initialBet) {
+            gameData.sBet += gameData.initialBet;
+            gameData.sChips -= gameData.initialBet;
         } else {
             gameState.state = GameState.State.QUIT;
             throw new Exception("Logic Error. Not enough chips for the minimum bet.");
         }
     }
 
-    private void setMinBetClient() throws Exception {
-        if (gameData.cChips >= gameData.minBet) {
-            gameData.cChips -= gameData.minBet;
-            gameData.cBet += gameData.minBet;
+    private void setInitialBetClient() throws Exception {
+        if (gameData.cChips >= gameData.initialBet) {
+            gameData.cChips -= gameData.initialBet;
+            gameData.cBet += gameData.initialBet;
         } else {
             gameState.state = GameState.State.QUIT;
             throw new Exception("Logic Error. Not enough chips for the minimum bet.");
@@ -359,7 +365,7 @@ public class Game {
     }
 
     private void manageBetServer(Move move) throws Exception {
-        if (move.chips >= gameData.minBet && gameData.sChips >= move.chips) {
+        if (gameData.sChips >= move.chips) {
             gameData.sChips -= move.chips;
             gameData.sBet += move.chips;
         } else {
@@ -368,7 +374,7 @@ public class Game {
     }
 
     private void manageBetClient(Move move) throws Exception {
-        if (move.chips >= gameData.minBet && gameData.cChips >= move.chips) {
+        if (gameData.cChips >= move.chips) {
             gameData.cChips -= move.chips;
             gameData.cBet += move.chips;
         } else {

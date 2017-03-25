@@ -106,10 +106,10 @@ public class Hand implements Comparable<Hand> {
      *
      * @param cards Card or Cards to remove
      */
-    public void discard(Card... cards) {
+    public void discard(Card... cards) throws Exception {
         for (Card c : cards) {
             if (!this.cards.remove(c)) {
-                System.err.println("Tried to remove a non existing card.");
+                throw new Exception("Logic Error. Tried to discard a non existing card.");
             }
         }
     }
@@ -446,7 +446,7 @@ public class Hand implements Comparable<Hand> {
         return Collections.max(cards);
     }
 
-    void dumpArray(Card[] cards) {
+    public void dumpArray(Card[] cards) {
         for(int i = 0; i < 5; i++)
             cards[i] = this.cards.get(i);
     }

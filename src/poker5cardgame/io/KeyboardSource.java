@@ -10,6 +10,7 @@ import java.util.Scanner;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
+import static poker5cardgame.Log.*;
 
 /**
  * Simple Keyboard source to play the game on the same computer.
@@ -30,7 +31,11 @@ public class KeyboardSource implements Source {
         try {
             move.action = Action.valueOf(args[0]);
         } catch (Exception e) {
-            System.err.println("INVALID ACTION");
+            FANCY_CLIENT("INVALID ACTION.\n", Format.BOLD, Format.RED);
+            FANCY_CLIENT("Oh! It looks like you entered an ", Format.RED);
+            FANCY_CLIENT("invalid action", Format.UNDERLINE, Format.RED);
+            FANCY_CLIENT(". Please try again.\n", Format.RED);
+            //System.err.println("INVALID ACTION");
             move.action = Action.NOOP;
         }
 
@@ -57,38 +62,41 @@ public class KeyboardSource implements Source {
                     break;                                      
             }
         } catch (Exception e) {
-            System.err.println("SYNTAX ERROR");
+            //System.err.println("SYNTAX ERROR");
+            FANCY_CLIENT("SYNTAX ERROR.\n", Format.BOLD, Format.RED);
+            FANCY_CLIENT("Oh! It looks like you did a ", Format.RED);
+            FANCY_CLIENT("syntax error", Format.UNDERLINE, Format.RED);
+            FANCY_CLIENT(". Please try again.\n", Format.RED);
             move.action = Action.NOOP;
         }
-
         return move;
     }
 
     public boolean sendMove(Move move) {
         // PRINTS SERVER REPLY TO Console
-        System.out.println("SERVER: " + move.action);
+        KB_DEBUG("SERVER: " + move.action);
 
         // Optional Arguments
         switch (move.action) {
             case ANTE_STAKES:
-                System.out.println("ANTE: " + move.chips);
-                System.out.println("STAKES: " + move.cStakes + " " + move.sStakes);
+                KB_DEBUG("ANTE: " + move.chips);
+                KB_DEBUG("STAKES: " + move.cStakes + " " + move.sStakes);
                 break;
             case DEALER_HAND:
-                System.out.println("DEALER:" + move.dealer);
-                System.out.println("HAND:" + Arrays.toString(move.cards));
+                KB_DEBUG("DEALER:" + move.dealer);
+                KB_DEBUG("HAND:" + Arrays.toString(move.cards));
                 break;
             case BET:
-                System.out.println("" + move.chips);
+                KB_DEBUG("" + move.chips);
                 break;
             case RAISE:
-                System.out.println("" + move.chips);
+                KB_DEBUG("" + move.chips);
                 break;
             case DRAW_SERVER:
-                System.out.println("DRAWN " + Arrays.toString(move.cards));
+                KB_DEBUG("DRAWN " + Arrays.toString(move.cards));
                 break;
             case SHOW:
-                System.out.println("SHOW" + Arrays.toString(move.cards));
+                KB_DEBUG("SHOW" + Arrays.toString(move.cards));
                 break;
             case NOOP:
                 break;
