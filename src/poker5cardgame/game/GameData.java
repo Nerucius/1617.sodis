@@ -55,16 +55,11 @@ public class GameData {
                 break;
 
             case ANTE_OK:
+                // TODO aixo es un manage ?
                 this.cChips -= this.initialBet;
                 this.sChips -= this.initialBet;
-                this.sBet += this.initialBet;
                 this.cBet += this.initialBet;
-                break;
-                
-            case STAKES:
-                this.cChips = move.cStakes;
-                this.sChips = move.sStakes;
-                this.initialBet = 0;
+                this.sBet += this.initialBet;
                 break;
 
             case DEALER_HAND:
@@ -89,20 +84,28 @@ public class GameData {
 
             case DRAW:
                 this.cDrawn = move.cDrawn;
-                if (this.cDrawn > 0)
-                    this.cHand.discard(move.cards);                
+                this.cHand.discard(move.cards);                
                 break;
                 
             case DRAW_SERVER:
-                if (move.cards != null && this.cDrawn > 0)
+                if (this.cDrawn > 0)
                     this.cHand.putCards(move.cards);
                 this.sDrawn = move.sDrawn;
                 break;
-                
-            case SHOW:
+
+            case STAKES:
                 this.winner = move.winner;
+                
+                // reset round data
+                this.cDrawn = -1;
+                this.sDrawn = -1;
+                this.cBet = 0;
+                this.sBet = 0;
+                this.initialBet = 0;
+                
+                this.cChips = move.cStakes;
+                this.sChips = move.sStakes;
                 break;
         }
     }
-
 }
