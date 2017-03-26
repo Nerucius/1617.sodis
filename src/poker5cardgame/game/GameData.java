@@ -1,5 +1,7 @@
 package poker5cardgame.game;
 
+import java.util.Arrays;
+import static poker5cardgame.Log.*;
 public class GameData {
 
 
@@ -128,6 +130,8 @@ public class GameData {
                 break;
 
             case SHOW:
+                this.sHand = new Hand(move.cards);
+                
                 this.winner = move.winner;
                 if(this.winner == 0)                
                     this.sChips += this.sBet + this.cBet;                

@@ -18,9 +18,8 @@ public class RandomServerAI extends ArtificialIntelligence {
     @Override
     public Move getNextMove() {
         
-        int MAX_BET = gameData.sChips;
-        if(gameData.cChips < gameData.sChips)
-            MAX_BET = gameData.cChips;
+        int MAX_BET = maxBet(server);
+        int MAX_RAISE = maxRaise(server);
 
         Move move = new Move();
         move.action = randomAction(server);
@@ -33,7 +32,7 @@ public class RandomServerAI extends ArtificialIntelligence {
                 break;
 
             case RAISE:
-                move.chips = random(1, MAX_BET);
+                move.chips = random(1, MAX_RAISE);
                 break;
 
             case DRAW_SERVER:

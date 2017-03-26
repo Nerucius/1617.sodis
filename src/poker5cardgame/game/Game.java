@@ -13,11 +13,6 @@ public class Game {
     private static final int INITIAL_SERVER_CHIPS = 10000;
     private static final int INITIAL_CLIENT_CHIPS = 1000;
     
-    // TODO manage cartes dolentes
-    // TODO manage all in en general
-    // TODO maxbet i minbet per ia i que sempre jugui sense enviar errors
-    // fet TODO es pot fer BET 5 !!!
-    
     /**
      * Source to be used for receiving and sending data to another player.
      */
@@ -209,15 +204,18 @@ public class Game {
                     move = getValidMove(playerSource);
 
                     // Complete the server hand with the missing cards
-                    gameData.sHand.putNCards(gameData.deck, move.sDrawn);
+                    if(move.sDrawn > 0)
+                        gameData.sHand.putNCards(gameData.deck, move.sDrawn);
 
+                    // Complete the client hand with the missing cards
                     move.cDrawn = gameData.cDrawn;
-                    move.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
+                    if(move.cDrawn > 0)
+                        move.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
                     
                     gameState.setServerTurn(gameData.dealer == 1);
                     
-                    IOSource.sendMove(move);
                     gameData.save(move, true);
+                    IOSource.sendMove(move);
                     break;
 
                 case SHOWDOWN:
@@ -233,23 +231,7 @@ public class Game {
                         gameData.sHand.dumpArray(move.cards); 
                         
                         // Manage winner with handranker
-                        Card[] sCardsCopy = new Card[Hand.SIZE];
-                        gameData.sHand.getCards().toArray(sCardsCopy);
-                        Hand sCopy = new Hand(sCardsCopy);
-                        
-                        Card[] cCardsCopy = new Card[Hand.SIZE];
-                        gameData.cHand.getCards().toArray(cCardsCopy);
-                        Hand cCopy = new Hand(sCardsCopy);
-                        
-                        
-                        sCopy.generateRankerInformation();
-                        cCopy.generateRankerInformation();
-                        if (sCopy.wins(cCopy))
-                            move.winner = 0;
-                        else if(cCopy.wins(sCopy))
-                            move.winner = 1;
-                        else
-                            move.winner = 2;
+                       move.winner = ArtificialIntelligence.manageWinner(gameData);
 
                         IOSource.sendMove(move);
                         gameData.save(move, true);

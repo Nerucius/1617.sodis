@@ -59,12 +59,13 @@ public class KeyboardSource implements Source {
                     move.cards = new Card[numCards];
                     for (int i = 0; i < numCards; i++)
                         move.cards[i] = Card.fromCode(args[2 + i]);
+                    move.cDrawn = numCards;
                     break;                                      
             }
         } catch (Exception e) {
             
             if(move.action == GameState.Action.DRAW)
-            {
+            {  
                 // We are here only in one case: the cDrawn number does not match with the number of cards
                 // In this case, we ignore the cDraw number and discard the given cards
                 FANCY_CLIENT("\nATTENTION: ", Format.BOLD, Format.RED);

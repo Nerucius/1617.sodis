@@ -3,6 +3,7 @@ package poker5cardgame.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.List;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentClientAI;
@@ -73,7 +74,7 @@ public class GameClient {
             throw new IllegalStateException("Client not connected");
         }
 
-        GAME_DEBUG("GameClient: Updating with state" + clientGameState);
+        GAME_DEBUG("GameClient: Updating with state" + clientGameState + " and data" + clientGameData);
 
         Move move = new Move();
         move.action = Action.NOOP;
@@ -175,7 +176,7 @@ public class GameClient {
           
                     // If the cards are not matching the hand cards, the discard method throws an exception.
                     if(move.cDrawn > 0)                   
-                        clientGameData.cHand.discard(move.cards);                      
+                        clientGameData.cHand.discard(move.cards);   
                     clientGameData.save(move, false);
                     break;
 
@@ -193,36 +194,20 @@ public class GameClient {
                     
                     if(!clientGameState.isFold() && clientGameState.isShowTime())
                     {
-                        try{clientGameData.sHand.putCards(move.cards);}catch(Exception e){}
-                    
-                        // Manage winner with handranker
-                        Card[] sCardsCopy = new Card[Hand.SIZE];
-                        clientGameData.sHand.getCards().toArray(sCardsCopy);
-                        Hand sCopy = new Hand(sCardsCopy);
-                        
-                        Card[] cCardsCopy = new Card[Hand.SIZE];
-                        clientGameData.cHand.getCards().toArray(cCardsCopy);
-                        Hand cCopy = new Hand(sCardsCopy);
-                        
-                        
-                        sCopy.generateRankerInformation();
-                        cCopy.generateRankerInformation();
-                        if (sCopy.wins(cCopy))
-                            move.winner = 0;
-                        else if(cCopy.wins(sCopy))
-                            move.winner = 1;
-                        else
-                            move.winner = 2;                  
-                   
+                        clientGameData.save(move, true);
                         this.fancyShowndown();
+                        
+                        move.winner = ArtificialIntelligence.manageWinner(clientGameData);
+                        clientGameData.save(move, true);
                         this.fancyWinner(move);
                         clientGameState.setShowTime(false);
                     }             
-                    clientGameState.setFold(false);
 
-                    if(!ArtificialIntelligence.possibleNewRound(clientGameData))
+                    if(!clientGameState.isShowTime() && !ArtificialIntelligence.possibleNewRound(clientGameData))
                         move.action = Action.TERMINATE;
                     
+                    clientGameState.setFold(false);
+                    clientGameState.setShowTime(false);
                     clientGameData.save(move, true);
                     break;
 
@@ -238,12 +223,13 @@ public class GameClient {
             GAME_DEBUG("GameClient: Processed move " + move);
 
         } catch (Exception e) {
-            GAME_DEBUG("GameClient: Exception");
+            e.printStackTrace();
             FANCY_CLIENT("ERROR: ", Format.BOLD, Format.RED);
             FANCY_CLIENT(e.getMessage() + '\n', Format.RED);
             FANCY_CLIENT("Oh! It looks like you did an error... Please try again!\n\n");
+            close(); // TODO delete
         }
-        GAME_DEBUG("GameClient: Updated State: " + getState());
+        GAME_DEBUG("GameClient: Updated State: " + getState() + " and data" + clientGameData);
     }
 
     public Move updateSend() {
@@ -253,7 +239,7 @@ public class GameClient {
         /* End: Talking with the client */
 
         GAME_DEBUG("GameClient: Waiting for next client move...");
-        Move next = playerSource.getNextMove();              
+        Move next = playerSource.getNextMove();    
 
         if(!clientGameState.getValidActions().contains(next.action) && next.action != Action.NOOP)
         {
@@ -468,7 +454,7 @@ public class GameClient {
     private void fancyWinner(Move move) {
         switch (move.winner) {
             case 0:
-                FANCY_CLIENT("\n----- YOU LOSE THIS TIME -----\n\n", Format.BLUE);
+                FANCY_CLIENT("\n----- YOU LOSE THIS TIME -----\n\n", Format.BOLD, Format.BLUE);
                 FANCY_CLIENT("Oh... You lose this time. "
                         + "But for sure you'll do it much better the next time! "
                         + "Do you want to continue playing?\n\n");
@@ -477,7 +463,7 @@ public class GameClient {
                 FANCY_CLIENT_RAINBOW("\n***** CONGRATULATIONS :) YOU WIN THIS TIME *****\n\n");
                 break;
             case 2:
-                FANCY_CLIENT("\n~~~~~ TIE ~~~~~\n\n", Format.GREEN);
+                FANCY_CLIENT("\n~~~~~ TIE ~~~~~\n\n", Format.BOLD, Format.GREEN);
                 FANCY_CLIENT("How amazing! You both are equal so good!\n\n");
                 break;
             default:

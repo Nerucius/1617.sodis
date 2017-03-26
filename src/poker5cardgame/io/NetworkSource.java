@@ -121,10 +121,7 @@ public class NetworkSource implements Source {
                 case DRAW_SERVER:
                     move.action = Action.DRAW_SERVER;
                     move.sDrawn = packet.getField("number", Integer.class);
-
-                    if(move.sDrawn > 0)
-                        move.cards = cardsFromCodeString(packet.getField("cards", String.class));
-                    // TODO @alex/client Save this value and inform the client of how many cards the server requested
+                    move.cards = cardsFromCodeString(packet.getField("cards", String.class));
                     break;
                     
                 case SHOWDOWN:
@@ -238,16 +235,13 @@ public class NetworkSource implements Source {
             case DRAW:
                 packets[0] = new Packet(Network.Command.DRAW);
                 // Create a list of arguments as follows: '2' 2C 3H
-                // TODO manage somewhere the case the client enters a different number as the cards lenght? (send error msg)
-
                 if (move.cDrawn == move.cards.length)
                     // Changed to 1 byte char
                     packets[0].putField("number", move.cDrawn+"");
                 
                 else
                     // Changed to 1 byte char
-                    packets[0].putField("number", move.cards.length+"");
-                
+                    packets[0].putField("number", move.cards.length+"");                
                 
                 if(move.cards.length > 0)
                     packets[0].putField("cards", cardsToCodeString(move.cards));

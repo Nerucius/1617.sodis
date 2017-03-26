@@ -18,9 +18,8 @@ public class RandomClientAI extends ArtificialIntelligence {
     @Override   
     public Move getNextMove() {
         
-        int MAX_BET = gameData.cChips;
-        if(gameData.sChips < gameData.cChips)
-            MAX_BET = gameData.sChips;
+        int MAX_BET = maxBet(client);
+        int MAX_RAISE = maxRaise(client);
        
         Move move = new Move();
         move.action = randomAction(client);
@@ -39,7 +38,7 @@ public class RandomClientAI extends ArtificialIntelligence {
                 break;
 
             case RAISE:
-                move.chips = random(1, MAX_BET);
+                move.chips = random(1, MAX_RAISE);
                 break;
 
             case DRAW:

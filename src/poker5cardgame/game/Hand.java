@@ -12,6 +12,8 @@ import static poker5cardgame.Log.*;
 import poker5cardgame.game.Card.Rank;
 import poker5cardgame.game.HandRanker.HandRank;
 import static poker5cardgame.game.HandRanker.getHandRank;
+import static poker5cardgame.Log.*;
+
 
 public class Hand implements Comparable<Hand> {
 
@@ -77,8 +79,8 @@ public class Hand implements Comparable<Hand> {
         for (Card c : newCards) {
             if (this.cards.size() < SIZE) {
                 this.cards.add(c);
-            } else{}
-                //GAME_ERROR("Hand: Too many cards added to the hand. Ignored card");
+            } else
+                GAME_ERROR(0,"Hand: Too many cards added to the hand. Ignored card");
         }
     }
 
