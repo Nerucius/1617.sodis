@@ -12,23 +12,23 @@ public class Log {
     public static /* final */ boolean INFO_SERVER = true;
     
     public static /* final */ boolean NET_ERROR = true;
-    public static /* final */ boolean NET_DEBUG = false;
+    public static /* final */ boolean NET_DEBUG = true;
     public static /* final */ boolean NET_TRACE = false;
     
     public static /* final */ boolean KB_ERROR = true;
     public static /* final */ boolean KB_DEBUG = false;
     public static /* final */ boolean KB_TRACE = false;
 
-    public static /* final */ boolean GAME_ERROR = false;
+    public static /* final */ boolean GAME_ERROR = true;
     public static /* final */ boolean GAME_DEBUG = false;
     public static /* final */ boolean GAME_TRACE = false;
 
     public static /* final */ boolean IO_ERROR = true;
-    public static /* final */ boolean IO_DEBUG = false;
+    public static /* final */ boolean IO_DEBUG = true;
     public static /* final */ boolean IO_TRACE = false;
 
     public static /* final */ boolean AI_ERROR = true;
-    public static /* final */ boolean AI_DEBUG = false;
+    public static /* final */ boolean AI_DEBUG = true;
     public static /* final */ boolean AI_TRACE = false;
     
     

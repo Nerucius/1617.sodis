@@ -1,7 +1,5 @@
 package poker5cardgame.game;
 
-import java.util.Arrays;
-import static poker5cardgame.Log.*;
 public class GameData {
 
 

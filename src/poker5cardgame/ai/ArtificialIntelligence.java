@@ -1,15 +1,22 @@
 package poker5cardgame.ai;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import static poker5cardgame.Log.*;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState;
 import poker5cardgame.game.Hand;
+import poker5cardgame.game.HandRanker;
+import poker5cardgame.game.Move;
 import poker5cardgame.io.Source;
 
 public abstract class ArtificialIntelligence implements Source {
+
+    protected final boolean server = true;
+    protected final boolean client = false;
 
     protected GameData gameData;
     protected GameState gameState;
@@ -142,55 +149,6 @@ public abstract class ArtificialIntelligence implements Source {
         }
         AI_DEBUG("Valid actions after control betting: " + validActions);
     }
-    protected void manageBettingPossibilities2(List validActions, boolean server)
-    {
-        if (server) {
-            boolean client = !server;
-            if (allIn(client)) {
-                validActions.remove(GameState.Action.BET);
-                validActions.remove(GameState.Action.RAISE);
-                // If the client has done an ALL IN, the server should CALL
-                if(validActions.contains(GameState.Action.CALL))
-                {
-                    validActions.clear();
-                    validActions.add(GameState.Action.CALL);
-                }
-            } else if(!possibleCall(gameData, server)) {
-                validActions.remove(GameState.Action.RAISE);
-                validActions.remove(GameState.Action.CALL); 
-            } else if (allIn(server)) {
-                validActions.remove(GameState.Action.BET);
-                validActions.remove(GameState.Action.RAISE);
-                validActions.remove(GameState.Action.CALL);
-            }else if(maxRaise(server) == 0)
-                validActions.remove(GameState.Action.RAISE);
-            else if(maxBet(server) == 0)
-                validActions.remove(GameState.Action.BET);
-        }
-        else {
-            boolean client = server;
-            if (allIn(server)) {
-                validActions.remove(GameState.Action.BET);
-                validActions.remove(GameState.Action.RAISE);
-                // If the server has done an ALL IN, the client should CALL
-                if(validActions.contains(GameState.Action.CALL))
-                {
-                    validActions.clear();
-                    validActions.add(GameState.Action.CALL);
-                }                      
-            } else if(!possibleCall(gameData, client)) {
-                validActions.remove(GameState.Action.RAISE);
-                validActions.remove(GameState.Action.CALL); 
-            } else if (allIn(client)) {
-                validActions.remove(GameState.Action.BET);
-                validActions.remove(GameState.Action.RAISE);
-                validActions.remove(GameState.Action.CALL);
-            } else if(maxRaise(client) == 0)
-                validActions.remove(GameState.Action.RAISE);
-            else if(maxBet(client) == 0)
-                validActions.remove(GameState.Action.BET);
-        }
-    }
     
     protected int maxBet(boolean server)
     {
@@ -243,6 +201,201 @@ public abstract class ArtificialIntelligence implements Source {
             return gameData.cChips == 0;
     }
     
+    protected Move bet(int chips, boolean server)
+    {
+        List<GameState.Action> validActions = validActions(server);
+        Move move = new Move();
+        
+        if (!validActions.contains(GameState.Action.BET)) {
+            move.action = GameState.Action.PASS;
+            return move;
+        }
+
+        int MAX_BET = maxBet(server);
+        move.action = GameState.Action.BET;
+        move.chips = chips;
+        if (move.chips > MAX_BET) {
+            move.chips = MAX_BET;
+        }
+
+        return move;   
+    }
+    
+    protected Move raise(int chips, boolean server)
+    {
+        List<GameState.Action> validActions = validActions(server);
+        Move move = new Move();
+        
+        if (!validActions.contains(GameState.Action.RAISE)) {
+            if (possibleCall(gameData, server)) {
+                move.action = GameState.Action.CALL;
+            } else {
+                move.action = GameState.Action.FOLD;
+            }
+            return move;
+        }
+        
+        int MAX_RAISE = maxRaise(server);
+        move.action = GameState.Action.RAISE;
+        move.chips = chips;
+        if (move.chips > MAX_RAISE) {
+            move.chips = MAX_RAISE;
+        }
+        
+        return move;
+    }
+    
+    protected Move betting(boolean server) {
+        
+        List<GameState.Action> validActions = validActions(server);
+        Move move = new Move();
+        HandRanker.HandRank handRank;
+        
+        if (server) {
+            gameData.sHand.generateRankerInformation();
+            handRank = HandRanker.getHandRank(gameData.sHand);
+        } else {
+            gameData.cHand.generateRankerInformation();
+            handRank = HandRanker.getHandRank(gameData.cHand);
+        }
+        
+        if (!validActions.contains(GameState.Action.BET) || handRank == HandRanker.HandRank.HIGH_CARD) {
+            move.action = GameState.Action.PASS;
+            return move;
+        }
+        
+        switch(handRank)
+        {   
+            case ONE_PAIR:
+                return bet(100, server);
+                
+            case TWO_PAIR:
+                return bet(200, server);
+                
+            case THREE_OF_A_KIND:
+                return bet(500, server);
+                
+            default:
+                if(server)
+                    return bet(gameData.sChips, server);
+                else
+                    return bet(gameData.cChips, server);
+        }
+    }
+    
+    protected Move counting(boolean server)
+    {
+        Move move = new Move();
+        HandRanker.HandRank handRank;
+        
+        if (server) {
+            gameData.sHand.generateRankerInformation();
+            handRank = HandRanker.getHandRank(gameData.sHand);
+        } else {
+            gameData.cHand.generateRankerInformation();
+            handRank = HandRanker.getHandRank(gameData.cHand);
+        }
+
+        switch (handRank) {
+            case HIGH_CARD:
+                if(possibleCall(gameData, server))
+                    move.action = GameState.Action.CALL;
+                else
+                    move.action = GameState.Action.FOLD;
+                break;
+
+            case ONE_PAIR:
+                return raise(50, server);
+
+            case TWO_PAIR:
+                return raise(200, server);
+                
+            case THREE_OF_A_KIND:                
+                return raise(500, server);
+                
+            default:
+                if(server)
+                    return raise(gameData.sChips, server);
+                else
+                    return raise(gameData.cChips, server);
+        }
+        return move;
+    }
+    
+    protected Move drawingServer() {
+        
+        Move move = new Move();
+        move.action = GameState.Action.DRAW_SERVER;
+
+        gameData.sHand.generateRankerInformation();
+        HandRanker.HandRank handRank = HandRanker.getHandRank(gameData.sHand);
+
+        switch(handRank)
+        {
+            case HIGH_CARD:
+                move.sDrawn = 5;
+                return move;
+                 
+            case ONE_PAIR:
+                move.sDrawn = 3;
+                break;
+                
+            case TWO_PAIR:
+                move.sDrawn = 1;
+                break;
+                
+            case THREE_OF_A_KIND:
+                move.sDrawn = 2;
+                break;
+                
+            case STRAIGHT:
+                move.sDrawn = 0;
+                break;
+
+            case FLUSH:
+                move.sDrawn = 0;
+                break;
+
+            case FULL_HOUSE:
+                move.sDrawn = 0;
+                break;
+                
+            case FOUR_OF_A_KIND:
+                move.sDrawn = 1;
+                break;
+                
+            case STRAIGHT_FLUSH:
+                move.sDrawn = 0;
+                break;               
+            
+        }
+        if(move.sDrawn > 0)
+        {
+            Card[] cardsToDiscard = new Card[move.sDrawn];
+            cardsToDiscard = discardLeftoverCards(move);
+            try {
+                gameData.sHand.discard(cardsToDiscard);
+            } catch (Exception ex) {/* Ignored. This exception will not be thrown because the ai discard the right cards */
+            }
+        }
+        return move;
+    }
+    
+    private Card[] discardLeftoverCards(Move move)
+    {        
+        List<Card> toDiscardList = new ArrayList(gameData.sHand.getCards());
+        List<Card.Rank> toDiscardRanks =  Hand.getKeysByValue(gameData.sHand.getOcurDict(), 1);
+
+        List<Card> aux = new ArrayList(toDiscardList);
+        for(Card cardToDiscard : aux)
+            if(!toDiscardRanks.contains(cardToDiscard.getRank()))
+                toDiscardList.remove(cardToDiscard);
+          
+        Card[] cardsToDiscard = new Card[move.sDrawn];
+        toDiscardList.toArray(cardsToDiscard);
+        return cardsToDiscard;
+    }
+
     public static boolean possibleNewRound(GameData gameData) {
         return (gameData.sChips >= gameData.initialBet && gameData.cChips >= gameData.initialBet);
     }

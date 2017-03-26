@@ -3,7 +3,6 @@ package poker5cardgame.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.List;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentClientAI;
@@ -419,7 +418,7 @@ public class GameClient {
     }
     
     private void fancyFold() {
-        FANCY_CLIENT("Ops! It looks like you don't have a good hand...\n I wish you good luck for the next round!\n");
+        FANCY_CLIENT("Ops! It looks like you don't have a good hand...\nI wish you good luck for the next round!\n");
     }
 
     private void fancyCards(Card... cards) {        
