@@ -112,13 +112,11 @@ public class GameState {
         // If the action is noop, do nothing
         if (action == Action.NOOP)
         {            
-            FANCY_CLIENT("Oh! NOOP\n", Format.RED);
             return;
         }
         
         // If the action is terminate, finish the game
         if (action == Action.TERMINATE) {
-            System.err.println("TERMINATE You exit the game. Thanks for playing!");
             state = State.QUIT;
             return;
         }

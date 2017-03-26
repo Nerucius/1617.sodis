@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentClientAI;
 import poker5cardgame.ai.RandomClientAI;
@@ -18,11 +16,11 @@ import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
 import static poker5cardgame.Log.*;
 import poker5cardgame.game.Card;
+import poker5cardgame.game.Hand;
 
 public class GameClient {
 
     private boolean FANCY_GREETING_TIME = true;
-    private boolean FANCY_WINNER_TIME = true;
     private boolean FANCY_ADVICES_TIME = true;
 
     /**
@@ -75,12 +73,6 @@ public class GameClient {
             throw new IllegalStateException("Client not connected");
         }
 
-        try {
-            Thread.sleep(000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(GameClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
         GAME_DEBUG("GameClient: Updating with state" + clientGameState);
 
         Move move = new Move();
@@ -117,9 +109,10 @@ public class GameClient {
                     break;
 
                 case BETTING:
-                    if(clientGameState.isServerTurn())
+                    if (clientGameState.isServerTurn()) {
                         move = this.updateReceive();
-
+                        INFO_SERVER(move.toString());
+                    }
                     else 
                     {
                         if(this.FANCY_ADVICES_TIME)
@@ -135,9 +128,10 @@ public class GameClient {
                     break;
 
                 case BETTING_DEALER:
-                    if(clientGameState.isServerTurn())
+                    if (clientGameState.isServerTurn()) {
                         move = this.updateReceive();
-
+                        INFO_SERVER(move.toString());
+                    }
                     else 
                     {
                         if(this.FANCY_ADVICES_TIME)
@@ -153,8 +147,10 @@ public class GameClient {
                     break;
 
                 case COUNTER:
-                    if(clientGameState.isServerTurn())
+                    if (clientGameState.isServerTurn()) {
                         move = this.updateReceive();
+                        INFO_SERVER(move.toString());
+                    }
                     else 
                     {
                         if(this.FANCY_ADVICES_TIME)
@@ -174,7 +170,7 @@ public class GameClient {
                     break;
 
                 case DRAW:
-                    //this.fancyDraw();
+                    this.fancyDraw();
                     move = this.updateSend();                       
           
                     // If the cards are not matching the hand cards, the discard method throws an exception.
@@ -186,29 +182,39 @@ public class GameClient {
                 case DRAW_SERVER:
                     move = this.updateReceive();
                     clientGameState.setServerTurn(clientGameData.dealer == 1);
-                    //this.fancyDrawServer(move);
                     clientGameData.save(move, true);
+                    this.fancyDrawServer(move);
                     break;
 
                 case SHOWDOWN:
                     move = this.updateReceive();
-                    System.out.println("----[DEBUG] SHOWNDOWN client move: " + move);
+                    if(clientGameState.isFold())
+                        this.fancyFold();
                     
                     if(!clientGameState.isFold() && clientGameState.isShowTime())
                     {
                         try{clientGameData.sHand.putCards(move.cards);}catch(Exception e){}
                     
                         // Manage winner with handranker
-                        clientGameData.sHand.generateRankerInformation();
-                        clientGameData.cHand.generateRankerInformation();
-                        if (clientGameData.sHand.wins(clientGameData.cHand))
+                        Card[] sCardsCopy = new Card[Hand.SIZE];
+                        clientGameData.sHand.getCards().toArray(sCardsCopy);
+                        Hand sCopy = new Hand(sCardsCopy);
+                        
+                        Card[] cCardsCopy = new Card[Hand.SIZE];
+                        clientGameData.cHand.getCards().toArray(cCardsCopy);
+                        Hand cCopy = new Hand(sCardsCopy);
+                        
+                        
+                        sCopy.generateRankerInformation();
+                        cCopy.generateRankerInformation();
+                        if (sCopy.wins(cCopy))
                             move.winner = 0;
-                        else if(clientGameData.cHand.wins(clientGameData.sHand))
+                        else if(cCopy.wins(sCopy))
                             move.winner = 1;
                         else
                             move.winner = 2;                  
-
-                        System.out.println("Entra aqui i el winner es = " + move.winner + move.action);
+                   
+                        this.fancyShowndown();
                         this.fancyWinner(move);
                         clientGameState.setShowTime(false);
                     }             
@@ -221,6 +227,7 @@ public class GameClient {
                     break;
 
                 case QUIT:
+                    FANCY_CLIENT("There are not enough chips for the initial bet. The game is finished.\n\n");
                     this.fancyGoodByeGreetings();
                     close();
                     break;
@@ -229,28 +236,36 @@ public class GameClient {
             clientGameState.apply(move.action);
 
             GAME_DEBUG("GameClient: Processed move " + move);
-            if(move.action == Action.NOOP) GAME_DEBUG("\n\n\nNOOOOOOOOOOOOOOOOOOOOOOOOOOP\n\n\n");
 
         } catch (Exception e) {
             GAME_DEBUG("GameClient: Exception");
-            e.printStackTrace();
-            System.out.println("LIADA PARDA: " + e.getMessage());
+            FANCY_CLIENT("ERROR: ", Format.BOLD, Format.RED);
+            FANCY_CLIENT(e.getMessage() + '\n', Format.RED);
+            FANCY_CLIENT("Oh! It looks like you did an error... Please try again!\n\n");
         }
         GAME_DEBUG("GameClient: Updated State: " + getState());
     }
 
     public Move updateSend() {
-        System.out.println("\nClient Data: " + clientGameData + clientGameState +"\n");
 
         /* Begin: Talking with the client */
         this.fancyMoves();
         /* End: Talking with the client */
 
         GAME_DEBUG("GameClient: Waiting for next client move...");
-        Move next = playerSource.getNextMove();
-        
-        if(!clientGameState.getValidActions().contains(next.action))
+        Move next = playerSource.getNextMove();              
+
+        if(!clientGameState.getValidActions().contains(next.action) && next.action != Action.NOOP)
+        {
+            FANCY_CLIENT("INVALID ACTION.\n", Format.BOLD, Format.RED);
+            FANCY_CLIENT("Oh! It looks like you entered an ", Format.RED);
+            FANCY_CLIENT("invalid action", Format.UNDERLINE, Format.RED);
+            FANCY_CLIENT(". Please try again.\n", Format.RED);
             next.action = Action.NOOP;
+        }
+        
+        if(next.action != Action.NOOP)
+            INFO_CLIENT(next.toString());
         
         IOSource.sendMove(next);
         return next;
@@ -258,6 +273,9 @@ public class GameClient {
 
     public Move updateReceive() {
         Move reply = IOSource.getNextMove();
+        if(reply.action == Action.TERMINATE)
+            close();
+
         if(reply.action != Action.ERROR)
             this.FANCY_ADVICES_TIME = true;  
 
@@ -354,7 +372,7 @@ public class GameClient {
         FANCY_CLIENT(clientGameData.sChips + "\n", Format.BOLD, Format.PURPLE);
         FANCY_CLIENT("The required initial bet to play: ");
         FANCY_CLIENT(clientGameData.initialBet + "\n", Format.BOLD);
-        FANCY_CLIENT("Do you want to play?\n");
+        FANCY_CLIENT("Do you want to play?\n\n");
         this.FANCY_ADVICES_TIME = false;
     }
 
@@ -370,39 +388,52 @@ public class GameClient {
     {
         FANCY_CLIENT("These are your cards: ");
         this.fancyCards(move.cards);
+        System.out.println("");
+    }
+     
+    private Card[] fancyRememberCards()
+    {
+        FANCY_CLIENT("Remember your cards: ");
+        Card[] cards = new Card[5];
+        clientGameData.cHand.getCards().toArray(cards);
+        this.fancyCards(cards);
+        return cards;
     }
     
     private void fancyDraw()
     {
-        FANCY_CLIENT("Remember your cards: ");
-        Card[] cards = new Card[5];
-                            //gameData.sHand.getCards().toArray(sMove.cards);
-                            clientGameData.cHand.getCards().toArray(cards);
-        //clientGameData.cHand.dumpArray(cards);
-        this.fancyCards(cards);
+        Card[] cards = this.fancyRememberCards();
         FANCY_CLIENT("Do you want to discard some cards? Remember the card codes:\n");
         this.fancyCodeCards(cards);
     }
     
     private void fancyDrawServer(Move move)
     {
-        FANCY_CLIENT("These are your new cards: ");
-        this.fancyCards(move.cards);
-        FANCY_CLIENT("The server discarted " + move.sDrawn + " cards.\n");
+        if(clientGameData.cDrawn > 0)
+        {
+            FANCY_CLIENT("These are your new cards: ");
+            this.fancyCards(move.cards);
+        }
+        FANCY_CLIENT("The server discarted " + move.sDrawn + " cards.\n\n");
     }
     
     private void fancyBetting() {
+        this.fancyRememberCards();
         FANCY_CLIENT("Oh! You have to take a very difficult decision!\n");
         FANCY_CLIENT("Remember some important informations:\n");
         FANCY_CLIENT("Your actual bet: ");
         FANCY_CLIENT(clientGameData.cBet + "   ", Format.BOLD, Format.BLUE);
-        FANCY_CLIENT("Your remaining chips: ");
+        FANCY_CLIENT("\nYour remaining chips: ");
         FANCY_CLIENT(clientGameData.cChips + "\n", Format.BOLD, Format.BLUE);
         FANCY_CLIENT("Your opponents bet: "); // TODO aixo ho sap el client?
         FANCY_CLIENT(clientGameData.sBet + "   ", Format.BOLD, Format.PURPLE);
-        FANCY_CLIENT("Your opponents remaining chips: ");
-        FANCY_CLIENT(clientGameData.sChips + "\n", Format.BOLD, Format.PURPLE);
+        FANCY_CLIENT("\nYour opponents remaining chips: ");
+        FANCY_CLIENT(clientGameData.sChips + "\n\n", Format.BOLD, Format.PURPLE);
         this.FANCY_ADVICES_TIME = false;
+    }
+    
+    private void fancyFold() {
+        FANCY_CLIENT("Ops! It looks like you don't have a good hand...\n I wish you good luck for the next round!\n");
     }
 
     private void fancyCards(Card... cards) {        
@@ -416,29 +447,41 @@ public class GameClient {
         String fancyCards = "";
         for(Card card: cards)        
             fancyCards += card.getRankCode() + Format.getCodeFromName(card.getSuit().name()) + " (code = " +card.getCode() + ") ";
-        FANCY_CLIENT(fancyCards + "\n");
+        FANCY_CLIENT(fancyCards + "\n\n");
     }
     
+    private void fancyShowndown()
+    {
+        //try{
+        Card[] cHand = new Card[Hand.SIZE];
+        clientGameData.cHand.getCards().toArray(cHand);
+        Card[] sHand = new Card[Hand.SIZE];
+        clientGameData.sHand.getCards().toArray(sHand);
+        FANCY_CLIENT("The game round ended here! Let's see the results...\n");
+        FANCY_CLIENT("Your final hand: ");
+        this.fancyCards(cHand);
+        FANCY_CLIENT("Server's final hand: ");
+        this.fancyCards(sHand);
+        //} catch(Exception ex){}
+        
+    }
     private void fancyWinner(Move move) {
         switch (move.winner) {
             case 0:
-                FANCY_CLIENT("SNIF SNIF SNIF\n", Format.CYAN);
+                FANCY_CLIENT("\n----- YOU LOSE THIS TIME -----\n\n", Format.BLUE);
                 FANCY_CLIENT("Oh... You lose this time. "
                         + "But for sure you'll do it much better the next time! "
-                        + "Do you want to continue playing?\n");
+                        + "Do you want to continue playing?\n\n");
                 break;
             case 1:
-                FANCY_CLIENT_RAINBOW("*****************************\n");
-                FANCY_CLIENT_RAINBOW("****** CONGRATULATIONS ******\n");
-                FANCY_CLIENT_RAINBOW("***** YOU WIN THIS TIME *****\n");
-                FANCY_CLIENT_RAINBOW("*****************************\n");
+                FANCY_CLIENT_RAINBOW("\n***** CONGRATULATIONS :) YOU WIN THIS TIME *****\n\n");
                 break;
             case 2:
-                FANCY_CLIENT_RAINBOW("***************TIE**************\n");
+                FANCY_CLIENT("\n~~~~~ TIE ~~~~~\n\n", Format.GREEN);
+                FANCY_CLIENT("How amazing! You both are equal so good!\n\n");
                 break;
             default:
                 break;
         }
-        this.FANCY_WINNER_TIME = false;
     }   
 }

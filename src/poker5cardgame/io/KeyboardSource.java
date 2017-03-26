@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.io;
 
 import java.util.ArrayList;
@@ -34,17 +29,18 @@ public class KeyboardSource implements Source {
         String[] args = command.split(" ");
         try {
             move.action = Action.valueOf(args[0]);
-        } catch (Exception e) {
+        } catch (Exception e) {   
             FANCY_CLIENT("INVALID ACTION.\n", Format.BOLD, Format.RED);
             FANCY_CLIENT("Oh! It looks like you entered an ", Format.RED);
             FANCY_CLIENT("invalid action", Format.UNDERLINE, Format.RED);
             FANCY_CLIENT(". Please try again.\n", Format.RED);
-            //System.err.println("INVALID ACTION");
             move.action = Action.NOOP;
+            return move;
         }
 
         try {
-            switch (move.action) {
+            switch (move.action) {   
+                    
                 case START:
                     move.id = Integer.valueOf(args[1]);
                     break;
@@ -71,7 +67,7 @@ public class KeyboardSource implements Source {
             {
                 // We are here only in one case: the cDrawn number does not match with the number of cards
                 // In this case, we ignore the cDraw number and discard the given cards
-                FANCY_CLIENT("ACHTUNG: ", Format.BOLD, Format.RED);
+                FANCY_CLIENT("\nATTENTION: ", Format.BOLD, Format.RED);
                 FANCY_CLIENT("It looks like you don't entered a matching number with the cards quantity...", Format.RED);
                 FANCY_CLIENT("But it's no problem! I'll do the next: I'll discard all your entered cards and "
                         + "ignore that you're not so good in maths ;)\n", Format.RED);   
@@ -83,6 +79,7 @@ public class KeyboardSource implements Source {
                 move.cards = new Card[auxCards.size()];
                 for(int i = 0; i < auxCards.size(); i++)
                     move.cards[i] = auxCards.get(i); 
+                move.cDrawn = move.cards.length;
                 return move;
                                               
             } else{
