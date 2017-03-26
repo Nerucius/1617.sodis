@@ -5,21 +5,47 @@ package poker5cardgame;
  */
 public class Log {
     
+    // TODO @alex @sonia !!!! en general al projecte:
+    /**
+     * S’haurà de poder sortir en qualsevol moment de la partida, tallant la
+     * comunicació amb el servidor. La partida però serà contada com a perduda i
+     * s’esborrarà del seu crèdit tots els diners apostats fins llavors.
+     *
+     * Només cal guardar el fitxer de log en el Servidor. Heu de guardar només
+     * el contingut de la comunicació per socket, tant del que es rep com el que
+     * s’està enviant. En cas de que hi hagi un error també heu de guardar el
+     * missatge que s’enviï o que es rebi pel socket.
+     *
+     * En el cas del servidor multithread el nom del fitxer de log l’heu de
+     * construir de la següent forma:
+     *
+     * "Server"+Thread.currentThread().getName()+".log"
+     *
+     * En el cas del servidor asíncron mono-thread, digueu-li ServerGame-0.log
+     * augmentant en u l’índex per cada partida nova que enguegui el servidor.
+     *
+     * Sobretot feu una carpeta src per cada aplicació on les classes principals
+     * es diguin Clienti Server respectivament.
+     */
+    // This flags are to print the log like in the specifications
+    public static /* final */ boolean LOG_CLIENT = true;
+    public static /* final */ boolean LOG_SERVER = true;
+
+    // This flags are to print the log in a fancy way, talking with the client
+    public static /* final */ boolean FANCY_CLIENT = false;
+    public static /* final */ boolean INFO_CLIENT = false;
+    public static /* final */ boolean INFO_SERVER = false;
     
-    
-    public static /* final */ boolean FANCY_CLIENT = true;
-    public static /* final */ boolean INFO_CLIENT = true;
-    public static /* final */ boolean INFO_SERVER = true;
-    
-    public static /* final */ boolean NET_ERROR = true;
-    public static /* final */ boolean NET_DEBUG = true;
+    // This flags are to debug the whole application
+    public static /* final */ boolean NET_ERROR = false;
+    public static /* final */ boolean NET_DEBUG = false;
     public static /* final */ boolean NET_TRACE = false;
     
-    public static /* final */ boolean KB_ERROR = true;
+    public static /* final */ boolean KB_ERROR = false;
     public static /* final */ boolean KB_DEBUG = false;
     public static /* final */ boolean KB_TRACE = false;
 
-    public static /* final */ boolean GAME_ERROR = true;
+    public static /* final */ boolean GAME_ERROR = false;
     public static /* final */ boolean GAME_DEBUG = false;
     public static /* final */ boolean GAME_TRACE = false;
 
@@ -27,10 +53,20 @@ public class Log {
     public static /* final */ boolean IO_DEBUG = true;
     public static /* final */ boolean IO_TRACE = false;
 
-    public static /* final */ boolean AI_ERROR = true;
-    public static /* final */ boolean AI_DEBUG = true;
+    public static /* final */ boolean AI_ERROR = false;
+    public static /* final */ boolean AI_DEBUG = false;
     public static /* final */ boolean AI_TRACE = false;
     
+    
+    public static void LOG_CLIENT(String msg) {
+        if (LOG_CLIENT)
+            System.err.println("C: " + msg);
+    }
+    
+    public static void LOG_SERVER(String msg) {
+        if (LOG_SERVER)
+            System.err.println("S: " + msg);
+    }
     
     public static void NET_ERROR(String msg) {
         if (NET_ERROR)
