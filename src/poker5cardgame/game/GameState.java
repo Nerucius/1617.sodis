@@ -206,7 +206,7 @@ public class GameState {
                 case COUNTER:
                     state.transitions.put(Action.CALL, State.DRAW);
                     state.transitions.put(Action.RAISE, State.COUNTER);
-                    state.transitions.put(Action.FOLD, State.SHOWDOWN); // TODO to know: edited State.QUIT to SHOWDOWN
+                    state.transitions.put(Action.FOLD, State.SHOWDOWN);
                     // 2nd time betting, exits to showdown
                     state.transitions.put(Action.SHOW, State.SHOWDOWN);
                     break;

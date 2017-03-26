@@ -221,12 +221,10 @@ public class GameClient {
 
             GAME_DEBUG("GameClient: Processed move " + move);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
             FANCY_CLIENT("ERROR: ", Format.BOLD, Format.RED);
-            FANCY_CLIENT(e.getMessage() + '\n', Format.RED);
+            FANCY_CLIENT(ex.getMessage() + '\n', Format.RED);
             FANCY_CLIENT("Oh! It looks like you did an error... Please try again!\n\n");
-            close(); // TODO delete
         }
         GAME_DEBUG("GameClient: Updated State: " + getState() + " and data" + clientGameData);
     }
@@ -410,7 +408,7 @@ public class GameClient {
         FANCY_CLIENT(clientGameData.cBet + "   ", Format.BOLD, Format.BLUE);
         FANCY_CLIENT("\nYour remaining chips: ");
         FANCY_CLIENT(clientGameData.cChips + "\n", Format.BOLD, Format.BLUE);
-        FANCY_CLIENT("Your opponents bet: "); // TODO aixo ho sap el client?
+        FANCY_CLIENT("Your opponents bet: "); 
         FANCY_CLIENT(clientGameData.sBet + "   ", Format.BOLD, Format.PURPLE);
         FANCY_CLIENT("\nYour opponents remaining chips: ");
         FANCY_CLIENT(clientGameData.sChips + "\n\n", Format.BOLD, Format.PURPLE);

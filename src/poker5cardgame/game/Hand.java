@@ -443,11 +443,6 @@ public class Hand implements Comparable<Hand> {
         return aux;
     }
 
-    // TODO temp for AI
-    public Card getHigh(List<Card> cards) {
-        return Collections.max(cards);
-    }
-
     public void dumpArray(Card[] cards) {
         for(int i = 0; i < 5; i++)
             cards[i] = this.cards.get(i);

@@ -39,7 +39,6 @@ public final class Deck {
      * Draw a card from the deck.
      * @return Card
      */
-    // TODO test it
     public Card draw(){
         return this.deck.remove(deck.size() - 1);
     }

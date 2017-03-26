@@ -27,7 +27,7 @@ public class IntelligentServerAI extends ArtificialIntelligence {
                 return counting(server);
                 
             case DRAW_SERVER:
-                return drawingServer();
+                return drawing(server);
         }
         
         Move move = new Move();

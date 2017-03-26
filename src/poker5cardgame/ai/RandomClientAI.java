@@ -51,9 +51,6 @@ public class RandomClientAI extends ArtificialIntelligence {
                 break;
         }
         AI_DEBUG("CAI: Sent: " + move);
-        
-        // Save move to our own recording of the Game
-        //sendMove(move);
         return move;
     }
 

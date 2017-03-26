@@ -1,9 +1,7 @@
 package poker5cardgame.ai;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import static poker5cardgame.Log.*;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameData;
@@ -322,76 +320,108 @@ public abstract class ArtificialIntelligence implements Source {
         return move;
     }
     
-    protected Move drawingServer() {
+    protected Move drawing(boolean server) {
         
         Move move = new Move();
-        move.action = GameState.Action.DRAW_SERVER;
+        int drawn = -1;
+        
+        HandRanker.HandRank handRank;
+        
+        if (server) {
+            gameData.sHand.generateRankerInformation();
+            handRank = HandRanker.getHandRank(gameData.sHand);
+        } else {
+            gameData.cHand.generateRankerInformation();
+            handRank = HandRanker.getHandRank(gameData.cHand);
+        }
 
-        gameData.sHand.generateRankerInformation();
-        HandRanker.HandRank handRank = HandRanker.getHandRank(gameData.sHand);
-
+        AI_DEBUG("drawing() "+handRank);
         switch(handRank)
         {
             case HIGH_CARD:
-                move.sDrawn = 5;
-                return move;
+                drawn = 5;
+                break;
                  
             case ONE_PAIR:
-                move.sDrawn = 3;
+                drawn = 3;
                 break;
                 
             case TWO_PAIR:
-                move.sDrawn = 1;
+                drawn = 1;
                 break;
                 
             case THREE_OF_A_KIND:
-                move.sDrawn = 2;
+                drawn = 2;
                 break;
                 
             case STRAIGHT:
-                move.sDrawn = 0;
+                drawn = 0;
                 break;
 
             case FLUSH:
-                move.sDrawn = 0;
+                drawn = 0;
                 break;
 
             case FULL_HOUSE:
-                move.sDrawn = 0;
+                drawn = 0;
                 break;
                 
             case FOUR_OF_A_KIND:
-                move.sDrawn = 1;
+                drawn = 1;
                 break;
                 
             case STRAIGHT_FLUSH:
-                move.sDrawn = 0;
+                drawn = 0;
                 break;               
             
         }
-        if(move.sDrawn > 0)
+        if(drawn > 0)
         {
-            Card[] cardsToDiscard = new Card[move.sDrawn];
-            cardsToDiscard = discardLeftoverCards(move);
-            try {
-                gameData.sHand.discard(cardsToDiscard);
-            } catch (Exception ex) {/* Ignored. This exception will not be thrown because the ai discard the right cards */
+            Card[] cardsToDiscard = discardLeftoverCards(drawn, server);
+            if (server) {
+                try {
+                    gameData.sHand.discard(cardsToDiscard);
+                } catch (Exception ex) {/* Ignored. This exception will not be thrown because the ai discard the right cards */
+                }
             }
+            else
+                move.cards = cardsToDiscard;
         }
+        
+        if(server)
+        {
+            move.action = GameState.Action.DRAW_SERVER;
+            move.sDrawn = drawn;
+        }
+        else
+        {   
+            move.action = GameState.Action.DRAW;
+            move.cDrawn = drawn;
+        }
+        
         return move;
     }
     
-    private Card[] discardLeftoverCards(Move move)
+    private Card[] discardLeftoverCards(int drawn, boolean server)
     {        
-        List<Card> toDiscardList = new ArrayList(gameData.sHand.getCards());
-        List<Card.Rank> toDiscardRanks =  Hand.getKeysByValue(gameData.sHand.getOcurDict(), 1);
+        AI_DEBUG("discardLeftovers: " + drawn);
+        List<Card> toDiscardList;
+        List<Card.Rank> toDiscardRanks;
+        
+        if (server) {
+            toDiscardList = new ArrayList(gameData.sHand.getCards());
+            toDiscardRanks = Hand.getKeysByValue(gameData.sHand.getOcurDict(), 1);
+        } else {
+            toDiscardList = new ArrayList(gameData.cHand.getCards());
+            toDiscardRanks = Hand.getKeysByValue(gameData.cHand.getOcurDict(), 1);
+        }
 
         List<Card> aux = new ArrayList(toDiscardList);
         for(Card cardToDiscard : aux)
             if(!toDiscardRanks.contains(cardToDiscard.getRank()))
                 toDiscardList.remove(cardToDiscard);
           
-        Card[] cardsToDiscard = new Card[move.sDrawn];
+        Card[] cardsToDiscard = new Card[drawn];
         toDiscardList.toArray(cardsToDiscard);
         return cardsToDiscard;
     }

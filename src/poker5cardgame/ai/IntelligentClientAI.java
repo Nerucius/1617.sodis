@@ -1,10 +1,11 @@
 package poker5cardgame.ai;
 
+import java.util.List;
+import static poker5cardgame.Log.AI_DEBUG;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState;
 import poker5cardgame.game.Move;
 
-// TODO @sonia
 public class IntelligentClientAI extends ArtificialIntelligence {
 
     public IntelligentClientAI(GameData gameData, GameState gameState) {
@@ -13,12 +14,37 @@ public class IntelligentClientAI extends ArtificialIntelligence {
     
     @Override
     public Move getNextMove() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        Move move = new Move();
+        
+        switch (gameState.state)
+        {
+            case INIT:
+                move.id = random(1, 1000);
+                break;
+                
+            case BETTING:
+                return betting(client);
+                
+            case BETTING_DEALER:                
+                return betting(client);            
+                
+            case COUNTER:
+                return counting(client);
+                
+            case DRAW:
+                return drawing(client);
+        }        
+        
+        List<GameState.Action> validActions = validActions(server);
+        move.action = validActions.get(0);
+        return move;
     }
 
-    @Deprecated
     @Override
     public boolean sendMove(Move move) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        AI_DEBUG("CAI: Saved: " + move);
+        gameData.save(move, gameState.isServerTurn());
+        return true;
     }
 }
