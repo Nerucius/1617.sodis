@@ -9,6 +9,10 @@ import static poker5cardgame.Log.*;
 
 public class Game {
 
+    private static final int INITIAL_BET = 100;
+    private static final int INITIAL_SERVER_CHIPS = 10000;
+    private static final int INITIAL_CLIENT_CHIPS = 1000;
+    
     // TODO manage cartes dolentes
     // TODO manage all in en general
     // TODO maxbet i minbet per ia i que sempre jugui sense enviar errors
@@ -85,85 +89,201 @@ public class Game {
      * Run the game with the next iteration of commands
      */
     public void update() {
-        GAME_DEBUG(gameData.cId, "Game: Updating with state" + gameState);
 
         Move move = new Move();
         move.action = Action.NOOP;
 
         try {
-
             switch (getState()) {
+                
                 case INIT:
-                    move = this.updateClient();
+                    move = getValidMove(IOSource);
+                    gameData.save(move, false);
                     break;
 
                 case START:
-                    move = this.updateServer();
+                    move = new Move();
+                    move.action = Action.ANTE_STAKES;
+                    move.chips = INITIAL_BET;
+                    move.cStakes = INITIAL_CLIENT_CHIPS;
+                    move.sStakes = INITIAL_SERVER_CHIPS;                    
+                    IOSource.sendMove(move);
+                    gameData.save(move, true);
                     break;
-
-                case ACCEPT_ANTE:
-                    move = this.updateClient();
+                    
+                case ACCEPT_ANTE:                    
+                    move = getValidMove(IOSource);
+                    gameData.save(move,false);
+                    break;
+                
+                case QUIT:                  
+                    move = new Move();
+                    move.action = Action.QUIT;
+                    IOSource.sendMove(move);
                     break;
 
                 case PLAY:
-                    move = this.updateServer();
-                    gameState.setServerTurn(gameData.dealer == 1);
-                    break;
+                    move = new Move();
+                    
+                    // Generate the server and client hands
+                    gameData.deck = new Deck();
+                    gameData.cHand.draw5FromDeck(gameData.deck);
+                    gameData.sHand.draw5FromDeck(gameData.deck);
 
+                    move.action = Action.DEALER_HAND;
+                    if (gameData.dealer == -1) // We want a random dealer only for the first game round
+                        move.dealer = Math.random() > 0.5 ? 1 : 0;
+                    else // Then, the dealer alternates in every game round
+                        move.dealer = 1 - gameData.dealer;
+                    move.cards = new Card[Hand.SIZE];
+                    gameData.cHand.dumpArray(move.cards);
+                    
+                    gameState.setServerTurn(move.dealer == 1);
+                    
+                    IOSource.sendMove(move);
+                    gameData.save(move, true);
+                    break;
+                
                 case BETTING:
-                    if (gameState.isServerTurn()) {
-                        move = this.updateServer();
-                    } else {
-                        move = this.updateClient();
+                    if(gameState.isServerTurn())
+                    {
+                        move = getValidMove(playerSource);
+                        IOSource.sendMove(move);
                     }
+                    else
+                    {
+                        move = getValidMove(IOSource);
+                        if(move.action == Action.BET && !ArtificialIntelligence.possibleBet(gameData, move.chips, false))
+                            throw new Exception("Logic Error. Not valid chips value."); 
+                    }
+                    gameData.save(move, gameState.isServerTurn());
                     gameState.setServerTurn(!gameState.isServerTurn());
                     break;
 
                 case BETTING_DEALER:
-                    if (gameState.isServerTurn()) {
-                        move = this.updateServer();
-                    } else {
-                        move = this.updateClient();
+                    if(gameState.isServerTurn())
+                    {
+                        move = getValidMove(playerSource);
+                        IOSource.sendMove(move);
                     }
+                    else
+                    {
+                        move = getValidMove(IOSource);
+                        if(move.action == Action.BET && !ArtificialIntelligence.possibleBet(gameData, move.chips, false))
+                            throw new Exception("Logic Error. Not valid chips value."); 
+                    }
+                    gameData.save(move, gameState.isServerTurn());
                     gameState.setServerTurn(!gameState.isServerTurn());
                     break;
 
                 case COUNTER:
-                    if (gameState.isServerTurn()) {
-                        move = this.updateServer();
-                    } else {
-                        move = this.updateClient();
+                    if(gameState.isServerTurn())
+                    {
+                        move = getValidMove(playerSource);
+                        IOSource.sendMove(move);
                     }
+                    else
+                    {
+                        move = getValidMove(IOSource);     
+                        if(move.action == Action.RAISE && !ArtificialIntelligence.possibleRaise(gameData, move.chips, false))
+                            throw new Exception("Logic Error. Not valid chips value."); 
+                        if(move.action == Action.CALL && !ArtificialIntelligence.possibleCall(gameData, false))
+                            throw new Exception("Logic Error. Not valid chips value.");                     
+                    }
+                    if(move.action == Action.FOLD)   
+                        gameState.setFold(true);
+                    gameData.save(move, gameState.isServerTurn());
                     gameState.setServerTurn(!gameState.isServerTurn());
                     break;
 
                 case DRAW:
-                    move = this.updateClient();
+                    move = getValidMove(IOSource);             
+                    // TODO: aixo ho ha de controlar el servidor, no el client, ara ho trasllado.
+                    // If the indicated number is not matching the cards quantity,
+                    // i.e., is grather than the entered number of cards, then
+                    // the server sends an error message, but all the indicated 
+                    // cards will be discarded.
+                    // If the cards are not matching the hand cards, the discard method throws an exception.
+                    // But this exception is managed in the clientGame, so it should not reach this exception point.
+                    if(move.cDrawn > 0)
+                        gameData.cHand.discard(move.cards);     
+                    gameData.save(move, false);
                     break;
 
-                case DRAW_SERVER:
-                    move = this.updateServer();
+                case DRAW_SERVER:;
+                    move = getValidMove(playerSource);
+
+                    // Complete the server hand with the missing cards
+                    gameData.sHand.putNCards(gameData.deck, move.sDrawn);
+
+                    move.cDrawn = gameData.cDrawn;
+                    move.cards = gameData.cHand.putNCards(gameData.deck, gameData.cDrawn);
+                    
                     gameState.setServerTurn(gameData.dealer == 1);
+                    
+                    IOSource.sendMove(move);
+                    gameData.save(move, true);
                     break;
 
                 case SHOWDOWN:
-                    move = this.updateServer();
+                    // Show the cards only if show time (i.e. we are not here because of a fold case)
+                    if (!gameState.isFold()) {
+                        if (!gameState.isShowTime()) {
+                            throw new Exception("Server can not show the cards now.");
+                        }
+                        
+                        move = new Move();
+                        move.action = Action.SHOW;
+                        move.cards = new Card[Hand.SIZE];
+                        gameData.sHand.dumpArray(move.cards); 
+                        
+                        // Manage winner with handranker
+                        gameData.sHand.generateRankerInformation();
+                        gameData.cHand.generateRankerInformation();
+                        if (gameData.sHand.wins(gameData.cHand))
+                            move.winner = 0;
+                        else if(gameData.cHand.wins(gameData.sHand))
+                            move.winner = 1;
+                        else
+                            move.winner = 2;
+
+                        IOSource.sendMove(move);
+                        gameData.save(move, true);
+                    }
+
+                    // Ended the game round, so prepare the next one
+                    gameState.setFold(false);
+                    gameState.setShowTime(false);
+                    
+                    move = new Move();
+                    if(!ArtificialIntelligence.possibleNewRound(gameData))
+                    {
+                        move.action = Action.TERMINATE;
+                        throw new Exception("Logic Error. Not enough chips for the initial bet. Terminates the communication.");
+                    }
+                    
+                    move.action = Action.STAKES;
+                    move.cStakes = gameData.cChips;
+                    move.sStakes = gameData.sChips;   
+                    move.winner = gameData.winner;
+                    gameData.save(move, true);
+                    IOSource.sendMove(move);
                     break;
             }
 
             gameState.apply(move.action);
-            GAME_DEBUG(gameData.cId, "Game: Processed move " + move);
+            
+            GAME_DEBUG(gameData.cId, "Processed move " + move);
 
-        } catch (Exception e) {
-            this.sendErrorMsg(e.getMessage());
-            if (getState().equals(GameState.State.QUIT)) {
-                gameState.apply(Action.TERMINATE);
-                this.sendErrorMsg("QUIT GAME due to ERROR: " + e.getMessage());
-                System.exit(1);
-            }
+        } catch (Exception ex) {
+            this.sendErrorMsg(ex.getMessage());
+            if (move.action == Action.TERMINATE)
+                gameState.apply(move.action);
+                //System.exit(1);           
         }
 
-        GAME_DEBUG(gameData.cId, "Game: Updated State: " + gameState.state + " | data: " + gameData + '\n');
+        System.out.println("\nServer Data: " + gameData + gameState +"\n");
+        GAME_DEBUG(gameData.cId, "Updated State: " + gameState + " | Data: " + gameData + '\n');
     }
 
     private Move updateClient() throws Exception {
@@ -312,7 +432,7 @@ public class Game {
                     IOSource.sendMove(sMove);
                 }
 
-                // reset game round flags information
+                // reset game round flags information   
                 gameState.setFold(false);
                 gameState.setShowTime(false);
                 gameData.sDrawn = 0;
@@ -354,6 +474,7 @@ public class Game {
         }
     }
 
+    // TODO use that!!!!
     private void setInitialBetClient() throws Exception {
         if (gameData.cChips >= gameData.initialBet) {
             gameData.cChips -= gameData.initialBet;
@@ -449,9 +570,7 @@ public class Game {
             errMove.action = Action.ERROR;
             errMove.error = msg;
             IOSource.sendMove(errMove);
-        } catch (Exception e) {
-            /* Ignored */
-        }
+        } catch (Exception ex) { /* Ignored */ }
     }
 
     private Move getValidMove(Source src) {

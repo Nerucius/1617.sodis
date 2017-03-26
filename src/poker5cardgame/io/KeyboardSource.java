@@ -5,12 +5,16 @@
  */
 package poker5cardgame.io;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import static poker5cardgame.Log.*;
+import poker5cardgame.game.GameState;
 
 /**
  * Simple Keyboard source to play the game on the same computer.
@@ -62,12 +66,32 @@ public class KeyboardSource implements Source {
                     break;                                      
             }
         } catch (Exception e) {
-            //System.err.println("SYNTAX ERROR");
-            FANCY_CLIENT("SYNTAX ERROR.\n", Format.BOLD, Format.RED);
-            FANCY_CLIENT("Oh! It looks like you did a ", Format.RED);
-            FANCY_CLIENT("syntax error", Format.UNDERLINE, Format.RED);
-            FANCY_CLIENT(". Please try again.\n", Format.RED);
-            move.action = Action.NOOP;
+            
+            if(move.action == GameState.Action.DRAW)
+            {
+                // We are here only in one case: the cDrawn number does not match with the number of cards
+                // In this case, we ignore the cDraw number and discard the given cards
+                FANCY_CLIENT("ACHTUNG: ", Format.BOLD, Format.RED);
+                FANCY_CLIENT("It looks like you don't entered a matching number with the cards quantity...", Format.RED);
+                FANCY_CLIENT("But it's no problem! I'll do the next: I'll discard all your entered cards and "
+                        + "ignore that you're not so good in maths ;)\n", Format.RED);   
+                
+                List<Card> auxCards = new ArrayList();
+                for (int i = 0; i < move.cards.length; i++)
+                        auxCards.add(move.cards[i]);
+                auxCards.removeAll(Collections.singleton(null));
+                move.cards = new Card[auxCards.size()];
+                for(int i = 0; i < auxCards.size(); i++)
+                    move.cards[i] = auxCards.get(i); 
+                return move;
+                                              
+            } else{
+                FANCY_CLIENT("SYNTAX ERROR.\n", Format.BOLD, Format.RED);
+                FANCY_CLIENT("Oh! It looks like you did a ", Format.RED);
+                FANCY_CLIENT("syntax error", Format.UNDERLINE, Format.RED);
+                FANCY_CLIENT(". Please try again.\n", Format.RED);
+                move.action = Action.NOOP;
+            }
         }
         return move;
     }

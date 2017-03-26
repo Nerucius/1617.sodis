@@ -1,23 +1,17 @@
 package poker5cardgame.game;
 
-// TODO @sonia: Maybe this class should've been for a single player, instead of
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-// for both client and server.
 public class GameData {
 
 
     // Common data (0:server;1:client);
     public int dealer = -1;
-    public int winner = -1;
+    public int winner = -1; //(2;tie)
     
     // Server data
     public Deck deck;
     public Hand sHand;
-    public int sChips = 10000;
-    public int initialBet = 100;
+    public int sChips;
+    public int initialBet;
     public int sBet = 0;
     public int sDrawn = -1;
     public int sInteractive = 1; 
@@ -25,7 +19,7 @@ public class GameData {
     // Client data
     public int cId = -1;
     public Hand cHand;
-    public int cChips = 1000;
+    public int cChips;
     public int cBet = 0;
     public int cDrawn = -1;
     public int cInteractive = 0;
@@ -40,10 +34,13 @@ public class GameData {
         return "GameData{" + "dealer=" + dealer + ", winner=" + winner + ", sHand=" + sHand + ", sChips=" + sChips + ", initialBet=" + initialBet + ", sBet=" + sBet + ", sDrawn=" + sDrawn + ", cId=" + cId + ", cHand=" + cHand + ", cChips=" + cChips + ", cBet=" + cBet + ", cDrawn=" + cDrawn + '}';
     }
 
-    public void save(Move move, boolean serverTurn) throws Exception {
-        // TODO refine this method, will be used by AI        
-
+    public void save(Move move, boolean server) {
+        
         switch (move.action) {
+            
+            case NOOP:
+                break;
+                
             case START:
                 this.cId = move.id;
                 break;
@@ -55,11 +52,11 @@ public class GameData {
                 break;
 
             case ANTE_OK:
-                // TODO aixo es un manage ?
+                this.winner = -1;
                 this.cChips -= this.initialBet;
                 this.sChips -= this.initialBet;
-                this.cBet += this.initialBet;
-                this.sBet += this.initialBet;
+                this.cBet = this.initialBet;
+                this.sBet = this.initialBet;
                 break;
 
             case DEALER_HAND:
@@ -68,23 +65,60 @@ public class GameData {
                 break;
 
             case BET:
-                System.out.println("SONIA DEBUG: save game data: server turn? " + serverTurn);
-                if(serverTurn)
-                    this.sBet = move.chips;
+                if(server)
+                {
+                    this.sBet += move.chips;
+                    this.sChips -= move.chips;
+                }
                 else
-                    this.cBet = move.chips;
+                {
+                    this.cBet += move.chips;
+                    this.cChips -= move.chips;
+                }
                 break;
 
             case RAISE:
-                if(serverTurn)
-                    this.sBet = move.chips;
+                if(server)
+                {
+                    int amount = this.cBet - this.sBet + move.chips;
+                    this.sBet += amount;
+                    this.sChips -= amount;
+                }
                 else
-                    this.cBet = move.chips;
+                {
+                    int amount = this.sBet - this.cBet + move.chips;
+                    this.cBet += amount;
+                    this.cChips -= amount;
+                }
+                break;
+                
+            case CALL:
+                if(server)
+                {
+                    int amount = this.cBet - this.sBet;
+                    this.sBet += amount;
+                    this.sChips -= amount;
+                }
+                else
+                {
+                    int amount = this.sBet - this.cBet;
+                    this.cBet += amount;
+                    this.cChips -= amount;
+                }
+                break;
+                
+            case FOLD:
+                if(server)                
+                    this.cChips += this.sBet + this.cBet;                
+                else
+                    this.sChips += this.sBet + this.cBet;                
                 break;
 
             case DRAW:
                 this.cDrawn = move.cDrawn;
-                this.cHand.discard(move.cards);                
+                try {
+                    this.cHand.discard(move.cards);
+                } catch (Exception ex) {/* Ignored. This exception does not reach this point */}
                 break;
                 
             case DRAW_SERVER:
@@ -93,16 +127,26 @@ public class GameData {
                 this.sDrawn = move.sDrawn;
                 break;
 
-            case STAKES:
+            case SHOW:
                 this.winner = move.winner;
+                if(this.winner == 0)                
+                    this.sChips += this.sBet + this.cBet;                
+                if(this.winner == 1)
+                    this.cChips += this.sBet + this.cBet; 
+                else if(this.winner == 2)
+                {
+                    this.cChips += this.cBet;
+                    this.sChips += this.sBet;
+                }
                 
                 // reset round data
                 this.cDrawn = -1;
                 this.sDrawn = -1;
                 this.cBet = 0;
                 this.sBet = 0;
-                this.initialBet = 0;
+                break;
                 
+            case STAKES:
                 this.cChips = move.cStakes;
                 this.sChips = move.sStakes;
                 break;

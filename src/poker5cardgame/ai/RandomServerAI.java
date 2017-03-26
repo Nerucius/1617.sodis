@@ -1,72 +1,39 @@
 package poker5cardgame.ai;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState;
-import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 
 import static poker5cardgame.Log.*;
 
 public class RandomServerAI extends ArtificialIntelligence {
 
-    // Fix the max bet to 500 to be realistic
-    private static final int MAX_BET = 500;
+    private final boolean server = true;
 
     public RandomServerAI(GameData gameData, GameState gameState) {
         super(gameData, gameState);
     }
 
-    /**
-     * Get a random number between min and max.
-     *
-     * @param min int
-     * @param max int
-     * @return int
-     */
-    private int random(int min, int max) {
-        int range = (max - min) + 1;
-        return (int) (Math.random() * range) + min;
-    }
-
     @Override
     public Move getNextMove() {
+        
+        int MAX_BET = gameData.sChips;
+        if(gameData.cChips < gameData.sChips)
+            MAX_BET = gameData.cChips;
 
         Move move = new Move();
-        move.action = randomAction();
+        move.action = randomAction(server);
 
-        // set the required move parameters
-        switch (move.action) {
+        // Set the required move parameters
+        switch (move.action) 
+        {
             case BET:
-                // Set a random bet if it is possible, if not bet the minimum bet
-                int bet = random(gameData.initialBet, MAX_BET);
-                if (gameData.sChips >= bet) {
-                    move.chips = bet;
-                } else {
-                    move.chips = random(gameData.initialBet, gameData.sChips);
-                }
+                move.chips = random(0, MAX_BET);             
                 break;
 
             case RAISE:
-                // Manage the case that the client has done an all in
-                if(gameData.cChips == 0)
-                {
-                    AI_DEBUG("SAI: Client has done an ALL IN");
-                    move = new Move();
-                    move.action = Action.CALL;
-                    break;
-                }
-                // Set a random raise if it is possible, if not raise the minimum bet
-                int raise = random(1, MAX_BET);
-                if (gameData.sChips >= raise) {
-                    move.chips = raise;
-                } else {
-                    move.chips = random(1, gameData.sChips);
-                }
+                move.chips = random(1, MAX_BET);
                 break;
 
             case DRAW_SERVER:
@@ -78,10 +45,7 @@ public class RandomServerAI extends ArtificialIntelligence {
                 }            
                 try {
                     gameData.sHand.discard(cardsToDiscard);
-                } catch (Exception ex) {
-                    /* Ignored */
-                }
-
+                } catch (Exception ex) {/* Ignored. This exception will not be thrown because the ai discard the right cards */}
                 break;
         }
 
@@ -93,17 +57,5 @@ public class RandomServerAI extends ArtificialIntelligence {
     public boolean sendMove(Move move) {
         AI_DEBUG("SAI: Recorded move " + move);
         return true;
-    }
-
-    private GameState.Action randomAction() {
-        List<Action> validActions = new ArrayList();
-        validActions.addAll(gameState.state.transitions.keySet());
-
-        // The case SHOW can not be choosen, it is automatically applied in the apply method
-        if (validActions.contains(Action.SHOW)) {
-            validActions.remove(Action.SHOW);
-        }
-
-        return validActions.get(random(0, validActions.size() - 1));
     }
 }

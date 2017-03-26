@@ -11,23 +11,8 @@ import poker5cardgame.game.Move;
 // TODO @sonia change it, now it is random
 public class IntelligentServerAI extends ArtificialIntelligence {
 
-    // Fix the max bet to 500 to be realistic
-    private static final int MAX_BET = 500;
-
     public IntelligentServerAI(GameData gameData, GameState gameState) {
         super(gameData, gameState);
-    }
-
-    /**
-     * Get a random number between min and max.
-     *
-     * @param min int
-     * @param max int
-     * @return int
-     */
-    private int random(int min, int max) {
-        int range = (max - min) + 1;
-        return (int) (Math.random() * range) + min;
     }
 
     @Override

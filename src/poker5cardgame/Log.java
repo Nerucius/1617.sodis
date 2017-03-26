@@ -22,7 +22,7 @@ public class Log {
     public static /* final */ boolean GAME_TRACE = false;
 
     public static /* final */ boolean IO_ERROR = true;
-    public static /* final */ boolean IO_DEBUG = true;
+    public static /* final */ boolean IO_DEBUG = false;
     public static /* final */ boolean IO_TRACE = false;
 
     public static /* final */ boolean AI_ERROR = true;

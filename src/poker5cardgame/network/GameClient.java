@@ -93,16 +93,19 @@ public class GameClient {
                         this.fancyWelcomeGreetings();
                     }
                     move = this.updateSend();
+                    clientGameData.save(move, false);
                     break;
 
                 case START:
                     move = this.updateReceive();
+                    clientGameData.save(move, true);
                     break;
 
                 case ACCEPT_ANTE:
                     if(this.FANCY_ADVICES_TIME)
                         this.fancyAccept();
                     move = this.updateSend();
+                    clientGameData.save(move, false);
                     break;
 
                 case PLAY:
@@ -110,58 +113,111 @@ public class GameClient {
                     clientGameState.setServerTurn(move.dealer == 1);
                     this.fancyDealer(move);
                     this.fancyHand(move);
+                    clientGameData.save(move, true);
                     break;
 
                 case BETTING:
-                    if (clientGameState.isServerTurn()) {
+                    if(clientGameState.isServerTurn())
                         move = this.updateReceive();
-                    } else {
+
+                    else 
+                    {
                         if(this.FANCY_ADVICES_TIME)
                             this.fancyBetting();
-                        move = this.updateSend();
+                        
+                        move = this.updateSend();                    
+                        if(move.action == Action.BET && !ArtificialIntelligence.possibleBet(clientGameData, move.chips, false))
+                            throw new Exception("Logic Error. Not valid chips value.");        
                     }
-                    if(move.action != Action.NOOP)
-                        clientGameState.setServerTurn(!clientGameState.isServerTurn());
+                    clientGameData.save(move, clientGameState.isServerTurn());
+                    if(move.action != Action.NOOP && move.action != Action.ERROR)
+                        clientGameState.setServerTurn(!clientGameState.isServerTurn());      
                     break;
 
                 case BETTING_DEALER:
-                    if (clientGameState.isServerTurn()) {
+                    if(clientGameState.isServerTurn())
                         move = this.updateReceive();
-                    } else {
+
+                    else 
+                    {
                         if(this.FANCY_ADVICES_TIME)
                             this.fancyBetting();
-                        move = this.updateSend();
+                        
+                        move = this.updateSend();                    
+                        if(move.action == Action.BET && !ArtificialIntelligence.possibleBet(clientGameData, move.chips, false))
+                            throw new Exception("Logic Error. Not valid chips value.");        
                     }
-                    if (move.action != Action.NOOP)
-                        clientGameState.setServerTurn(!clientGameState.isServerTurn());
+                    clientGameData.save(move, clientGameState.isServerTurn());
+                    if(move.action != Action.NOOP && move.action != Action.ERROR)
+                        clientGameState.setServerTurn(!clientGameState.isServerTurn());   
                     break;
 
                 case COUNTER:
-                    if (clientGameState.isServerTurn()) {
+                    if(clientGameState.isServerTurn())
                         move = this.updateReceive();
-                    } else {
+                    else 
+                    {
                         if(this.FANCY_ADVICES_TIME)
                             this.fancyBetting();
-                        move = this.updateSend();
+                        
+                        move = this.updateSend();                    
+                        if(move.action == Action.RAISE && !ArtificialIntelligence.possibleRaise(clientGameData, move.chips, false))
+                            throw new Exception("Logic Error. Not valid chips value.");
+                        if(move.action == Action.CALL && !ArtificialIntelligence.possibleCall(clientGameData, false))
+                            throw new Exception("Logic Error. Not valid chips value.");                           
                     }
-                    if(move.action != Action.NOOP)
+                    if(move.action == Action.FOLD)
+                        clientGameState.setFold(true);
+                    clientGameData.save(move, clientGameState.isServerTurn());
+                    if(move.action != Action.NOOP && move.action != Action.ERROR)
                         clientGameState.setServerTurn(!clientGameState.isServerTurn());
                     break;
 
                 case DRAW:
                     //this.fancyDraw();
-                    move = this.updateSend();
+                    move = this.updateSend();                       
+          
+                    // If the cards are not matching the hand cards, the discard method throws an exception.
+                    if(move.cDrawn > 0)                   
+                        clientGameData.cHand.discard(move.cards);                      
+                    clientGameData.save(move, false);
                     break;
 
                 case DRAW_SERVER:
                     move = this.updateReceive();
                     clientGameState.setServerTurn(clientGameData.dealer == 1);
                     //this.fancyDrawServer(move);
+                    clientGameData.save(move, true);
                     break;
 
                 case SHOWDOWN:
                     move = this.updateReceive();
-                    this.fancyWinner(move);
+                    System.out.println("----[DEBUG] SHOWNDOWN client move: " + move);
+                    
+                    if(!clientGameState.isFold() && clientGameState.isShowTime())
+                    {
+                        try{clientGameData.sHand.putCards(move.cards);}catch(Exception e){}
+                    
+                        // Manage winner with handranker
+                        clientGameData.sHand.generateRankerInformation();
+                        clientGameData.cHand.generateRankerInformation();
+                        if (clientGameData.sHand.wins(clientGameData.cHand))
+                            move.winner = 0;
+                        else if(clientGameData.cHand.wins(clientGameData.sHand))
+                            move.winner = 1;
+                        else
+                            move.winner = 2;                  
+
+                        System.out.println("Entra aqui i el winner es = " + move.winner + move.action);
+                        this.fancyWinner(move);
+                        clientGameState.setShowTime(false);
+                    }             
+                    clientGameState.setFold(false);
+
+                    if(!ArtificialIntelligence.possibleNewRound(clientGameData))
+                        move.action = Action.TERMINATE;
+                    
+                    clientGameData.save(move, true);
                     break;
 
                 case QUIT:
@@ -171,17 +227,20 @@ public class GameClient {
             }
 
             clientGameState.apply(move.action);
-            clientGameData.save(move, clientGameState.isServerTurn());
+
             GAME_DEBUG("GameClient: Processed move " + move);
+            if(move.action == Action.NOOP) GAME_DEBUG("\n\n\nNOOOOOOOOOOOOOOOOOOOOOOOOOOP\n\n\n");
 
         } catch (Exception e) {
             GAME_DEBUG("GameClient: Exception");
+            e.printStackTrace();
+            System.out.println("LIADA PARDA: " + e.getMessage());
         }
         GAME_DEBUG("GameClient: Updated State: " + getState());
     }
 
     public Move updateSend() {
-        System.out.println("\nClient Data: " + clientGameData +"\n");
+        System.out.println("\nClient Data: " + clientGameData + clientGameState +"\n");
 
         /* Begin: Talking with the client */
         this.fancyMoves();
@@ -189,6 +248,10 @@ public class GameClient {
 
         GAME_DEBUG("GameClient: Waiting for next client move...");
         Move next = playerSource.getNextMove();
+        
+        if(!clientGameState.getValidActions().contains(next.action))
+            next.action = Action.NOOP;
+        
         IOSource.sendMove(next);
         return next;
     }
@@ -196,7 +259,7 @@ public class GameClient {
     public Move updateReceive() {
         Move reply = IOSource.getNextMove();
         if(reply.action != Action.ERROR)
-            this.FANCY_ADVICES_TIME = true;            
+            this.FANCY_ADVICES_TIME = true;  
 
         GAME_DEBUG("GameClient: Received Move: " + reply);
         playerSource.sendMove(reply);
@@ -357,19 +420,25 @@ public class GameClient {
     }
     
     private void fancyWinner(Move move) {
-        if (move.winner == 1) {
-            FANCY_CLIENT("SNIF SNIF SNIF\n", Format.CYAN);
-            FANCY_CLIENT("Oh... You lose this time. "
-                    + "But for sure you'll do it much better the next time! "
-                    + "Do you want to continue playing?\n");
-        } else {
-            FANCY_CLIENT_RAINBOW("*****************************\n");
-            FANCY_CLIENT_RAINBOW("****** CONGRATULATIONS ******\n");
-            FANCY_CLIENT_RAINBOW("***** YOU WIN THIS TIME *****\n");
-            FANCY_CLIENT_RAINBOW("*****************************\n");
+        switch (move.winner) {
+            case 0:
+                FANCY_CLIENT("SNIF SNIF SNIF\n", Format.CYAN);
+                FANCY_CLIENT("Oh... You lose this time. "
+                        + "But for sure you'll do it much better the next time! "
+                        + "Do you want to continue playing?\n");
+                break;
+            case 1:
+                FANCY_CLIENT_RAINBOW("*****************************\n");
+                FANCY_CLIENT_RAINBOW("****** CONGRATULATIONS ******\n");
+                FANCY_CLIENT_RAINBOW("***** YOU WIN THIS TIME *****\n");
+                FANCY_CLIENT_RAINBOW("*****************************\n");
+                break;
+            case 2:
+                FANCY_CLIENT_RAINBOW("***************TIE**************\n");
+                break;
+            default:
+                break;
         }
         this.FANCY_WINNER_TIME = false;
-    }
-
-   
+    }   
 }
