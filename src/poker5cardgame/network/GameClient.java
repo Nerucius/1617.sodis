@@ -183,6 +183,7 @@ public class GameClient {
                     move = this.updateReceive();
                     clientGameState.setServerTurn(clientGameData.dealer == 1);
                     clientGameData.save(move, true);
+                    INFO_SERVER(move.toString());
                     this.fancyDrawServer(move);
                     break;
 
@@ -225,6 +226,8 @@ public class GameClient {
             FANCY_CLIENT("ERROR: ", Format.BOLD, Format.RED);
             FANCY_CLIENT(ex.getMessage() + '\n', Format.RED);
             FANCY_CLIENT("Oh! It looks like you did an error... Please try again!\n\n");
+            ex.printStackTrace();
+            close();
         }
         GAME_DEBUG("GameClient: Updated State: " + getState() + " and data" + clientGameData);
     }

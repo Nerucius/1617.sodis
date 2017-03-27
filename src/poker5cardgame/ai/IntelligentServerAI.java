@@ -24,7 +24,7 @@ public class IntelligentServerAI extends ArtificialIntelligence {
                 return betting(server);            
                 
             case COUNTER:
-                return counting(server);
+                return countering(server);
                 
             case DRAW_SERVER:
                 return drawing(server);

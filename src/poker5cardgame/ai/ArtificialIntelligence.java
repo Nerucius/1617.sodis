@@ -281,7 +281,7 @@ public abstract class ArtificialIntelligence implements Source {
         }
     }
     
-    protected Move counting(boolean server)
+    protected Move countering(boolean server)
     {
         Move move = new Move();
         HandRanker.HandRank handRank;
@@ -335,6 +335,7 @@ public abstract class ArtificialIntelligence implements Source {
             handRank = HandRanker.getHandRank(gameData.cHand);
         }
 
+        Card[] cardsToDiscard = new Card[0];
         AI_DEBUG("drawing() "+handRank);
         switch(handRank)
         {
@@ -377,17 +378,16 @@ public abstract class ArtificialIntelligence implements Source {
         }
         if(drawn > 0)
         {
-            Card[] cardsToDiscard = discardLeftoverCards(drawn, server);
+            cardsToDiscard = discardLeftoverCards(drawn, server);
             if (server) {
                 try {
                     gameData.sHand.discard(cardsToDiscard);
                 } catch (Exception ex) {/* Ignored. This exception will not be thrown because the ai discard the right cards */
                 }
-            }
-            else
-                move.cards = cardsToDiscard;
+            }             
         }
         
+        move.cards = cardsToDiscard;
         if(server)
         {
             move.action = GameState.Action.DRAW_SERVER;

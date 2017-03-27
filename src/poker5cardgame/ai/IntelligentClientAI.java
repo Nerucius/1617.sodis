@@ -5,6 +5,7 @@ import static poker5cardgame.Log.AI_DEBUG;
 import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState;
 import poker5cardgame.game.Move;
+import static poker5cardgame.Log.AI_DEBUG;
 
 public class IntelligentClientAI extends ArtificialIntelligence {
 
@@ -30,7 +31,7 @@ public class IntelligentClientAI extends ArtificialIntelligence {
                 return betting(client);            
                 
             case COUNTER:
-                return counting(client);
+                return countering(client);
                 
             case DRAW:
                 return drawing(client);
