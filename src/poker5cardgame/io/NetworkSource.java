@@ -1,12 +1,12 @@
 package poker5cardgame.io;
 
+import poker5cardgame.network.Network;
 import java.io.IOException;
 import java.net.Socket;
 import static poker5cardgame.Log.*;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
-import poker5cardgame.network.Network;
 import poker5cardgame.network.Packet;
 
 /**

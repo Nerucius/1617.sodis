@@ -10,7 +10,6 @@ import static poker5cardgame.Log.*;
 import poker5cardgame.io.ComUtils;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Writable;
-import poker5cardgame.network.Network;
 import poker5cardgame.network.Packet;
 
 /**

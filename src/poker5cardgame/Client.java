@@ -1,6 +1,6 @@
 package poker5cardgame;
 
-import poker5cardgame.network.GameClient;
+import poker5cardgame.game.GameClient;
 import static poker5cardgame.Log.*;
 import poker5cardgame.ai.ArtificialIntelligence;
 

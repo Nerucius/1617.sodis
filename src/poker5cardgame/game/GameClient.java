@@ -1,4 +1,4 @@
-package poker5cardgame.network;
+package poker5cardgame.game;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -7,16 +7,11 @@ import java.util.List;
 import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.ai.IntelligentClientAI;
 import poker5cardgame.ai.RandomClientAI;
-import poker5cardgame.game.GameData;
-import poker5cardgame.game.GameState;
 import poker5cardgame.game.GameState.Action;
-import poker5cardgame.game.Move;
 import poker5cardgame.io.KeyboardSource;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
 import static poker5cardgame.Log.*;
-import poker5cardgame.game.Card;
-import poker5cardgame.game.Hand;
 
 public class GameClient {
 
@@ -34,6 +29,7 @@ public class GameClient {
 
     /**
      * Create a client With the given AI type
+     * @param aiType
      */
     public GameClient(ArtificialIntelligence.Type aiType) {
         clientGameData = new GameData();
@@ -61,6 +57,7 @@ public class GameClient {
 
     /**
      * Create a Client with the given source.
+     * @param playerSource
      */
     public GameClient(Source playerSource) {
         this.playerSource = playerSource;

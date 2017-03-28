@@ -8,7 +8,7 @@ import poker5cardgame.game.Move;
 import poker5cardgame.io.KeyboardSource;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
-import poker5cardgame.network.GameClient;
+import poker5cardgame.game.GameClient;
 import poker5cardgame.network.MTGameServer;
 import poker5cardgame.network.Server;
 

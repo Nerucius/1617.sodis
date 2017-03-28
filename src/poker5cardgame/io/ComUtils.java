@@ -1,11 +1,11 @@
 package poker5cardgame.io;
 
+import poker5cardgame.network.Network;
 import java.net.*;
 import java.io.*;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import poker5cardgame.network.Network;
 import poker5cardgame.network.Network.Command;
 import poker5cardgame.network.Packet;
 

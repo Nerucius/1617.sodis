@@ -1,3 +1,7 @@
+
+// TODO delete class
+
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -8,7 +12,7 @@ package poker5cardgame;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
-import poker5cardgame.network.GameClient;
+import poker5cardgame.game.GameClient;
 import poker5cardgame.network.MTEchoServer;
 import poker5cardgame.network.Server;
 
