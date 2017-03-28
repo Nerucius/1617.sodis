@@ -1,8 +1,9 @@
 package poker5cardgame;
 
 import poker5cardgame.game.ClientGame;
-import static poker5cardgame.Log.*;
 import poker5cardgame.ai.ArtificialIntelligence;
+
+import static poker5cardgame.Log.*;
 
 /**
  * Client launcher class
@@ -16,6 +17,10 @@ public class Client {
     static ClientGame client;
 
     public static void main(String... args) {
+        
+        // Enable full console logging for incoming and outgoing
+        LOG_CLIENT = true;
+        LOG_SERVER = true;
 
         try {
             for (int i = 0; i < args.length; i++) {

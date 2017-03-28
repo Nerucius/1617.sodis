@@ -16,6 +16,7 @@ import poker5cardgame.game.ServerGame;
 import poker5cardgame.io.ComUtils;
 
 import static poker5cardgame.Log.*;
+import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.io.NetworkSource;
 
 /**
@@ -23,6 +24,8 @@ import poker5cardgame.io.NetworkSource;
  */
 public class SGameServer extends SelectorServer {
 
+    private ArtificialIntelligence.Type AIType = ArtificialIntelligence.Type.AI_RANDOM;
+    
     // Program-Wide Saved games
     private final ConcurrentHashMap<Integer, GameData> savedGames = new ConcurrentHashMap<>();
     private final HashMap<SocketChannel, ClientCapsule> clientStreams = new HashMap<>();
@@ -62,6 +65,7 @@ public class SGameServer extends SelectorServer {
             cc.nSource.setComUtils(comUtils);
             
             // Update the game
+            game.nextMoveReady = true;
             boolean keepUpdating = true;
             while(keepUpdating)
                 keepUpdating = !game.update();
@@ -76,7 +80,6 @@ public class SGameServer extends SelectorServer {
     }
 
     private Packet defragmentPacket(SelectorWorker.ServerDataEvent event) {
-
         // Get or create a buffer for this socket
         ClientCapsule streams = getClient(event);
 
@@ -135,7 +138,8 @@ public class SGameServer extends SelectorServer {
             // Create networkSource and Game
             client.nSource = new NetworkSource();
             client.nSource.setBlocking(false);
-            client.game = new ServerGame(client.nSource);
+            client.game = new ServerGame(client.nSource, AIType);
+            client.game.isSelector = true;
         }
 
         return client;
@@ -158,6 +162,11 @@ public class SGameServer extends SelectorServer {
 
         // Set to true if the last transmission was a fragment
         boolean incomplete = false;
+    }
+
+    @Override
+    public void setAIType(ArtificialIntelligence.Type type) {
+        this.AIType = type;
     }
 
 }

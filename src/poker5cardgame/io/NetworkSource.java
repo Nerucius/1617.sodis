@@ -43,15 +43,17 @@ public class NetworkSource implements Source {
     }
 
     /**
-     * Non-Exclusive Network Source. Use SetComUtils() to set input-output.
-     * In the case of non-blocking, use the packetQueue methods instead
-     * to inject new data.
+     * Non-Exclusive Network Source. Use SetComUtils() to set input-output. In
+     * the case of non-blocking, use the packetQueue methods instead to inject
+     * new data.
      */
     public NetworkSource() {
     }
 
     public Move getNextMove() {
         Move move = new Move();
+        Packet packet;
+
         if (comUtils == null) {
             // Connection has been closed. Notify the Game
             move.action = Action.TERMINATE;
@@ -61,16 +63,18 @@ public class NetworkSource implements Source {
         if (!blocking) {
             // For non-blocking Selector servers, the packet has to be
             // inserted before into a queue, then it can be retreived here
-            Packet packet = packetQueue.remove();
+            packet = packetQueue.remove();
             move = _getNextMovePacket(packet);
 
         } else {
             // Read the next full packet from the network. This method
             // never fails or throws exception. If the network connection
             // breaks the packet will just say NET_ERROR.
-            Packet packet = comUtils.read_NetworkPacket();
+            packet = comUtils.read_NetworkPacket();
             move = _getNextMovePacket(packet);
         }
+
+        LOG_SERVER(packet.toString());
 
         return move;
     }
@@ -307,7 +311,7 @@ public class NetworkSource implements Source {
 
         // Write all packets to the network
         for (Packet packet : packets) {
-            if (packet != null)
+            if (packet != null) {
                 // TODO Deal with exception inside try-catch
 
                 if (!comUtils.write_NetworkPacket(packet)) {
@@ -320,17 +324,21 @@ public class NetworkSource implements Source {
                     comUtils = null;
                     return false;
                 }
+                
+                LOG_CLIENT(packet.toString());
+                
+            }
+
         }
         return true;
     }
-    
+
     // Important IO Stuff
-    
-    public void setBlocking(boolean blocking){
+    public void setBlocking(boolean blocking) {
         this.blocking = blocking;
-        
+
         // Create a queue for the non-blocking case
-        if(!blocking && packetQueue == null){
+        if (!blocking && packetQueue == null) {
             packetQueue = new ArrayBlockingQueue<>(16);
         }
     }

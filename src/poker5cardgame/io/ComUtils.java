@@ -13,8 +13,6 @@ import static poker5cardgame.Log.*;
 
 public class ComUtils {
 
-    // TODO @alex Test Socket Timeout
-
     /* Mida d'una cadena de caracters */
     private final int STRSIZE = 32;
 

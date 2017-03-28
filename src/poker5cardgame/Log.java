@@ -28,8 +28,8 @@ public class Log {
      * es diguin Clienti Server respectivament.
      */
     // This flags are to print the log like in the specifications
-    public static /* final */ boolean LOG_CLIENT = true;
-    public static /* final */ boolean LOG_SERVER = true;
+    public static /* final */ boolean LOG_CLIENT = false;
+    public static /* final */ boolean LOG_SERVER = false;
 
     // This flags are to print the log in a fancy way, talking with the client
     public static /* final */ boolean FANCY_CLIENT = false;
@@ -37,21 +37,21 @@ public class Log {
     public static /* final */ boolean INFO_SERVER = false;
     
     // This flags are to debug the whole application
-    public static /* final */ boolean NET_ERROR = true;
-    public static /* final */ boolean NET_DEBUG = true;
-    public static /* final */ boolean NET_TRACE = true;
+    public static /* final */ boolean NET_ERROR = false;
+    public static /* final */ boolean NET_DEBUG = false;
+    public static /* final */ boolean NET_TRACE = false;
     
     public static /* final */ boolean KB_ERROR = false;
     public static /* final */ boolean KB_DEBUG = false;
     public static /* final */ boolean KB_TRACE = false;
 
-    public static /* final */ boolean GAME_ERROR = true;
-    public static /* final */ boolean GAME_DEBUG = true;
+    public static /* final */ boolean GAME_ERROR = false;
+    public static /* final */ boolean GAME_DEBUG = false;
     public static /* final */ boolean GAME_TRACE = false;
 
-    public static /* final */ boolean IO_ERROR = true;
+    public static /* final */ boolean IO_ERROR = false;
     public static /* final */ boolean IO_DEBUG = false;
-    public static /* final */ boolean IO_TRACE = true;
+    public static /* final */ boolean IO_TRACE = false;
 
     public static /* final */ boolean AI_ERROR = false;
     public static /* final */ boolean AI_DEBUG = false;
@@ -60,12 +60,12 @@ public class Log {
     
     public static void LOG_CLIENT(String msg) {
         if (LOG_CLIENT)
-            System.err.println("C: " + msg);
+            System.out.println("C: " + msg);
     }
     
     public static void LOG_SERVER(String msg) {
         if (LOG_SERVER)
-            System.err.println("S: " + msg);
+            System.out.println("S: " + msg);
     }
     
     public static void NET_ERROR(String msg) {

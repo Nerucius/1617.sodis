@@ -7,6 +7,7 @@ package poker5cardgame.network;
 
 import java.net.Socket;
 import static poker5cardgame.Log.*;
+import poker5cardgame.ai.ArtificialIntelligence;
 import poker5cardgame.io.ComUtils;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Writable;
@@ -68,6 +69,11 @@ public class MTEchoServer extends MultithreadServer {
              */
         }
 
+    }
+
+    @Override
+    public void setAIType(ArtificialIntelligence.Type type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

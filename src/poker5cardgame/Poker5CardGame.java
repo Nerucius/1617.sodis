@@ -2,7 +2,6 @@ package poker5cardgame;
 
 import java.util.Scanner;
 import poker5cardgame.game.Card;
-import poker5cardgame.game.GameData;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import poker5cardgame.io.KeyboardSource;

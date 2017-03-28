@@ -6,15 +6,8 @@
  */
 package poker5cardgame;
 
-import poker5cardgame.game.Card;
-import poker5cardgame.game.GameState.Action;
-import poker5cardgame.game.Move;
 import poker5cardgame.game.ClientGame;
-import poker5cardgame.io.ComUtils;
 import poker5cardgame.io.KeyboardSource;
-import poker5cardgame.io.NetworkSource;
-import poker5cardgame.network.MTGameServer;
-import poker5cardgame.network.MultithreadServer;
 import poker5cardgame.network.SGameServer;
 import poker5cardgame.network.Server;
 

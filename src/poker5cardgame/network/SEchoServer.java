@@ -1,6 +1,7 @@
 package poker5cardgame.network;
 
 import static poker5cardgame.Log.*;
+import poker5cardgame.ai.ArtificialIntelligence;
 
 /**
  *
@@ -23,5 +24,10 @@ public class SEchoServer extends SelectorServer {
 
         }
 
+    }
+
+    @Override
+    public void setAIType(ArtificialIntelligence.Type type) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -6,6 +6,7 @@ import poker5cardgame.ai.RandomServerAI;
 import poker5cardgame.io.Source;
 import poker5cardgame.game.GameState.Action;
 import static poker5cardgame.Log.*;
+import poker5cardgame.io.NetworkSource;
 
 public class ServerGame {
 
@@ -23,6 +24,10 @@ public class ServerGame {
     private Source playerSource;
     private GameData serverGameData;
     private GameState serverGameState;
+    
+    // Selector Variables
+    public boolean nextMoveReady = false;
+    public boolean isSelector = false;
 
     /**
      * Create a new Game Instance with the given source. Which is in charge of
@@ -86,7 +91,7 @@ public class ServerGame {
      * @return true if the update cycle is done.
      */
     public boolean update() {
-        boolean done = true;
+        boolean done = false;
 
         Move move = new Move();
         move.action = Action.NOOP;
@@ -97,7 +102,6 @@ public class ServerGame {
                 case INIT:
                     move = getValidMove(IOSource);
                     serverGameData.save(move, false);
-                    done = false;
                     break;
 
                 case START:
@@ -113,7 +117,6 @@ public class ServerGame {
                 case ACCEPT_ANTE:                    
                     move = getValidMove(IOSource);
                     serverGameData.save(move,false);
-                    done = false;
                     break;
                 
                 case QUIT:                  
@@ -266,11 +269,14 @@ public class ServerGame {
             
             GAME_DEBUG(serverGameData.cId, "Processed move " + move);
 
-        } catch (Exception ex) {
+        } catch (MoveNotReadyException e){
+            GAME_DEBUG("Finished Server turn for the Selector Server");
+            done = true;
+            
+        }catch (Exception ex) {
             this.sendErrorMsg(ex.getMessage());
             if (move.action == Action.TERMINATE)
                 serverGameState.apply(move.action);
-                //System.exit(1);   
                 return true;
         }
 
@@ -287,7 +293,16 @@ public class ServerGame {
         } catch (Exception ex) { /* Ignored */ }
     }
 
-    private Move getValidMove(Source src) {
+    private Move getValidMove(Source src) throws MoveNotReadyException {
+        // In the case of the selector server, we can't run the update method 
+        // in a while(true) loop, so when we request the next move after the first
+        // has been processed, we have to tell the server that we can't update
+        // further without new data from the client
+        if(isSelector && !nextMoveReady && src instanceof NetworkSource){
+            throw new MoveNotReadyException();
+        }
+        nextMoveReady = false;        
+        
         // get the next  move
         Move move = src.getNextMove();
 
@@ -298,5 +313,9 @@ public class ServerGame {
         }
         // return the valid move
         return move;
+    }
+    
+    private class MoveNotReadyException extends Exception{
+        
     }
 }
