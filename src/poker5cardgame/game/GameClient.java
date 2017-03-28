@@ -121,7 +121,9 @@ public class GameClient {
                     }
                     clientGameData.save(move, clientGameState.isServerTurn());
                     if(move.action != Action.NOOP && move.action != Action.ERROR)
-                        clientGameState.setServerTurn(!clientGameState.isServerTurn());      
+                        clientGameState.setServerTurn(!clientGameState.isServerTurn());   
+                    if(move.action != Action.PASS)
+                        this.fancyInfoBetting();
                     break;
 
                 case BETTING_DEALER:
@@ -133,20 +135,25 @@ public class GameClient {
                     {
                         if(this.FANCY_ADVICES_TIME)
                             this.fancyBetting();
-                        
-                        move = this.updateSend();                    
+                        move = this.updateSend();       
                         if(move.action == Action.BET && !ArtificialIntelligence.possibleBet(clientGameData, move.chips, false))
                             throw new Exception("Logic Error. Not valid chips value.");        
                     }
                     clientGameData.save(move, clientGameState.isServerTurn());
                     if(move.action != Action.NOOP && move.action != Action.ERROR)
-                        clientGameState.setServerTurn(!clientGameState.isServerTurn());   
+                        clientGameState.setServerTurn(!clientGameState.isServerTurn());  
+                    if(move.action != Action.PASS)
+                        this.fancyInfoBetting();
                     break;
 
                 case COUNTER:
                     if (clientGameState.isServerTurn()) {
                         move = this.updateReceive();
                         INFO_SERVER(move.toString());
+                        if (move.action == Action.FOLD) {
+                            clientGameState.setFold(true);
+                            this.fancyServerFold();
+                        }
                     }
                     else 
                     {
@@ -157,13 +164,18 @@ public class GameClient {
                         if(move.action == Action.RAISE && !ArtificialIntelligence.possibleRaise(clientGameData, move.chips, false))
                             throw new Exception("Logic Error. Not valid chips value.");
                         if(move.action == Action.CALL && !ArtificialIntelligence.possibleCall(clientGameData, false))
-                            throw new Exception("Logic Error. Not valid chips value.");                           
+                            throw new Exception("Logic Error. Not valid chips value.");   
+                        if(move.action == Action.FOLD)
+                        {
+                            clientGameState.setFold(true);
+                            this.fancyClientFold();
+                        }
                     }
-                    if(move.action == Action.FOLD)
-                        clientGameState.setFold(true);
                     clientGameData.save(move, clientGameState.isServerTurn());
                     if(move.action != Action.NOOP && move.action != Action.ERROR)
                         clientGameState.setServerTurn(!clientGameState.isServerTurn());
+                    if(move.action != Action.FOLD)
+                        this.fancyInfoBetting();
                     break;
 
                 case DRAW:
@@ -185,9 +197,7 @@ public class GameClient {
                     break;
 
                 case SHOWDOWN:
-                    move = this.updateReceive();
-                    if(clientGameState.isFold())
-                        this.fancyFold();
+                    move = this.updateReceive();                        
                     
                     if(!clientGameState.isFold() && clientGameState.isShowTime())
                     {
@@ -404,6 +414,10 @@ public class GameClient {
         this.fancyRememberCards();
         FANCY_CLIENT("Oh! You have to take a very difficult decision!\n");
         FANCY_CLIENT("Remember some important informations:\n");
+        this.fancyInfoBetting();
+    }
+    
+    private void fancyInfoBetting() {
         FANCY_CLIENT("Your actual bet: ");
         FANCY_CLIENT(clientGameData.cBet + "   ", Format.BOLD, Format.BLUE);
         FANCY_CLIENT("\nYour remaining chips: ");
@@ -415,8 +429,12 @@ public class GameClient {
         this.FANCY_ADVICES_TIME = false;
     }
     
-    private void fancyFold() {
-        FANCY_CLIENT("Ops! It looks like you don't have a good hand...\nI wish you good luck for the next round!\n");
+    private void fancyClientFold() {
+        FANCY_CLIENT("Ops! It looks like you don't have a good hand...\nI wish you good luck for the next round! Do you want to play again?\n");
+    }
+    
+    private void fancyServerFold() {
+        FANCY_CLIENT("OMG! You're so good that the server doesn't dare to play against you. Next round?\n");
     }
 
     private void fancyCards(Card... cards) {        

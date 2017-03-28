@@ -140,12 +140,14 @@ public class GameData {
                     this.cChips += this.cBet;
                     this.sChips += this.sBet;
                 }
-                
-                // reset round data
-                this.cDrawn = -1;
-                this.sDrawn = -1;
-                this.cBet = 0;
-                this.sBet = 0;
+                                
+                if (this.winner != -1) {
+                    // reset round data
+                    this.cDrawn = -1;
+                    this.sDrawn = -1;
+                    this.cBet = 0;
+                    this.sBet = 0;
+                }
                 break;
                 
             case STAKES:

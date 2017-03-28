@@ -473,8 +473,8 @@ public abstract class ArtificialIntelligence implements Source {
         
         AI_DEBUG("manageWinner: sRankerHand: " + sRankerHand);
         AI_DEBUG("manageWinner: cRankerHand: " + cRankerHand);
-        
-        if(sRankerHand.wins(cRankerHand))
+
+        if(sRankerHand.wins(cRankerHand))            
             return 0;
         if(sRankerHand.loses(cRankerHand))
             return 1;
