@@ -1,7 +1,4 @@
-
 // TODO delete class
-
-
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,7 +10,7 @@ import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
 import poker5cardgame.game.GameClient;
-import poker5cardgame.network.MTEchoServer;
+import poker5cardgame.network.SGameServer;
 import poker5cardgame.network.Server;
 
 /**
@@ -24,9 +21,9 @@ public class NetTester {
 
     static public void main(String... args) throws Exception {
 
-        Server s = new MTEchoServer();
-        //s.bind(1212);
-        //s.start();
+        Server s = new SGameServer();
+        s.bind(1212);
+        s.start();
 
         GameClient c = new GameClient();
         c.connect("localhost", 1212);
@@ -46,9 +43,9 @@ public class NetTester {
         c.getSource().sendMove(move);
         while (c.isConnected()) {
             Move reply = c.getSource().getNextMove();
-            if(reply.action == Action.TERMINATE)
+            if (reply.action == Action.TERMINATE)
                 break;
-            System.out.println(reply);
+            System.out.println("Client got: " + reply);
         }
 
         c.close();

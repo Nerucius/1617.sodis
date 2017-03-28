@@ -31,7 +31,7 @@ public class ComUtils {
 
     // Private State
     private int expectedCards = -1;
-
+    
     public ComUtils(Socket socket) {
         try {
             this.socket = socket;
@@ -47,6 +47,22 @@ public class ComUtils {
         } catch (IOException ex) {
             IO_ERROR("CU: Failed to Open Socket");
         }
+    }
+    
+    /**
+     * Unbound ComUtils
+     * NOTE: DANGER DO NOT USE UNLESS YOU KNOW WHAT YOU'RE DOING
+     */
+    public ComUtils(){
+        
+    }
+    
+    /** 
+     * Assign new streams on the fly
+     */
+    public void setInputOutputStreams(InputStream is, OutputStream os){
+        dis = new DataInputStream(is);
+        bos = new BufferedOutputStream(os);
     }
 
     public Socket getSocket() {
@@ -68,7 +84,7 @@ public class ComUtils {
                 // Try to read next packet
                 packet = _read_NetworkPacket();                
                 return packet;
-
+                
             } catch (SocketTimeoutException e) {
                 // Timing out allowed for a number of tries
                 toCount++;
@@ -82,9 +98,26 @@ public class ComUtils {
                     packet = new Packet(Command.NET_ERROR);
                     return packet;
                 }
+            } catch (IOException e) {
+                // Packet could not be read, fragmented packet
+                return new Packet(Command.NET_ERROR);                
             }
         }
 
+    }
+    
+    /** Tries to read a packet from a InputStream, returns null if packet is incomplete */
+    public Packet read_NetworkPacketSelector(){
+        IO_TRACE("CU: Waiting for next Packet");
+        Packet packet = null;
+        
+        try{
+            packet = _read_NetworkPacket();
+        } catch (IOException e){
+            // Incomplete packet or closed connection
+            return null;
+        }
+        return packet;
     }
 
     /**
@@ -92,8 +125,9 @@ public class ComUtils {
      * further processing.
      *
      * @return received Network Packet.
+     * @throws SocketTimeoutException
      */
-    private Packet _read_NetworkPacket() throws SocketTimeoutException {
+    private Packet _read_NetworkPacket() throws SocketTimeoutException, IOException {
         Packet packet = new Packet(null);
 
         try {
@@ -103,10 +137,11 @@ public class ComUtils {
             // While the current 4 bytes are not a valid command, read one more byte
             while (!Network.Command.isValid(new String(nextBytes))) {
                 // Log invalid packet code
-                IO_TRACE("CU: Invalid packet: " + new String(nextBytes));
+                IO_TRACE("CU: Invalid packet: [" + new String(nextBytes) +"]");
 
                 // Send an error packet every time this fails
                 send_error_packet("Invalid PROTOCOL Code");
+                
                 // Move last 3 bytes back, and read one more
                 System.arraycopy(nextBytes, 1, nextBytes, 0, 3);
                 nextBytes[3] = read_bytes(1)[0];
@@ -127,8 +162,8 @@ public class ComUtils {
             // TODO do something with exception ? see current read bytes
             throw e;
         } catch (IOException e) {
-            IO_ERROR("CU: Socket Error (closed?)");
-            packet.command = Command.NET_ERROR;
+            IO_ERROR("CU: Read error, Connection Closed or Incomplete Packet");
+            throw e;
         }
 
         return packet;

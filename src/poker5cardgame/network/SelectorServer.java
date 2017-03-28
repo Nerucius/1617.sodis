@@ -16,6 +16,9 @@ import java.util.Map;
 import static poker5cardgame.Log.*;
 
 /**
+ * Base Class for Any Selector Server, using a Single Thread and java Non-blocking IO
+ * to communicate with a number of clients.
+ * 
  * @author German Dempere
  */
 public abstract class SelectorServer implements Server {
@@ -46,6 +49,11 @@ public abstract class SelectorServer implements Server {
             NET_DEBUG("Server: Bound to port: " + port);
     }
 
+    /**
+     * Start the Selector server and the worker sub-thread.
+     * The selector passes any data jobs to the worker thread.
+     * Any other operation is managed internally (connect, disconnect, etc.)
+     */
     @Override
     public void start() {
         if (selector != null) {
