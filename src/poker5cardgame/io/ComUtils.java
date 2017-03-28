@@ -95,27 +95,45 @@ public class ComUtils {
                     NET_ERROR("CU: Max timeout reached. Disconnecting");
                     send_error_packet("Max Timeout Reached.");
 
-                    packet = new Packet(Command.NET_ERROR);
-                    return packet;
-                }
-            } catch (IOException e) {
-                // Packet could not be read, fragmented packet
-                return new Packet(Command.NET_ERROR);                
+                    return new Packet(Command.NET_ERROR);
+                }       
+            
+            } catch(InvalidProtocolException e){
+                send_error_packet("MALFORMED PROTOCOL CODE");
+                return new Packet(Command.NET_ERROR);
+            
+            } catch (IOException | FragmentedPacketException e){
+                // Packet could not be read
+                return new Packet(Command.NET_ERROR);
             }
+            
+            
         }
 
     }
     
-    /** Tries to read a packet from a InputStream, returns null if packet is incomplete */
+    /** 
+     * Tries to read a packet from a InputStream,
+     * returns null if packet is incomplete
+     */
     public Packet read_NetworkPacketSelector(){
         IO_TRACE("CU: Waiting for next Packet");
         Packet packet = null;
         
         try{
             packet = _read_NetworkPacket();
-        } catch (IOException e){
-            // Incomplete packet or closed connection
+            
+        }catch (InvalidProtocolException e){
+            // Fragmented packet or Naughty client
             return null;
+            
+        } catch (FragmentedPacketException e){
+            // Closed Connection
+            return null;
+            
+        } catch (IOException e){
+            // Closed Connection
+            return new Packet(Command.NET_ERROR);
         }
         return packet;
     }
@@ -127,7 +145,7 @@ public class ComUtils {
      * @return received Network Packet.
      * @throws SocketTimeoutException
      */
-    private Packet _read_NetworkPacket() throws SocketTimeoutException, IOException {
+    private Packet _read_NetworkPacket() throws SocketTimeoutException, IOException, InvalidProtocolException, FragmentedPacketException {
         Packet packet = new Packet(null);
 
         try {
@@ -137,14 +155,19 @@ public class ComUtils {
             // While the current 4 bytes are not a valid command, read one more byte
             while (!Network.Command.isValid(new String(nextBytes))) {
                 // Log invalid packet code
-                IO_TRACE("CU: Invalid packet: [" + new String(nextBytes) +"]");
-
-                // Send an error packet every time this fails
-                send_error_packet("Invalid PROTOCOL Code");
+                IO_TRACE("CU: Invalid packet code: [" + new String(nextBytes) +"]");
                 
+                throw new InvalidProtocolException("Packet identifier not correct");
+                
+                // DISABLED DUE TO SELECTOR COMPATIBLITY
+                // It didn't really break compatiblity but made the selector 
+                // read the entire buffer's lenght which could be dangerous
+                
+                // Send an error packet every time this fails
+                // send_error_packet("Invalid PROTOCOL Code");
                 // Move last 3 bytes back, and read one more
-                System.arraycopy(nextBytes, 1, nextBytes, 0, 3);
-                nextBytes[3] = read_bytes(1)[0];
+                // System.arraycopy(nextBytes, 1, nextBytes, 0, 3);
+                // nextBytes[3] = read_bytes(1)[0];
             }
 
             String opCode = new String(nextBytes);
@@ -195,59 +218,67 @@ public class ComUtils {
         }
     }
 
-    private void read_PacketArgs(Packet packet) throws IOException {
-        read_bytes(1); // Consume Space
+    private void read_PacketArgs(Packet packet) throws FragmentedPacketException {
+        try {
+            read_bytes(1); // Consume Space
 
-        // TODO @alex Implement reading packet args for every command type
-        switch (packet.command) {
-            case START:
-                packet.putField("id", read_int32());
-                break;
-            case ANTE:
-                packet.putField("chips", read_int32());
-                break;
-            case STAKES:
-                packet.putField("stakes_client", read_int32());
-                read_bytes(1);
-                packet.putField("stakes_server", read_int32());
-                break;
-            case DEALER:
-                int dealer = read_byte_as_int();
-                packet.putField("dealer", dealer);
-                break;
-            case HAND:
-                packet.putField("cards", read_cards(5));
-                break;
-            case BET:
-                packet.putField("chips", read_int32());
-                break;
-            case RAISE:
-                packet.putField("chips", read_int32());
-                break;
-            case DRAW:
-                int drawCount = read_byte_as_int();
-                expectedCards = drawCount; // Save the number of expected cards to read cards in DRAW_SERVER
-                packet.putField("number", drawCount);
-                if (drawCount > 0) {
-                    read_bytes(1); // Consume space
-                    packet.putField("cards", read_cards(drawCount));
-                }
-                break;
-            case DRAW_SERVER:
-                if (expectedCards > 0) {
-                    packet.putField("cards", read_cards(expectedCards));
-                    read_bytes(1); // Consume space
-                }
-                int drawServerCount = read_byte_as_int();
-                packet.putField("number", drawServerCount);
-                break;
-            case SHOWDOWN:
-                packet.putField("cards", read_cards(5));
-                break;
-            case ERROR:
-                packet.putField("error", read_string_variable(2));
-                break;
+            // TODO @alex Implement reading packet args for every command type
+            switch (packet.command) {
+                case START:
+                    packet.putField("id", read_int32());
+                    break;
+                case ANTE:
+                    packet.putField("chips", read_int32());
+                    break;
+                case STAKES:
+                    packet.putField("stakes_client", read_int32());
+                    read_bytes(1);
+                    packet.putField("stakes_server", read_int32());
+                    break;
+                case DEALER:
+                    int dealer = read_byte_as_int();
+                    packet.putField("dealer", dealer);
+                    break;
+                case HAND:
+                    packet.putField("cards", read_cards(5));
+                    break;
+                case BET:
+                    packet.putField("chips", read_int32());
+                    break;
+                case RAISE:
+                    packet.putField("chips", read_int32());
+                    break;
+                case DRAW:
+                    int drawCount = read_byte_as_int();
+                    expectedCards = drawCount; // Save the number of expected cards to read cards in DRAW_SERVER
+                    packet.putField("number", drawCount);
+                    if (drawCount > 0) {
+                        read_bytes(1); // Consume space
+                        packet.putField("cards", read_cards(drawCount));
+                    }
+                    break;
+                case DRAW_SERVER:
+                    if (expectedCards > 0) {
+                        packet.putField("cards", read_cards(expectedCards));
+                        read_bytes(1); // Consume space
+                    }
+                    int drawServerCount = read_byte_as_int();
+                    packet.putField("number", drawServerCount);
+                    break;
+                case SHOWDOWN:
+                    packet.putField("cards", read_cards(5));
+                    break;
+                case ERROR:
+                    packet.putField("error", read_string_variable(2));
+                    break;
 
+            }
+            
+        } catch (IOException e) {
+            // If an IO exception is thrown, we exhaused the stream but could not
+            // read all arguments, so lets assume that the packet got here
+            // fragmented
+            throw new FragmentedPacketException("Could not read Packet Arguments");
         }
     }
 
@@ -354,12 +385,13 @@ public class ComUtils {
         }
         return number;
     }
+    
     //llegir bytes.
-
     private byte[] read_bytes(int numBytes) throws IOException {
         int len = 0;
         byte bStr[] = new byte[numBytes];
         int bytesread = 0;
+        
         do {
             bytesread = dis.read(bStr, len, numBytes - len);
             if (bytesread == -1) {
@@ -367,6 +399,10 @@ public class ComUtils {
             }
             len += bytesread;
         } while (len < numBytes);
+        
+        if(len < numBytes)
+            throw new IOException("Exhaused Buffer");
+        
         return bStr;
     }
 
@@ -470,6 +506,20 @@ public class ComUtils {
             socket.setSoTimeout(timeout);
         } catch (SocketException ex) {
             Logger.getLogger(ComUtils.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static class InvalidProtocolException extends Exception {
+
+        public InvalidProtocolException(String msg) {
+            super(msg);
+        }
+    }
+
+    public static class FragmentedPacketException extends Exception {
+
+        public FragmentedPacketException(String msg) {
+            super(msg);
         }
     }
 }

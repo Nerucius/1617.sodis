@@ -4,7 +4,7 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import poker5cardgame.ai.ArtificialIntelligence;
-import poker5cardgame.game.GameServer;
+import poker5cardgame.game.ServerGame;
 import poker5cardgame.game.GameState;
 import poker5cardgame.io.NetworkSource;
 
@@ -13,7 +13,7 @@ import poker5cardgame.io.NetworkSource;
  */
 public class MTGameServer extends MultithreadServer{
     
-    Map<Integer, GameServer> savedGames = new ConcurrentHashMap<>();
+    Map<Integer, ServerGame> savedGames = new ConcurrentHashMap<>();
     
     ArtificialIntelligence.Type AIType = ArtificialIntelligence.Type.AI_RANDOM;
 
@@ -23,7 +23,7 @@ public class MTGameServer extends MultithreadServer{
         // TODO @alex 
         source.getCom().setTimeout(0); 
         
-        GameServer game = new GameServer(source, AIType);
+        ServerGame game = new ServerGame(source, AIType);
         int id = 0;
         // TODO @alex Add persistence
         /*int id = game.getPlayerID();

@@ -13,7 +13,7 @@ import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
 import static poker5cardgame.Log.*;
 
-public class GameClient {
+public class ClientGame {
 
     private boolean FANCY_GREETING_TIME = true;
     private boolean FANCY_ADVICES_TIME = true;
@@ -31,7 +31,7 @@ public class GameClient {
      * Create a client With the given AI type
      * @param aiType
      */
-    public GameClient(ArtificialIntelligence.Type aiType) {
+    public ClientGame(ArtificialIntelligence.Type aiType) {
         clientGameData = new GameData();
         clientGameState = new GameState();
 
@@ -48,7 +48,7 @@ public class GameClient {
     /**
      * Create a client that reads new commands from the Server.
      */
-    public GameClient() {
+    public ClientGame() {
         this(new KeyboardSource());
         clientGameData = new GameData();
         clientGameState = new GameState();
@@ -59,7 +59,7 @@ public class GameClient {
      * Create a Client with the given source.
      * @param playerSource
      */
-    public GameClient(Source playerSource) {
+    public ClientGame(Source playerSource) {
         this.playerSource = playerSource;
         clientGameData = new GameData();
         clientGameState = new GameState();

@@ -5,18 +5,18 @@
  */
 package poker5cardgame.network;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import static poker5cardgame.Log.*;
 import poker5cardgame.game.GameData;
-import poker5cardgame.game.GameServer;
-import poker5cardgame.io.ByteBufferInputStream;
-import poker5cardgame.io.ByteBufferOutputStream;
+import poker5cardgame.game.ServerGame;
 import poker5cardgame.io.ComUtils;
+
+import static poker5cardgame.Log.*;
+import poker5cardgame.io.NetworkSource;
 
 /**
  * A Selector Server which manages multiple games.
@@ -25,10 +25,9 @@ public class SGameServer extends SelectorServer {
 
     // Program-Wide Saved games
     private final ConcurrentHashMap<Integer, GameData> savedGames = new ConcurrentHashMap<>();
-    private final HashMap<SocketChannel, GameServer> games = new HashMap<>();
-    private final HashMap<SocketChannel, ClientStreams> clientStreams = new HashMap<>();
+    private final HashMap<SocketChannel, ClientCapsule> clientStreams = new HashMap<>();
 
-    // Slave ComUtils
+    // Slave ComUtils and Network source
     private final ComUtils comUtils = new ComUtils();
 
     public SGameServer() {
@@ -41,81 +40,124 @@ public class SGameServer extends SelectorServer {
         public void handleData(SelectorWorker.ServerDataEvent event) {
             NET_TRACE("SServer: Received " + new String(event.data));
 
-            // Get or create a buffer for this socket
-            ClientStreams streams;
-            if (clientStreams.containsKey(event.socket))
-                streams = clientStreams.get(event.socket);
-            else {
-                streams = new ClientStreams();
-                streams.readBuffer = ByteBuffer.allocate(512);
-                streams.writeBuffer = ByteBuffer.allocate(512);
+            Packet packet = defragmentPacket(event);
 
-                // Wrap read and write buffer
-                streams.is = new ByteBufferInputStream(streams.readBuffer);
-                streams.os = new ByteBufferOutputStream(streams.writeBuffer);
-                clientStreams.put(event.socket, streams);
-            }
-
-            // TODO This is totally not working
-            
-            // if the last time there was no complete packet
-            // Move write pointer to mark, put new data, mark
-            if(streams.incomplete) streams.readBuffer.reset();
-            streams.readBuffer.put(event.data);
-            streams.readBuffer.mark();
-            
-            try {
-                System.out.println("Reading inputStream");
-                byte[] bytes = new byte[1];
-                
-                while ((streams.is.read(bytes, 0, 1) != -1)) {
-                    System.out.print(new String(bytes));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            
-            
-            if(true) return;
-
-
-            comUtils.setInputOutputStreams(streams.is, streams.os);
-            Packet packet = comUtils.read_NetworkPacketSelector();
-            if (packet == null) {
-                // Received incomplete packet
-                streams.incomplete = true;
-                NET_TRACE("SServer: Incomplete packet: " + new String(event.data));
+            // Null packet, ignore for now
+            if (packet == null)
                 return;
-            }
+
+            // Get the streams for this client
+            ClientCapsule cc = clientStreams.get(event.socket);
+            ServerGame game = cc.game;
             
-            // Clear inclomplete flag
-            streams.incomplete = false;
+            cc.nSource.addPacketToQueue(packet);
+
+            // Special case for Moves that require two packets. Exit now
+            if (packet.command == Network.Command.ANTE || packet.command == Network.Command.DEALER)
+                return;
             
-            // Clear write stream
-            streams.writeBuffer.clear();
-            comUtils.write_NetworkPacket(packet);
+            // Prepare streams to receive new output data from the Game
+            cc.os.reset();
+            comUtils.setInputOutputStreams(cc.is, cc.os);
+            cc.nSource.setComUtils(comUtils);
             
-            byte[] sent = streams.writeBuffer.array();
-            NET_TRACE("SServer: Sent: " + new String(sent));
-            event.server.send(event.socket, sent);
-            
+            // Update the game
+            boolean keepUpdating = true;
+            while(keepUpdating)
+                keepUpdating = !game.update();
+
+            //comUtils.write_NetworkPacket(packet);
+            // Get whatever the Server wanted to write out and send it
+            byte[] dataSent = cc.os.toByteArray();
+            event.server.send(event.socket, dataSent);
+
         }
 
     }
 
-    private class ClientStreams {
+    private Packet defragmentPacket(SelectorWorker.ServerDataEvent event) {
 
-        public ByteBuffer readBuffer;
-        public ByteBuffer writeBuffer;
+        // Get or create a buffer for this socket
+        ClientCapsule streams = getClient(event);
 
-        ByteBufferInputStream is;
-        ByteBufferOutputStream os;
-        
-        boolean incomplete = false;
+        // if the last time there was no complete packet reset the input
+        // stream's read pointer, and append new data
+        if (streams.incomplete)
+            streams.is.reset();
+        streams.readBuffer.put(event.data);
 
-        public ClientStreams() {
+        // Try to read a complete packet
+        comUtils.setInputOutputStreams(streams.is, streams.os);
+        Packet packet = comUtils.read_NetworkPacketSelector();
+
+        if (packet == null) {
+            // Received incomplete packet
+            streams.incomplete = true;
+            NET_DEBUG("SServer: Incomplete packet: " + new String(event.data));
+            return null;
         }
 
+        // Clear inclomplete flag
+        streams.incomplete = false;
+
+        // Clear write stream
+        streams.is.reset();
+        streams.readBuffer.clear();
+
+        NET_DEBUG("SServer: Got complete packet");
+
+        return packet;
+    }
+
+    /**
+     * Finds or creates a new client capsule for the given socket channel.
+     *
+     * @param event
+     * @return Found or New Client Capsule
+     */
+    private ClientCapsule getClient(SelectorWorker.ServerDataEvent event) {
+        ClientCapsule client;
+
+        if (clientStreams.containsKey(event.socket))
+            client = clientStreams.get(event.socket);
+
+        else {
+            client = new ClientCapsule();
+
+            // Create and wrap read buffer
+            client.readBuffer = ByteBuffer.allocate(512);
+            client.is = new ByteArrayInputStream(client.readBuffer.array());
+
+            // Create output buffer
+            client.os = new ByteArrayOutputStream(512);
+            clientStreams.put(event.socket, client);
+
+            // Create networkSource and Game
+            client.nSource = new NetworkSource();
+            client.nSource.setBlocking(false);
+            client.game = new ServerGame(client.nSource);
+        }
+
+        return client;
+    }
+
+    /**
+     * A Container class that encapsulates all that is necessary for
+     * communicating with a recurring client.
+     */
+    private class ClientCapsule {
+
+        // Read/Write buffers
+        public ByteBuffer readBuffer;
+        public ByteArrayInputStream is;
+        public ByteArrayOutputStream os;
+
+        // Private networkSource and Game
+        ServerGame game;
+        NetworkSource nSource;
+
+        // Set to true if the last transmission was a fragment
+        boolean incomplete = false;
     }
 
 }

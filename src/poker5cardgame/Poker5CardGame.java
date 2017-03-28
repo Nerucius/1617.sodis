@@ -8,7 +8,7 @@ import poker5cardgame.game.Move;
 import poker5cardgame.io.KeyboardSource;
 import poker5cardgame.io.NetworkSource;
 import poker5cardgame.io.Source;
-import poker5cardgame.game.GameClient;
+import poker5cardgame.game.ClientGame;
 import poker5cardgame.network.MTGameServer;
 import poker5cardgame.network.Server;
 
@@ -32,7 +32,7 @@ public class Poker5CardGame {
         // Read console input
         Scanner sc = new Scanner(System.in);
         String line;
-        final GameClient client = new GameClient();
+        final ClientGame client = new ClientGame();
         Server server = null;
         Integer mode = null;
 

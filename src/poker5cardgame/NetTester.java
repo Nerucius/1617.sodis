@@ -9,7 +9,12 @@ package poker5cardgame;
 import poker5cardgame.game.Card;
 import poker5cardgame.game.GameState.Action;
 import poker5cardgame.game.Move;
-import poker5cardgame.game.GameClient;
+import poker5cardgame.game.ClientGame;
+import poker5cardgame.io.ComUtils;
+import poker5cardgame.io.KeyboardSource;
+import poker5cardgame.io.NetworkSource;
+import poker5cardgame.network.MTGameServer;
+import poker5cardgame.network.MultithreadServer;
 import poker5cardgame.network.SGameServer;
 import poker5cardgame.network.Server;
 
@@ -24,7 +29,15 @@ public class NetTester {
         Server s = new SGameServer();
         s.bind(1212);
         s.start();
+        
+        ClientGame c = new ClientGame(new KeyboardSource());
+        c.connect("localhost", 1212);
 
+        while(c.isConnected()){
+            c.update();
+        }
+        
+        /*
         GameClient c = new GameClient();
         c.connect("localhost", 1212);
 
@@ -47,6 +60,7 @@ public class NetTester {
                 break;
             System.out.println("Client got: " + reply);
         }
+        */
 
         c.close();
         s.close();

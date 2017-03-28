@@ -1,6 +1,6 @@
 package poker5cardgame;
 
-import poker5cardgame.game.GameClient;
+import poker5cardgame.game.ClientGame;
 import static poker5cardgame.Log.*;
 import poker5cardgame.ai.ArtificialIntelligence;
 
@@ -13,7 +13,7 @@ public class Client {
     static int remotePort = 1212;
     static int mode = 0;
 
-    static GameClient client;
+    static ClientGame client;
 
     public static void main(String... args) {
 
@@ -64,14 +64,14 @@ public class Client {
         System.out.println("Port: " + remotePort);
         System.out.println("Interactive: " + mode);
 
-        GameClient client;
+        ClientGame client;
         
         // Read AI type
         ArtificialIntelligence.Type type = ArtificialIntelligence.Type.fromCode(mode);
         if (type != null)
-            client = new GameClient(type);
+            client = new ClientGame(type);
         else
-            client = new GameClient();
+            client = new ClientGame();
 
         client.connect(remoteAddr, remotePort);
 

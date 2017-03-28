@@ -7,7 +7,7 @@ import poker5cardgame.io.Source;
 import poker5cardgame.game.GameState.Action;
 import static poker5cardgame.Log.*;
 
-public class GameServer {
+public class ServerGame {
 
     private static final int INITIAL_BET = 100;
     private static final int INITIAL_SERVER_CHIPS = 10000;
@@ -32,7 +32,7 @@ public class GameServer {
      * @param IOSource input/output source
      * @param aiType Type of AI (Random / Advanced)
      */
-    public GameServer(Source IOSource, ArtificialIntelligence.Type aiType) {
+    public ServerGame(Source IOSource, ArtificialIntelligence.Type aiType) {
         this.IOSource = IOSource;
 
         this.serverGameData = new GameData();
@@ -58,7 +58,7 @@ public class GameServer {
      * @param IOSource Source to be used for Sending/Receiving from the other
      * player
      */
-    public GameServer(Source IOSource) {
+    public ServerGame(Source IOSource) {
         this(IOSource, ArtificialIntelligence.Type.AI_RANDOM);
     }
 
@@ -69,7 +69,7 @@ public class GameServer {
      * player
      * @param playerSource Source to be used locally to get Moves
      */
-    public GameServer(Source IOSource, Source playerSource) {
+    public ServerGame(Source IOSource, Source playerSource) {
         this.IOSource = IOSource;
         this.playerSource = playerSource;
         this.serverGameData = new GameData();
@@ -81,9 +81,12 @@ public class GameServer {
     }
 
     /**
-     * Run the game with the next iteration of commands
+     * Run the game with the next iteration of Moves.
+     * 
+     * @return true if the update cycle is done.
      */
-    public void update() {
+    public boolean update() {
+        boolean done = true;
 
         Move move = new Move();
         move.action = Action.NOOP;
@@ -94,6 +97,7 @@ public class GameServer {
                 case INIT:
                     move = getValidMove(IOSource);
                     serverGameData.save(move, false);
+                    done = false;
                     break;
 
                 case START:
@@ -109,6 +113,7 @@ public class GameServer {
                 case ACCEPT_ANTE:                    
                     move = getValidMove(IOSource);
                     serverGameData.save(move,false);
+                    done = false;
                     break;
                 
                 case QUIT:                  
@@ -265,10 +270,12 @@ public class GameServer {
             this.sendErrorMsg(ex.getMessage());
             if (move.action == Action.TERMINATE)
                 serverGameState.apply(move.action);
-                //System.exit(1);           
+                //System.exit(1);   
+                return true;
         }
 
         GAME_DEBUG(serverGameData.cId, "Updated State: " + serverGameState + " | Data: " + serverGameData + '\n');
+        return done;
     }
 
     private void sendErrorMsg(String msg) {

@@ -45,12 +45,12 @@ public class Log {
     public static /* final */ boolean KB_DEBUG = false;
     public static /* final */ boolean KB_TRACE = false;
 
-    public static /* final */ boolean GAME_ERROR = false;
-    public static /* final */ boolean GAME_DEBUG = false;
+    public static /* final */ boolean GAME_ERROR = true;
+    public static /* final */ boolean GAME_DEBUG = true;
     public static /* final */ boolean GAME_TRACE = false;
 
     public static /* final */ boolean IO_ERROR = true;
-    public static /* final */ boolean IO_DEBUG = true;
+    public static /* final */ boolean IO_DEBUG = false;
     public static /* final */ boolean IO_TRACE = true;
 
     public static /* final */ boolean AI_ERROR = false;
