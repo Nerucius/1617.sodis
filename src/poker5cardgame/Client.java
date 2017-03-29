@@ -48,6 +48,8 @@ public class Client {
                     String arg2 = args[++i];
                     mode = Integer.valueOf(arg2);
                 }
+                
+
 
             }
         } catch (Exception e) {
@@ -70,6 +72,12 @@ public class Client {
         System.out.println("Interactive: " + mode);
 
         ClientGame client;
+        
+        if(mode == 0){
+            LOG_CLIENT = false;
+            LOG_SERVER = false;
+            FANCY_CLIENT = true;
+        }
         
         // Read AI type
         ArtificialIntelligence.Type type = ArtificialIntelligence.Type.fromCode(mode);

@@ -62,8 +62,14 @@ public class Log {
         if (LOG_CLIENT)
             System.out.println("C: " + msg);
     }
-    
+
     public static void LOG_SERVER(String msg) {
+        // New line before STKS
+        char[] code = new char[4];
+        msg.getChars(0, 4, code, 0);
+        if (new String(code).equalsIgnoreCase("STKS"))
+            System.out.println("");
+
         if (LOG_SERVER)
             System.out.println("S: " + msg);
     }

@@ -1,7 +1,9 @@
 package poker5cardgame.game;
 
 public class GameData {
-
+    
+    private static final int INITIAL_SERVER_CHIPS = 10000;
+    private static final int INITIAL_CLIENT_CHIPS = 1000;
 
     // Common data (0:server;1:client);
     public int dealer = -1;
@@ -10,7 +12,7 @@ public class GameData {
     // Server data
     public Deck deck;
     public Hand sHand;
-    public int sChips;
+    public int sChips = INITIAL_SERVER_CHIPS;
     public int initialBet;
     public int sBet = 0;
     public int sDrawn = -1;
@@ -19,7 +21,7 @@ public class GameData {
     // Client data
     public int cId = -1;
     public Hand cHand;
-    public int cChips;
+    public int cChips = INITIAL_CLIENT_CHIPS;
     public int cBet = 0;
     public int cDrawn = -1;
     public int cInteractive = 0;

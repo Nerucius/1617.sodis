@@ -381,7 +381,7 @@ public class ClientGame {
     {
         FANCY_CLIENT("These are your cards: ");
         this.fancyCards(move.cards);
-        System.out.println("");
+        FANCY_CLIENT("\n");
     }
      
     private Card[] fancyRememberCards()

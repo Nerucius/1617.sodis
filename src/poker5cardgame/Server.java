@@ -1,6 +1,7 @@
 package poker5cardgame;
 
 import poker5cardgame.ai.ArtificialIntelligence;
+import poker5cardgame.network.MTGameServer;
 import poker5cardgame.network.SGameServer;
 
 /**
@@ -12,6 +13,8 @@ public class Server {
 
     static int bindPort = 1212;
     static int mode = 1;
+    /** 0 for MT, 1 for Selector */
+    static int serverType = 0;
 
     public static void main(String... args) {
 
@@ -37,6 +40,12 @@ public class Server {
                     mode = Integer.valueOf(arg2);
                 }
 
+                // Server Type Argument
+                if (arg.equals("-t")) {
+                    String arg2 = args[++i];
+                    serverType = Integer.valueOf(arg2);
+                }
+
             }
         } catch (Exception e) {
             System.err.println("Server: Exception reading paramenters:");
@@ -54,7 +63,17 @@ public class Server {
         System.out.println("Interactive: " + mode);
 
         // Switch the Type of server here
-        server = new SGameServer();
+        switch (serverType) {
+            case 0:
+                server = new MTGameServer();    // MultiThreaded
+                break;
+            case 1:
+                server = new SGameServer();   // Selector
+                break;
+            default:
+                System.out.println("Invalid server type");
+                System.exit(1);
+        }
 
         System.out.println("Type of Server: " + server.getClass().getCanonicalName());
 

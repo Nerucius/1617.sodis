@@ -10,13 +10,12 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
-import poker5cardgame.game.GameData;
 import poker5cardgame.game.ServerGame;
 import poker5cardgame.io.ComUtils;
 
 import static poker5cardgame.Log.*;
 import poker5cardgame.ai.ArtificialIntelligence;
+import poker5cardgame.game.GameData;
 import poker5cardgame.io.NetworkSource;
 
 /**
@@ -25,10 +24,10 @@ import poker5cardgame.io.NetworkSource;
 public class SGameServer extends SelectorServer {
 
     private ArtificialIntelligence.Type AIType = ArtificialIntelligence.Type.AI_RANDOM;
-    
+
     // Program-Wide Saved games
-    private final ConcurrentHashMap<Integer, GameData> savedGames = new ConcurrentHashMap<>();
     private final HashMap<SocketChannel, ClientCapsule> clientStreams = new HashMap<>();
+    private final HashMap<Integer, GameData> savedGames = new HashMap<>();
 
     // Slave ComUtils and Network source
     private final ComUtils comUtils = new ComUtils();
@@ -50,24 +49,24 @@ public class SGameServer extends SelectorServer {
                 return;
 
             // Get the streams for this client
-            ClientCapsule cc = clientStreams.get(event.socket);
+            ClientCapsule cc = getClient(event, packet);
             ServerGame game = cc.game;
-            
+
             cc.nSource.addPacketToQueue(packet);
 
             // Special case for Moves that require two packets. Exit now
             if (packet.command == Network.Command.ANTE || packet.command == Network.Command.DEALER)
                 return;
-            
+
             // Prepare streams to receive new output data from the Game
             cc.os.reset();
             comUtils.setInputOutputStreams(cc.is, cc.os);
             cc.nSource.setComUtils(comUtils);
-            
+
             // Update the game
             game.nextMoveReady = true;
             boolean keepUpdating = true;
-            while(keepUpdating)
+            while (keepUpdating)
                 keepUpdating = !game.update();
 
             //comUtils.write_NetworkPacket(packet);
@@ -75,13 +74,16 @@ public class SGameServer extends SelectorServer {
             byte[] dataSent = cc.os.toByteArray();
             event.server.send(event.socket, dataSent);
 
+            // Save game data for this client
+            savedGames.put(cc.game.getID(), cc.game.getGameData());
+
         }
 
     }
 
     private Packet defragmentPacket(SelectorWorker.ServerDataEvent event) {
         // Get or create a buffer for this socket
-        ClientCapsule streams = getClient(event);
+        ClientCapsule streams = getClient(event, null);
 
         // if the last time there was no complete packet reset the input
         // stream's read pointer, and append new data
@@ -118,13 +120,25 @@ public class SGameServer extends SelectorServer {
      * @param event
      * @return Found or New Client Capsule
      */
-    private ClientCapsule getClient(SelectorWorker.ServerDataEvent event) {
+    private ClientCapsule getClient(SelectorWorker.ServerDataEvent event, Packet packet) {
         ClientCapsule client;
 
-        if (clientStreams.containsKey(event.socket))
+        if (clientStreams.containsKey(event.socket)) {
             client = clientStreams.get(event.socket);
 
-        else {
+            // Persitence
+            if (packet != null && packet.command == Network.Command.START) {
+                
+                // See if this client has any previous saved games
+                int gameID = packet.getField("id", Integer.class);
+                if (savedGames.containsKey(gameID)) {
+                    // Create a new game but copy old data
+                    client.game = new ServerGame(client.nSource, AIType);
+                    client.game.copyGameData(savedGames.get(gameID));
+                }
+            }
+            
+        } else {
             client = new ClientCapsule();
 
             // Create and wrap read buffer
@@ -133,13 +147,15 @@ public class SGameServer extends SelectorServer {
 
             // Create output buffer
             client.os = new ByteArrayOutputStream(512);
-            clientStreams.put(event.socket, client);
 
             // Create networkSource and Game
             client.nSource = new NetworkSource();
             client.nSource.setBlocking(false);
             client.game = new ServerGame(client.nSource, AIType);
             client.game.isSelector = true;
+            
+            // Save to HashMap
+            clientStreams.put(event.socket, client);
         }
 
         return client;

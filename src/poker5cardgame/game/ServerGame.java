@@ -11,8 +11,6 @@ import poker5cardgame.io.NetworkSource;
 public class ServerGame {
 
     private static final int INITIAL_BET = 100;
-    private static final int INITIAL_SERVER_CHIPS = 10000;
-    private static final int INITIAL_CLIENT_CHIPS = 1000;
     
     /**
      * Source to be used for receiving and sending data to another player.
@@ -95,7 +93,7 @@ public class ServerGame {
 
         Move move = new Move();
         move.action = Action.NOOP;
-
+        
         try {
             switch (getState()) {
                 
@@ -108,8 +106,8 @@ public class ServerGame {
                     move = new Move();
                     move.action = Action.ANTE_STAKES;
                     move.chips = INITIAL_BET;
-                    move.cStakes = INITIAL_CLIENT_CHIPS;
-                    move.sStakes = INITIAL_SERVER_CHIPS;                    
+                    move.cStakes = serverGameData.cChips;
+                    move.sStakes = serverGameData.sChips;                    
                     IOSource.sendMove(move);
                     serverGameData.save(move, true);
                     break;
@@ -313,6 +311,19 @@ public class ServerGame {
         }
         // return the valid move
         return move;
+    }
+    
+    public int getID(){
+        return this.serverGameData.cId;
+    }
+
+    public void copyGameData(GameData prevData) {
+        this.serverGameData.sChips = prevData.sChips;
+        this.serverGameData.cChips = prevData.cChips;
+    }
+    
+    public GameData getGameData(){
+        return this.serverGameData;
     }
     
     private class MoveNotReadyException extends Exception{
