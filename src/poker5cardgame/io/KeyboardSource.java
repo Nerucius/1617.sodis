@@ -64,7 +64,7 @@ public class KeyboardSource implements Source {
             }
         } catch (Exception e) {
             
-            if(move.action == GameState.Action.DRAW)
+            /*if(move.action == GameState.Action.DRAW)
             {  
                 // We are here only in one case: the cDrawn number does not match with the number of cards
                 // In this case, we ignore the cDraw number and discard the given cards
@@ -83,13 +83,14 @@ public class KeyboardSource implements Source {
                 move.cDrawn = move.cards.length;
                 return move;
                                               
-            } else{
+            } else{*/
+                
                 FANCY_CLIENT("SYNTAX ERROR.\n", Format.BOLD, Format.RED);
                 FANCY_CLIENT("Oh! It looks like you did a ", Format.RED);
                 FANCY_CLIENT("syntax error", Format.UNDERLINE, Format.RED);
                 FANCY_CLIENT(". Please try again.\n", Format.RED);
                 move.action = Action.NOOP;
-            }
+            //}
         }
         return move;
     }

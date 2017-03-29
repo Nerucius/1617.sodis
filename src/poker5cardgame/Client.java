@@ -74,9 +74,12 @@ public class Client {
         ClientGame client;
         
         if(mode == 0){
+            // Manual mode, engage maximun FANCY
             LOG_CLIENT = false;
             LOG_SERVER = false;
             FANCY_CLIENT = true;
+            INFO_CLIENT = true;
+            INFO_SERVER = true;
         }
         
         // Read AI type
