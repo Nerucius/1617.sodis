@@ -22,6 +22,8 @@ public class MTGameServer extends MultithreadServer {
     @Override
     public void handleConnection(Socket sock) {
         NetworkSource source = new NetworkSource(sock);
+        
+        // NOTE: Timeout Disabled Enable here
         source.getCom().setTimeout(0);
 
         ServerGame game = new ServerGame(source, AIType);
