@@ -24,7 +24,7 @@ public class Server {
 
                 // Help argument
                 if (arg.equals("-h")) {
-                    System.out.println("Us: java Server -p <port> [-i 1|2]");
+                    System.out.println("Us: java Server -p <port> [-i 1|2] [-t 0|1]");
                     return;
                 }
 

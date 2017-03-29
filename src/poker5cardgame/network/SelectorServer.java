@@ -109,13 +109,14 @@ public abstract class SelectorServer implements Server {
 
                 }
             } catch (Exception e) {
-                NET_ERROR("Server: Error Selecting Keys");
-                e.printStackTrace();
-                break;
+                NET_ERROR("SServer: Client Closed Connection. Clearing null key");
+                changeRequests.remove(0);
+                //.printStackTrace();
+                //break;
             }
         }
 
-        this.close();
+        //this.close();
     }
 
     /**

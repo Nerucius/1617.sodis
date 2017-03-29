@@ -121,6 +121,7 @@ public class ServerGame {
                     move = new Move();
                     move.action = Action.QUIT;
                     IOSource.sendMove(move);
+                    done = true;
                     break;
 
                 case PLAY:

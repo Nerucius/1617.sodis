@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package poker5cardgame.network;
 
 import java.io.ByteArrayInputStream;
@@ -29,7 +24,7 @@ public class SGameServer extends SelectorServer {
     private final HashMap<SocketChannel, ClientCapsule> clientStreams = new HashMap<>();
     private final HashMap<Integer, GameData> savedGames = new HashMap<>();
 
-    // Slave ComUtils and Network source
+    // Slave ComUtils
     private final ComUtils comUtils = new ComUtils();
 
     public SGameServer() {
@@ -38,13 +33,14 @@ public class SGameServer extends SelectorServer {
 
     private class GameWorker extends SelectorWorker {
 
+        /** Handle Incoming data from the network on a given Socket Channel */
         @Override
         public void handleData(SelectorWorker.ServerDataEvent event) {
             NET_TRACE("SServer: Received " + new String(event.data));
 
             Packet packet = defragmentPacket(event);
 
-            // Null packet, ignore for now
+            // Null packet, means the packet could not be read fully, ignore for now
             if (packet == null)
                 return;
 
@@ -69,7 +65,7 @@ public class SGameServer extends SelectorServer {
             while (keepUpdating)
                 keepUpdating = !game.update();
 
-            //comUtils.write_NetworkPacket(packet);
+            
             // Get whatever the Server wanted to write out and send it
             byte[] dataSent = cc.os.toByteArray();
             event.server.send(event.socket, dataSent);
@@ -109,7 +105,7 @@ public class SGameServer extends SelectorServer {
         streams.is.reset();
         streams.readBuffer.clear();
 
-        NET_DEBUG("SServer: Got complete packet");
+        NET_TRACE("SServer: Got complete packet " + packet);
 
         return packet;
     }
@@ -134,6 +130,8 @@ public class SGameServer extends SelectorServer {
                 if (savedGames.containsKey(gameID)) {
                     // Create a new game but copy old data
                     client.game = new ServerGame(client.nSource, AIType);
+                    client.game.isSelector = true;
+                    client.game.nextMoveReady = false;
                     client.game.copyGameData(savedGames.get(gameID));
                 }
             }
