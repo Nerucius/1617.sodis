@@ -15,6 +15,9 @@ class Flight(models.Model):
     aircraft = models.CharField(max_length=4)
     status = models.CharField(max_length=40)
 
+    class Meta:
+        ordering = ['airline', 'id']
+
     def __str__(self):
         return "[" + self.flight_number + "] " + self.location_departure + "-" + self.location_arrival + " : " + str(
             self.estimated_time_departure) + " / " + str(self.estimated_time_arrival) + " [" + self.status + "]"

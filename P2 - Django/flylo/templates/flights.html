@@ -1,0 +1,22 @@
+{% include 'base.html' %}
+
+{% block content %}
+
+    <h1>Flight List</h1>
+
+    {% if departure %}
+        <p><b>Viewing flights from: {{ departure }}</b></p>
+    {% endif %}
+
+    {% if flights %}
+        {% for flight in flights %}
+            <li> {{ flight.id }} - {{ flight.flight_number }}</li>
+        {% endfor %}
+
+    {% else %}
+        <p>No flights available</p>
+    {% endif %}
+
+    <p><a href="{% url 'index' %}">Go back to Index</a></p>
+
+{% endblock %}

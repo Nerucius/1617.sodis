@@ -5,7 +5,7 @@ import json
 
 
 def main():
-	locs = ['BCN', 'MAD', 'LAX', 'HKG', 'FRA', 'CAN', 'ORD', 'DEN', 'TKK', 'ATL', 'PEK']
+	locs = ['BCN', 'MAD', 'LAX', 'HKG', 'FRA', 'CAN', 'ORD', 'DEN', 'TKK', 'ATL', 'PEK', 'ZRH']
 	status = ['CANCELLED', 'FLYING', 'GATE', 'BOARDING', 'OK', 'DELAYED', 'ON TIME']
 	airlines = ['ANB', 'DAL', 'CAL', 'IBE', 'VLG', 'RYA']
 	planes = ['B747', 'A234', 'B787', 'B737', 'A230']

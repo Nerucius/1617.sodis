@@ -17,6 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    # Route to flylo with include()
+	url(r'^admin/', admin.site.urls),
+	# Route to flylo with include()
+	url(r'^flylo/', include('flylo.urls'))
 ]
