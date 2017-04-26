@@ -28,10 +28,10 @@ def main():
 		arrival = "{0}+0200".format(arrival)
 
 		# Departure and arrival locations
-		departure_location = choice(locations)
+		location_departure = choice(locations)
 		other_locations = list(locations)
-		other_locations.remove(departure_location)
-		arrival_location = choice(other_locations)
+		other_locations.remove(location_departure)
+		location_arrival = choice(other_locations)
 
 		# Airline
 		airline = choice(airlines)
@@ -46,8 +46,8 @@ def main():
 		flight["fields"]["flight_number"] = fn
 		flight["fields"]["estimated_time_departure"] = departure
 		flight["fields"]["estimated_time_arrival"] = arrival
-		flight["fields"]["location_departure"] = departure_location
-		flight["fields"]["location_arrival"] = arrival_location
+		flight["fields"]["location_departure"] = location_departure
+		flight["fields"]["location_arrival"] = location_arrival
 		flight["fields"]["airline"] = airline
 		flight["fields"]["aircraft"] = choice(planes)
 		flight["fields"]["status"] = choice(status)

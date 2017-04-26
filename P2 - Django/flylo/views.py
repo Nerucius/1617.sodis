@@ -5,8 +5,11 @@ from models import *
 # Index view with a request, and a render response to index.html
 
 
-def index(request):
-	return render(request, 'index.html')
+def index(request, departure=None):
+	context = {}
+	context['departures'] = Flight.objects.order_by().values_list('location_departure', flat=True).distinct()
+
+	return render(request, 'index.html', context)
 
 
 def flights(request, departure=None):
