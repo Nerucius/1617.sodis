@@ -12,10 +12,10 @@
         <ul>
             {% for flight in flights %}
                 {% if departure %}
-                    <li>{{ flight.flight_number }} from {{ flight.location_departure }} to {{ flight.location_arrival }}</li>
+                    <li>{{ flight.flight_number }} from {{ flight.location_departure }} to {{ flight.location_arrival }} [{{ flight.status }}]</li>
                 {% else %}
                     <li><a href="{% url 'flights' %}{{ flight.location_departure }}">{{ flight.flight_number }}</a>
-                    from {{ flight.location_departure }} to {{ flight.location_arrival }}</li>
+                    from {{ flight.location_departure }} to {{ flight.location_arrival }} [{{ flight.status }}]</li>
                 {% endif %}
             {% endfor %}
         </ul>
