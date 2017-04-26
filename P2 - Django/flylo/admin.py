@@ -3,7 +3,9 @@ from models import *
 
 # Register your models here.
 
+
 class FlightAdmin(admin.ModelAdmin):
+
     list_display = [f.name for f in Flight._meta.fields]
 
     def __unicode__(self):

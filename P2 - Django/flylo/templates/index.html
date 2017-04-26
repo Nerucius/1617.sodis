@@ -1,13 +1,10 @@
 {% include 'base.html' %}
 
-
-
 {% block content %}
 
-<p>
-    <h1>Flylo Flights App</h1>
-</p>
+    <p><h1>Flylo Flights App</h1></p>
+    <p>Hello, world. You're at the flylo home page.</p>
 
-<p> <a href="{% url 'flights' %}" >Go to the flight list</a> </p>
+    <p><a href="{% url 'flights' %}">Go to the flight list</a></p>
 
 {% endblock %}
