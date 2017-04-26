@@ -7,10 +7,11 @@
 
     {% if departures %}
     <p>See flights with departure:
-        <select>
-            <option value="empty">--- Select departure ---</option>
+        <select onchange="window.location.href=this.value">
+            <option>-- Select departure --</option>
         {% for departure in departures %}
-            <option value="departure">{{ departure }}</option>
+            <option value="{% url 'flights' %}{{ departure }}">{{ departure }}</option>>
+
         {% endfor %}
         </select>
     </p>
