@@ -3,14 +3,15 @@ from models import *
 
 # Register your models here.
 
-
-class FlightAdmin(admin.ModelAdmin):
-
-    list_display = [f.name for f in Flight._meta.fields]
+"""
+class ListAdmin(admin.ModelAdmin):
 
     def __unicode__(self):
-        """ Function that returns the table display columns for Django-Admin. """
-        return self.list_display
+        Function that returns the table display columns for Django-Admin.
+        list_display = [f.name for f in self.model._meta.fields]
+        return list_display
+"""
 
-
-admin.site.register(Flight, FlightAdmin)
+admin.site.register(Flight)
+admin.site.register(Airline)
+admin.site.register(Airplane)

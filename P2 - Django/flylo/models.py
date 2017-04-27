@@ -5,16 +5,35 @@ from django.db import models
 # Create your models here.
 
 
-class Flight(models.Model):
+class Airline(models.Model):
+	code = models.CharField(max_length=3)
 
+	def __str__(self):
+		return self.code
+
+
+class Airplane(models.Model):
+	aircraft = models.CharField(max_length=4)
+	seats_first_class = models.IntegerField()
+	seats_business = models.IntegerField()
+	seats_economy = models.IntegerField()
+
+	def __str__(self):
+		return self.aircraft
+
+
+class Flight(models.Model):
 	flight_number = models.CharField(max_length=8)
 	estimated_time_departure = models.DateTimeField()
 	estimated_time_arrival = models.DateTimeField()
 	location_departure = models.CharField(max_length=3)
 	location_arrival = models.CharField(max_length=3)
-	airline = models.CharField(max_length=3)
-	aircraft = models.CharField(max_length=4)
+	# airline = models.CharField(max_length=3)
+	# aircraft = models.CharField(max_length=4)
 	status = models.CharField(max_length=40)
+
+	airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
+	airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
 
 	class Meta:
 		# ordering by logical departure order
@@ -25,3 +44,4 @@ class Flight(models.Model):
 	def __str__(self):
 		return "[" + self.flight_number + "] " + self.location_departure + "-" + self.location_arrival + " : " + str(
 			self.estimated_time_departure) + " / " + str(self.estimated_time_arrival) + " [" + self.status + "]"
+

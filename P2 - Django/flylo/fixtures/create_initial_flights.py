@@ -11,7 +11,7 @@ def main():
 
 	now = int(time())
 
-	file = open("hw1_flights.json", "w")
+	file = open("flights.json", "w")
 
 	file.write("[")
 
