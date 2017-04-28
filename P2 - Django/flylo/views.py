@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from models import *
+from .models import *
 
 
 # Index view with a request, and a render response to index.html

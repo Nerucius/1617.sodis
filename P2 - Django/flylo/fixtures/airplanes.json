@@ -1,0 +1,32 @@
+[
+	{
+		"pk": 1,
+		"model": "flylo.Airplane",
+		"fields": {
+			"aircraft": "A125",
+			"seats_first_class": 10,
+			"seats_business": 20,
+			"seats_economy": 50
+		}
+	},
+	{
+		"pk": 2,
+		"model": "flylo.Airplane",
+		"fields": {
+			"aircraft": "A518",
+			"seats_first_class": 5,
+			"seats_business": 10,
+			"seats_economy": 80
+		}
+	},
+	{
+		"pk": 3,
+		"model": "flylo.Airplane",
+		"fields": {
+			"aircraft": "A135",
+			"seats_first_class": 10,
+			"seats_business": 30,
+			"seats_economy": 50
+		}
+	}
+]

@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
-
 from django.db import models
 
 # Create your models here.
 
 
 class Airline(models.Model):
+	# fields
 	code = models.CharField(max_length=3)
 
 	def __str__(self):
@@ -13,6 +13,7 @@ class Airline(models.Model):
 
 
 class Airplane(models.Model):
+	# fields
 	aircraft = models.CharField(max_length=4)
 	seats_first_class = models.IntegerField()
 	seats_business = models.IntegerField()
@@ -23,17 +24,17 @@ class Airplane(models.Model):
 
 
 class Flight(models.Model):
+	# foreign keys
+	airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
+	airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
+
+	# fields
 	flight_number = models.CharField(max_length=8)
 	estimated_time_departure = models.DateTimeField()
 	estimated_time_arrival = models.DateTimeField()
 	location_departure = models.CharField(max_length=3)
 	location_arrival = models.CharField(max_length=3)
-	# airline = models.CharField(max_length=3)
-	# aircraft = models.CharField(max_length=4)
 	status = models.CharField(max_length=40)
-
-	airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
-	airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
 
 	class Meta:
 		# ordering by logical departure order
