@@ -1,0 +1,28 @@
+{% include 'base.html' %}
+
+{% block content %}
+
+    <h1>Flight List</h1>
+
+    {% if departure %}
+        <p><b>You're looking at flights departing from: {{ departure }}</b></p>
+    {% endif %}
+
+    {% if flights %}
+        <ul>
+            {% for flight in flights %}
+                {% if departure %}
+                    <li>{{ flight.flight_number }} from {{ flight.location_departure }} to {{ flight.location_arrival }} [{{ flight.status }}]</li>
+                {% else %}
+                    <li><a href="{% url 'flights' %}{{ flight.location_departure }}">{{ flight.flight_number }}</a>
+                    from {{ flight.location_departure }} to {{ flight.location_arrival }} [{{ flight.status }}]</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No flights are available.</p>
+    {% endif %}
+
+    <p><a href="{% url 'index' %}">Go back to the home page</a></p>
+
+{% endblock %}
