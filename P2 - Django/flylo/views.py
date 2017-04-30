@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
+
 from .forms import *
 
 # Flags to control which flight view has to be rendered
 SIMPLE_FLIGHTS = False
-DETAILED_FLIGHTS = True
+DETAILED_FLIGHTS = False
 
 
 # Index view with a request, and a render response to index.html
@@ -41,3 +43,16 @@ def flights(request, departure=None):
 		template = 'flylo/flights.html'
 
 	return render(request, template, context)
+
+
+def shoppingcart(request):
+	selectedFlights = []
+	for key in request.POST:
+		if key.startswith("checkbox"):
+			selectedFlights.append(request.POST[key])
+	request.session["selectedFlights"] = selectedFlights
+	return HttpResponseRedirect(reverse('flylo:buy'))
+
+
+def buy(request):
+	return HttpResponse("TODO buy view")

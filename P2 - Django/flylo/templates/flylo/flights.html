@@ -15,24 +15,32 @@
     {% if flights %}
 
         {% if departure %}
-            <p><b>You are looking at flights departing from: {{ departure }}</b></p>
+            <h3>You are looking at flights departing from {{ departure }}:</h3>
         {% else %}
-            <p><b>These are all available flights:</b></p>
+            <h3>These are all available flights:</h3>
         {% endif %}
 
-        <ul>
+
+        <form action="{% url 'flylo:shoppingcart' %}" method="post">
+            {% csrf_token %}
             {% for flight in flights %}
+                <label><input type="checkbox" name="checkbox{{ flight.id }}" id="checkbox{{ flight.id }}"
+                              value="{{ flight.id }}"></label>
                 {% if departure %}
-                    <li>{{ flight.flight_number }} to {{ flight.location_arrival }}</li>
+                    {{ flight.flight_number }} to {{ flight.location_arrival }} <br>
                 {% else %}
-                    <li><a href="{% url 'flights' departure %}{{ flight.location_departure }}">
+                    <a href="{% url 'flylo:flights' departure %}{{ flight.location_departure }}">
                         {{ flight.flight_number }} </a> from {{ flight.location_departure }}
-                        to {{ flight.location_arrival }}</li>
+                    to {{ flight.location_arrival }} <br>
                 {% endif %}
             {% endfor %}
-        </ul>
+            <input type="submit" value="Go to shopping cart">
+        </form>
+
+
 
     {% else %}
         <p>No flights are available.</p>
     {% endif %}
+
 {% endblock %}

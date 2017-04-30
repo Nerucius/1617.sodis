@@ -37,9 +37,9 @@
     {% if flights %}
 
         {% if departure %}
-            <p><b>You are looking at flights departing from: {{ departure }}</b></p>
+            <h3>You are looking at flights departing from {{ departure }}:</h3>
         {% else %}
-            <p><b>These are all available flights:</b></p>
+            <h3>These are all available flights:</h3>
         {% endif %}
 
 
@@ -60,7 +60,7 @@
                     {% if departure %}
                         <td>{{ flight.flight_number }}</td>
                     {% else %}
-                        <td><a href="{% url 'flights' departure %}{{ flight.location_departure }}">
+                        <td><a href="{% url 'flylo:flights' departure %}{{ flight.location_departure }}">
                             {{ flight.flight_number }}</a></td>
                     {% endif %}
                     <td>{{ flight.location_departure }} <br> {{ flight.estimated_time_departure }}</td>
