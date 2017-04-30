@@ -1,0 +1,38 @@
+{% include 'flylo/base.html' %}
+
+
+{% block style %}
+    <style>
+        body {
+            text-align: left;
+        }
+    </style>
+{% endblock %}
+
+
+{% block content %}
+
+    {% if flights %}
+
+        {% if departure %}
+            <p><b>You are looking at flights departing from: {{ departure }}</b></p>
+        {% else %}
+            <p><b>These are all available flights:</b></p>
+        {% endif %}
+
+        <ul>
+            {% for flight in flights %}
+                {% if departure %}
+                    <li>{{ flight.flight_number }} to {{ flight.location_arrival }}</li>
+                {% else %}
+                    <li><a href="{% url 'flights' departure %}{{ flight.location_departure }}">
+                        {{ flight.flight_number }} </a> from {{ flight.location_departure }}
+                        to {{ flight.location_arrival }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+    {% else %}
+        <p>No flights are available.</p>
+    {% endif %}
+{% endblock %}

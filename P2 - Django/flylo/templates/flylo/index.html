@@ -1,4 +1,4 @@
-{% include 'base.html' %}
+{% include 'flylo/base.html' %}
 
 
 {% block content %}
@@ -11,11 +11,5 @@
         {{ form }}
         <input type="submit" value="Submit">
     </form>
-
-    <!--form-- action="/flylo/flights/" method="post">
-        { % csrf_token %}
-        { { form }}
-        <input type="submit" value="Submit">
-    </form-->
 
 {% endblock %}
