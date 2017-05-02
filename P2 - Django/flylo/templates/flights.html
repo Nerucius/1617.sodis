@@ -1,46 +1,47 @@
-{% include 'base.html' %}
-
-
-{% block style %}
-    <style>
-        body {
-            text-align: left;
-        }
-    </style>
-{% endblock %}
+{% extends 'base.html' %}
 
 
 {% block content %}
 
-    {% if flights %}
+	{% if flights %}
 
-        {% if departure %}
-            <h3>You are looking at flights departing from {{ departure }}:</h3>
-        {% else %}
-            <h3>These are all available flights:</h3>
-        {% endif %}
-
-
-        <form action="{% url 'flylo:shoppingcart' %}" method="post">
-            {% csrf_token %}
-            {% for flight in flights %}
-                <label><input type="checkbox" name="checkbox{{ flight.id }}" id="checkbox{{ flight.id }}"
-                              value="{{ flight.id }}"></label>
-                {% if departure %}
-                    {{ flight.flight_number }} to {{ flight.location_arrival }} <br>
-                {% else %}
-                    <a href="{% url 'flylo:flights' departure %}{{ flight.location_departure }}">
-                        {{ flight.flight_number }} </a> from {{ flight.location_departure }}
-                    to {{ flight.location_arrival }} <br>
-                {% endif %}
-            {% endfor %}
-            <input type="submit" value="Go to shopping cart">
-        </form>
+		{% if departure %}
+			<h3>You are looking at flights departing from {{ departure }}:</h3>
+		{% else %}
+			<h3>These are all available flights:</h3>
+		{% endif %}
 
 
+		<form style="margin: 0 3pc" class="form" action="{% url 'flylo:cart' %}" method="post">
+			{% csrf_token %}
+			{% for flight in flights %}
 
-    {% else %}
-        <p>No flights are available.</p>
-    {% endif %}
+				<div class="checkbox">
+					<label for="checkbox{{ flight.id }}">
+						<input type="checkbox" name="checkbox{{ flight.id }}" id="checkbox{{ flight.id }}"
+							   value="{{ flight.id }}">
+
+
+						{% if departure %}
+							{{ flight.flight_number }} to {{ flight.location_arrival }}
+
+						{% else %}
+							<a href="{% url 'flylo:flights' departure %}{{ flight.location_departure }}">
+								{{ flight.flight_number }} </a> from {{ flight.location_departure }}
+							to {{ flight.location_arrival }}
+						{% endif %}
+
+					</label>
+				</div>
+
+			{% endfor %}
+			<input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
+		</form>
+
+
+
+	{% else %}
+		<p>No flights are available.</p>
+	{% endif %}
 
 {% endblock %}

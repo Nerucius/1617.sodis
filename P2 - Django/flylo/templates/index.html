@@ -1,15 +1,16 @@
-{% include 'base.html' %}
-
+{% extends 'base.html' %}
 
 {% block content %}
 
-    <p style="color: darkred; font-size:450%";><b style="color: cornflowerblue">Fly</b>lo</p>
-    <p><b>Your web application for searching and buying flights.</b></p>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Submit">
-    </form>
+
+	<p>
+	<h3>Select a Depature City</h3>
+	<form class="form" method="post">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" value="Submit">
+	</form>
+	</p>
 
 {% endblock %}

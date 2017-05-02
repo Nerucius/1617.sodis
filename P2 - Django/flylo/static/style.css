@@ -1,0 +1,27 @@
+body {
+    font-family: "Trebuchet MS";
+    background-color: #fff;
+    margin: 0px;
+    padding: 0px;
+}
+
+.content {
+    margin: auto;
+    width: 720px;
+    box-shadow: 0px 0px 5px black;
+    padding: .5pc;
+    min-height: 100vh;
+}
+
+.lead{
+    margin: -.5pc;
+    padding-top: .5pc;
+    padding: .5pc;
+    font-size: 3pc;
+    background-color: #1b1b1b;
+}
+.lead p{
+    font-size: 1pc;
+    color: #ddd
+}
+

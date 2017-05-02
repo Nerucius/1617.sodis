@@ -46,13 +46,19 @@ def flights(request, departure=None):
 
 
 def shoppingcart(request):
+	"""
 	selectedFlights = []
 	for key in request.POST:
 		if key.startswith("checkbox"):
 			selectedFlights.append(request.POST[key])
 	request.session["selectedFlights"] = selectedFlights
-	return HttpResponseRedirect(reverse('flylo:buy'))
+	"""
+
+	return HttpResponse([(f, request.POST[f]) for f in request.POST])
+
+
+	# return HttpResponseRedirect(reverse('flylo:checkout'))
 
 
 def checkout(request):
-	return HttpResponse("TODO buy view")
+	return HttpResponse("Empty Page");
