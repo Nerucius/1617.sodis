@@ -1,4 +1,4 @@
-{% include 'flylo/base.html' %}
+{% include 'base.html' %}
 
 
 {% block style %}
@@ -48,11 +48,6 @@
                 <th>Flight number</th>
                 <th>Departure</th>
                 <th>Arrival</th>
-                <th>Airline</th>
-                <th>Airplane</th>
-                <!--th>First class (seats)</th>
-                <th>Business (seats)</th>
-                <th>Economy (seats)</th-->
                 <th>Status</th>
             </tr>
             {% for flight in flights %}
@@ -63,20 +58,8 @@
                         <td><a href="{% url 'flylo:flights' departure %}{{ flight.location_departure }}">
                             {{ flight.flight_number }}</a></td>
                     {% endif %}
-                    <td>{{ flight.location_departure }} <br> {{ flight.estimated_time_departure }}</td>
-                    <td>{{ flight.location_arrival }} <br> {{ flight.estimated_time_arrival }}</td>
-                    <td>{{ flight.airline.code }}</td>
-                    <td>{{ flight.airplane.aircraft }}
-                        <button type="button" onclick="alert(
-                                'Number of seats '
-                                + '\nFirst class: ' + {{ flight.airplane.seats_first_class }}
-                                + '\nBusiness: ' + {{ flight.airplane.seats_business }}
-                                + '\nEconomy: ' + {{ flight.airplane.seats_economy }}
-                            )">Show number of seats</button>
-                    </td>
-                    <!--td>{ { flight.airplane.seats_first_class }}</td>
-                    <td>{ { flight.airplane.seats_business }}</td>
-                    <td>{ { flight.airplane.seats_economy }}</td-->
+                    <td>{{ flight.location_departure }}</td>
+                    <td>{{ flight.location_arrival }}</td>
                     <td>{{ flight.status }}</td>
                 </tr>
             {% endfor %}

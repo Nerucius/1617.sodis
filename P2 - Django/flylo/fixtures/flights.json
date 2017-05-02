@@ -8,7 +8,7 @@
             "location_departure": "SXF",
             "location_arrival": "BCN",
             "flight_number": "IBE5688",
-            "airline": 1,
+            "airlines": [1],
             "estimated_time_arrival": "2017-04-29 03:00:37+0200",
             "airplane": 1
         }
@@ -22,7 +22,7 @@
             "location_departure": "SXF",
             "location_arrival": "BCN",
             "flight_number": "RYA9655",
-            "airline": 4,
+            "airlines": [1,2],
             "estimated_time_arrival": "2017-04-29 03:51:34+0200",
             "airplane": 1
         }
@@ -36,7 +36,7 @@
             "location_departure": "SXF",
             "location_arrival": "BCN",
             "flight_number": "SWR4510",
-            "airline": 3,
+            "airlines": [3],
             "estimated_time_arrival": "2017-04-29 03:15:47+0200",
             "airplane": 2
         }
@@ -50,7 +50,7 @@
             "location_departure": "BCN",
             "location_arrival": "ZRH",
             "flight_number": "VLG7637",
-            "airline": 2,
+            "airlines": [1,2],
             "estimated_time_arrival": "2017-04-29 02:47:27+0200",
             "airplane": 2
         }
@@ -64,7 +64,7 @@
             "location_departure": "SXF",
             "location_arrival": "BCN",
             "flight_number": "IBE4955",
-            "airline": 1,
+            "airlines": [2,3],
             "estimated_time_arrival": "2017-04-29 02:02:21+0200",
             "airplane": 3
         }
@@ -78,7 +78,7 @@
             "location_departure": "BCN",
             "location_arrival": "ZRH",
             "flight_number": "VLG9324",
-            "airline": 2,
+            "airlines": [2],
             "estimated_time_arrival": "2017-04-29 03:13:16+0200",
             "airplane": 3
         }
@@ -92,7 +92,7 @@
             "location_departure": "ZRH",
             "location_arrival": "SXF",
             "flight_number": "VLG6199",
-            "airline": 2,
+            "airlines": [3,4],
             "estimated_time_arrival": "2017-04-29 00:36:23+0200",
             "airplane": 3
         }
@@ -106,7 +106,7 @@
             "location_departure": "ZRH",
             "location_arrival": "BCN",
             "flight_number": "RYA5031",
-            "airline": 4,
+            "airlines": [4],
             "estimated_time_arrival": "2017-04-29 03:37:54+0200",
             "airplane": 2
         }
@@ -120,7 +120,7 @@
             "location_departure": "SXF",
             "location_arrival": "BCN",
             "flight_number": "RYA1482",
-            "airline": 4,
+            "airlines": [1,4],
             "estimated_time_arrival": "2017-04-29 01:06:18+0200",
             "airplane": 3
         }
@@ -134,7 +134,7 @@
             "location_departure": "SXF",
             "location_arrival": "BCN",
             "flight_number": "SWR2315",
-            "airline": 3,
+            "airlines": [1,2,3],
             "estimated_time_arrival": "2017-04-29 01:57:46+0200",
             "airplane": 2
         }
@@ -148,7 +148,7 @@
             "location_departure": "BCN",
             "location_arrival": "SXF",
             "flight_number": "IBE6944",
-            "airline": 1,
+            "airlines": [1],
             "estimated_time_arrival": "2017-04-29 02:04:15+0200",
             "airplane": 2
         }
@@ -162,7 +162,7 @@
             "location_departure": "ZRH",
             "location_arrival": "SXF",
             "flight_number": "SWR6240",
-            "airline": 3,
+            "airlines": [1,2,3,4],
             "estimated_time_arrival": "2017-04-29 00:31:40+0200",
             "airplane": 2
         }

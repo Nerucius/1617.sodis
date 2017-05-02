@@ -1,17 +1,16 @@
 from django.contrib import admin
 from models import *
 
-# Register your models here.
 
-"""
-class ListAdmin(admin.ModelAdmin):
+def column_lister(model):
+	""" Creates a new ModelAdmin that always lists the models in a table fashion. """
 
-    def __unicode__(self):
-        Function that returns the table display columns for Django-Admin.
-        list_display = [f.name for f in self.model._meta.fields]
-        return list_display
-"""
+	class ListAdmin(admin.ModelAdmin):
+		list_display = [f.name for f in model._meta.fields]
 
-admin.site.register(Flight)
-admin.site.register(Airline)
-admin.site.register(Airplane)
+	return ListAdmin
+
+
+admin.site.register(Flight, column_lister(Flight))
+admin.site.register(Airline, column_lister(Airline))
+admin.site.register(Airplane, column_lister(Airplane))

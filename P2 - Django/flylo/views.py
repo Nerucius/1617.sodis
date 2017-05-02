@@ -23,7 +23,7 @@ def index(request):
 	# If not, send the empty form
 	else:
 		context['form'] = SelectDepartureForm()
-	return render(request, 'flylo/index.html', context)
+	return render(request, 'index.html', context)
 
 
 def flights(request, departure=None):
@@ -36,11 +36,11 @@ def flights(request, departure=None):
 		context['flights'] = Flight.objects.all()
 
 	if SIMPLE_FLIGHTS:
-		template = 'flylo/simple_flights.html'
+		template = 'simple_flights.html'
 	elif DETAILED_FLIGHTS:
-		template = 'flylo/detailed_flights.html'
+		template = 'detailed_flights.html'
 	else:
-		template = 'flylo/flights.html'
+		template = 'flights.html'
 
 	return render(request, template, context)
 
@@ -54,5 +54,5 @@ def shoppingcart(request):
 	return HttpResponseRedirect(reverse('flylo:buy'))
 
 
-def buy(request):
+def checkout(request):
 	return HttpResponse("TODO buy view")

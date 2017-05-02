@@ -25,7 +25,7 @@ class Airplane(models.Model):
 
 class Flight(models.Model):
 	# foreign keys
-	airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
+	airlines = models.ManyToManyField(Airline);
 	airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
 
 	# fields
@@ -35,6 +35,7 @@ class Flight(models.Model):
 	location_departure = models.CharField(max_length=3)
 	location_arrival = models.CharField(max_length=3)
 	status = models.CharField(max_length=40)
+
 
 	class Meta:
 		# ordering by logical departure order

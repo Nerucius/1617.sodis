@@ -7,5 +7,5 @@ urlpatterns = [
 	url(r'^flights/()$', views.flights, name='flights'),
 	url(r'^flights/(?P<departure>\w+)/$', views.flights, name='flights'),
 	url(r'^shoppingcart/$', views.shoppingcart, name='shoppingcart'),
-	url(r'^buy/$', views.buy, name='buy'),
+	url(r'^checkout/$', views.checkout, name='buy'),
 ]
