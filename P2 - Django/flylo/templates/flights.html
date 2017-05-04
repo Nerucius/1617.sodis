@@ -1,47 +1,91 @@
 {% extends 'base.html' %}
 
 
+{% block style %}
+<style>
+        body {
+            text-align: left;
+        }
+
+        .table thead{
+            background-color : black;
+                color:white;
+        }
+</style>
+{% endblock %}
+
+
 {% block content %}
 
-	{% if flights %}
+{% if flights %}
 
-		{% if departure %}
-			<h3>You are looking at flights departing from {{ departure }}:</h3>
-		{% else %}
-			<h3>These are all available flights:</h3>
-		{% endif %}
-
-
-		<form style="margin: 0 3pc" class="form" action="{% url 'flylo:cart' %}" method="post">
-			{% csrf_token %}
-			{% for flight in flights %}
-
-				<div class="checkbox">
-					<label for="checkbox{{ flight.id }}">
-						<input type="checkbox" name="checkbox{{ flight.id }}" id="checkbox{{ flight.id }}"
-							   value="{{ flight.id }}">
+{% if departure %}
+<h3>You are looking at flights departing from {{ departure }}:</h3>
+{% else %}
+<h3>These are all available flights:</h3>
+{% endif %}
 
 
-						{% if departure %}
-							{{ flight.flight_number }} to {{ flight.location_arrival }}
+<form action="{% url 'flylo:shoppingcart' %}" method="post">
+    {% csrf_token %}
 
-						{% else %}
-							<a href="{% url 'flylo:flights' departure %}{{ flight.location_departure }}">
-								{{ flight.flight_number }} </a> from {{ flight.location_departure }}
-							to {{ flight.location_arrival }}
-						{% endif %}
+    <table class="table table-striped table-hover">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Flight No.</th>
+            <th>Departure</th>
+            <th>Arrival</th>
+            <th>Status</th>
 
-					</label>
-				</div>
-
-			{% endfor %}
-			<input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
-		</form>
+            <th>No. Seats</th>
+            <th>Class</th>
+        </tr>
+        </thead>
 
 
+        {% for flight in flights %}
+        <tr>
 
-	{% else %}
-		<p>No flights are available.</p>
-	{% endif %}
+            <td >
+                <label for="checkbox{{ flight.id }}">
+                    <input type="checkbox"
+                           name="checkbox{{ flight.id }}"
+                           id="checkbox{{ flight.id }}"
+                           value="{{ flight.id }}">
+                </label>
+            </td>
+
+
+            <td><a href="{% url 'flylo:flights' pk %}{{ flight.id }}">
+                {{ flight.flight_number }}</a></td>
+            <td>{{ flight.location_departure }}</td>
+            <td>{{ flight.location_arrival }}</td>
+            <td>{{ flight.status }}</td>
+
+
+            <td class="center"><input type="number" min="1" max="5" value="1" name="seats{{flight.id}}"> </td>
+
+            <td class="center">
+                <select name="type{{flight.id}}">
+                    <option value='e'>Economy</option>
+                    <option value='b'>Business</option>
+                    <option value='f'>First Class</option>
+                </select>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+
+    <input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
+
+</form>
+
+{% else %}
+<p>No flights are available.</p>
+{% endif %}
 
 {% endblock %}

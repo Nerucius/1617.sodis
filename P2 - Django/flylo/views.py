@@ -3,10 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
 from .forms import *
-
-# Flags to control which flight view has to be rendered
-SIMPLE_FLIGHTS = False
-DETAILED_FLIGHTS = False
+import random as rand
 
 
 # Index view with a request, and a render response to index.html
@@ -35,30 +32,51 @@ def flights(request, departure=None):
 	else:
 		context['flights'] = Flight.objects.all()
 
-	if SIMPLE_FLIGHTS:
-		template = 'simple_flights.html'
-	elif DETAILED_FLIGHTS:
-		template = 'detailed_flights.html'
-	else:
-		template = 'flights.html'
+	return render(request, 'flights.html', context)
 
-	return render(request, template, context)
+
+def detailed_flight(request, pk=None):
+	context = {}
+	context['flight'] = Flight.objects.get(pk=pk)
+	return render(request, 'detailed_flight.html', context)
 
 
 def shoppingcart(request):
-	"""
-	selectedFlights = []
+	reservations = []
+	if request.session['reservations']:
+		for pk in request.session['reservations']:
+			reservations.append(pk)
+
 	for key in request.POST:
-		if key.startswith("checkbox"):
-			selectedFlights.append(request.POST[key])
-	request.session["selectedFlights"] = selectedFlights
-	"""
+		if key.startswith('checkbox'):
+			# For all checked flights, get the form values
+			fid = request.POST[key]
+			n_seats = int(request.POST['seats' + fid])
+			type = request.POST['type' + fid]
 
-	return HttpResponse([(f, request.POST[f]) for f in request.POST])
+			flight = Flight.objects.get(pk=fid)
+			airline = rand.choice(flight.airlines.all())
+
+			for i in range(n_seats):
+				# Create one reservation for each seat
+				res = Reservation()
+				res.airline = airline
+				res.price = 49.99
+				res.flight = flight
+				res.type = type
+				res.save()
+				reservations.append(res.pk)
+
+	request.session['reservations'] = reservations
+
+	return HttpResponseRedirect(reverse('flylo:buy'))
 
 
-	# return HttpResponseRedirect(reverse('flylo:checkout'))
+def buy(request):
+	context = {'reservations': []}
+	context['session'] = request.session
 
+	for pk in request.session['reservations']:
+		context['reservations'].append(Reservation.objects.get(pk=pk))
 
-def checkout(request):
-	return HttpResponse("Empty Page");
+	return render(request, 'buy.html', context)

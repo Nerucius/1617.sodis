@@ -4,6 +4,11 @@ from django.db import models
 
 # Create your models here.
 
+FLIGHT_CLASS = (
+    ('e', 'Economy'),
+    ('b', 'Business'),
+    ('f', 'First Class'),
+)
 
 class Airline(models.Model):
 	# fields
@@ -50,24 +55,28 @@ class Flight(models.Model):
 
 """
 class Client(models.Model):
-	# Fields
+	# fields
 	email = models.CharField()
 	password = models.EmailField()
 """
 
-class Seat(models.Model):
-	# Foreign Keys
+class Reservation(models.Model):
+	# foreign Keys
 	flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
+	airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
 	# TODO Link to auth middleware model
 	# client = models.ForeignKey(Client, on_delete=models.CASCADE)
 
 	# fields
-	type = models.CharField()
-	code = models.CharField()
+	type = models.CharField(max_length=1, choices=FLIGHT_CLASS)
+	seat = models.CharField(max_length=4, blank=True, null=True)
 	price = models.FloatField()
-	confirmed = models.BooleanField(default=False)
-	added = models.DateTimeField(auto_now_add=True)
+	paid = models.BooleanField(default=False)
+	checkin = models.BooleanField(default=False)
+	created = models.DateTimeField(auto_now_add=True)
 
+	def __str__(self):
+		return self.flight.flight_number + ": " + self.airline.code + ", " + str(self.price)
 
 
 

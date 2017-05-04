@@ -14,3 +14,4 @@ def column_lister(model):
 admin.site.register(Flight, column_lister(Flight))
 admin.site.register(Airline, column_lister(Airline))
 admin.site.register(Airplane, column_lister(Airplane))
+admin.site.register(Reservation, column_lister(Reservation))
