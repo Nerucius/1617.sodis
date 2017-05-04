@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from django.db import models
 
+
 # Create your models here.
 
 
@@ -36,14 +37,48 @@ class Flight(models.Model):
 	location_arrival = models.CharField(max_length=3)
 	status = models.CharField(max_length=40)
 
-
 	class Meta:
 		# ordering by logical departure order
 		ordering = ['estimated_time_departure', 'location_arrival']
-		# ordering by logical arrival order
-		# ordering = ['estimated_time_arrival', 'location_departure']
+	# ordering by logical arrival order
+	# ordering = ['estimated_time_arrival', 'location_departure']
 
 	def __str__(self):
 		return "[" + self.flight_number + "] " + self.location_departure + "-" + self.location_arrival + " : " + str(
 			self.estimated_time_departure) + " / " + str(self.estimated_time_arrival) + " [" + self.status + "]"
+
+
+"""
+class Client(models.Model):
+	# Fields
+	email = models.CharField()
+	password = models.EmailField()
+"""
+
+class Seat(models.Model):
+	# Foreign Keys
+	flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
+	# TODO Link to auth middleware model
+	# client = models.ForeignKey(Client, on_delete=models.CASCADE)
+
+	# fields
+	type = models.CharField()
+	code = models.CharField()
+	price = models.FloatField()
+	confirmed = models.BooleanField(default=False)
+	added = models.DateTimeField(auto_now_add=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
