@@ -3,9 +3,9 @@
 
 {% block content %}
 
-{% for res in reservations%}
+{% for reservation in reservations%}
 
-<li>{{ res }}</li>
+<li>{{ reservation.pk }} ({{ reservation.flight.pk }})</li>
 
 {% endfor %}
 

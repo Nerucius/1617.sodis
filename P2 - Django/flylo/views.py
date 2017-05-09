@@ -44,21 +44,29 @@ def detailed_flight(request, pk=None):
 def shoppingcart(request):
 	""" Backend view to add Selected flights to Cart. """
 	reservations = []
+	return_flights_ids = []
+	request.session['reservations'] = []
 
-	try:
+	"""try:
 		if request.session['reservations']:
 			for pk in request.session['reservations']:
 				reservations.append(pk)
 	except Exception:  # not reservations in session
-		pass
+		pass"""
 
 	for key in request.POST:
+
+		# When selecting going flight
 		if key.startswith('selected_going'):
 			# For all checked flights, get the form values
 			fid = request.POST[key]
 
-			ret_flight = bool(request.POST['return_flight'] + fid)
-			# TODO here
+			# Return flight can be selected or not
+			try:
+				return_flight = int(request.POST['return_flight' + fid])
+				return_flights_ids.append(return_flight)
+			except Exception:
+				pass
 
 			n_seats = int(request.POST['seats' + fid])
 			type = request.POST['type' + fid]
@@ -67,6 +75,29 @@ def shoppingcart(request):
 			airline = rand.choice(flight.airlines.all())
 
 			for i in range(n_seats):
+				# TODO with backend information
+				# Create one reservation for each seat
+				res = Reservation()
+				res.airline = airline
+				res.price = 49.99
+				res.flight = flight
+				res.type = type
+				res.save()
+				reservations.append(res.pk)
+
+		# When selecting return flight
+		if key.startswith('selected_return'):
+			# For all checked flights, get the form values
+			fid = request.POST[key]
+
+			n_seats = request.POST['seats' + fid]
+			type = request.POST['type' + fid]
+
+			flight = Flight.objects.get(pk=fid)
+			airline = rand.choice(flight.airlines.all())
+
+			for i in range(n_seats):
+				# TODO with backend information
 				# Create one reservation for each seat
 				res = Reservation()
 				res.airline = airline
@@ -78,8 +109,13 @@ def shoppingcart(request):
 
 	request.session['reservations'] = reservations
 
-	if not ret_flight:
+	if len(return_flights_ids) == 0:
 		return HttpResponseRedirect(reverse('flylo:buy'))
+	else:
+		url_parameters = ""
+		for fid in return_flights_ids:
+			url_parameters += str(fid) + "/"
+		return HttpResponseRedirect('../return/' + url_parameters)
 
 
 def return_flights(request, flight_list):
