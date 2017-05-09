@@ -42,15 +42,24 @@ def detailed_flight(request, pk=None):
 
 
 def shoppingcart(request):
+	""" Backend view to add Selected flights to Cart. """
 	reservations = []
-	if request.session['reservations']:
-		for pk in request.session['reservations']:
-			reservations.append(pk)
+
+	try:
+		if request.session['reservations']:
+			for pk in request.session['reservations']:
+				reservations.append(pk)
+	except Exception:  # not reservations in session
+		pass
 
 	for key in request.POST:
-		if key.startswith('checkbox'):
+		if key.startswith('selected_going'):
 			# For all checked flights, get the form values
 			fid = request.POST[key]
+
+			ret_flight = bool(request.POST['return_flight'] + fid)
+			# TODO here
+
 			n_seats = int(request.POST['seats' + fid])
 			type = request.POST['type' + fid]
 
@@ -69,7 +78,38 @@ def shoppingcart(request):
 
 	request.session['reservations'] = reservations
 
-	return HttpResponseRedirect(reverse('flylo:buy'))
+	if not ret_flight:
+		return HttpResponseRedirect(reverse('flylo:buy'))
+
+
+def return_flights(request, flight_list):
+	flight_list = set(flight_list.split('/'))
+
+	try:
+		flight_list.remove('')
+	except Exception:
+		pass
+
+	context = {}
+
+	context["flights"] = []
+
+	for pk in flight_list:
+		f = Flight.objects.get(pk=pk)
+		flight_number = f.flight_number
+		arr = f.location_departure
+		dep = f.location_arrival
+
+		ret_flights = Flight.objects.filter(location_departure=dep, location_arrival=arr)
+
+		context['flights'].append(
+			{
+				'flight_number': flight_number,
+				'return_flights': ret_flights
+			}
+		)
+
+	return render(request, 'return_flights.html', context)
 
 
 def buy(request):

@@ -5,9 +5,7 @@ body {
     padding: 0px;
 }
 
-.content {
-    margin: auto;
-    width: 720px;
+.container {
     box-shadow: 0px 0px 5px black;
     padding: .5pc;
     min-height: 100vh;

@@ -28,67 +28,50 @@
 
 
 {% block content %}
-
-{% if flights %}
-
-{% if departure %}
-<h3>You are looking at flights departing from {{ departure }}:</h3>
-{% else %}
-<h3>These are all available flights:</h3>
-{% endif %}
-
-
 <form action="{% url 'flylo:shoppingcart' %}" method="post">
 	{% csrf_token %}
+
+	{% for flight in flights %}
+	<h1>Return flights for {{flight.flight_number}}:</h1>
 
 	<table class="table table-striped table-hover">
 		<thead>
 		<tr>
 			<th>Add to Cart</th>
-			<th>Return Trip</th>
 			<th>Flight No.</th>
 			<th>Departure</th>
 			<th>Arrival</th>
 			<th>Status</th>
-
 			<th>No. Seats</th>
 			<th>Class</th>
 		</tr>
 		</thead>
 
-
-		{% for flight in flights %}
+		{% for return_flight in flight.return_flights %}
 		<tr>
 
 			<td>
-				<label for="checkbox{{ flight.id }}">
+				<label for="checkbox{{ return_flight.id }}">
 					<input type="checkbox"
-						   name="selected_going{{ flight.id }}"
-						   id="checkbox{{ flight.id }}"
-						   value="{{ flight.id }}">
+						   name="selected_return{{ return_flight.id }}"
+						   id="checkbox{{ return_flight.id }}"
+						   value="{{ return_flight.id }}">
 				</label>
 			</td>
 
-			<td>
 
-				<input type="checkbox"
-					   name="return_flight{{ flight.id}}"
-					   data-toggle="toggle" data-size="mini"
-					   data-on="Yes" data-off="No">
+			<td><a href="{% url 'flylo:flights' pk %}{{ return_flight.id }}">
+				{{ return_flight.flight_number }} ({{ return_flight.pk }})</a></td>
+			<td>{{ return_flight.location_departure }}</td>
+			<td>{{ return_flight.location_arrival }}</td>
+			<td>{{ return_flight.status }}</td>
 
+
+			<td class="center"><input type="number" min="1" max="5" value="1" name="seats{{return_flight.id}}" disabled>
 			</td>
 
-			<td><a href="{% url 'flylo:flights' pk %}{{ flight.id }}">
-				{{ flight.flight_number }}</a></td>
-			<td>{{ flight.location_departure }}</td>
-			<td>{{ flight.location_arrival }}</td>
-			<td>{{ flight.status }}</td>
-
-
-			<td class="center"><input type="number" min="1" max="5" value="1" name="seats{{flight.id}}"></td>
-
 			<td class="center">
-				<select name="type{{flight.id}}">
+				<select name="type{{return_flight.id}}" disabled>
 					<option value='e'>Economy</option>
 					<option value='b'>Business</option>
 					<option value='f'>First Class</option>
@@ -97,16 +80,9 @@
 
 		</tr>
 		{% endfor %}
-
 	</table>
-
+	{% endfor %}
 
 	<input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
-
 </form>
-
-{% else %}
-<p>No flights are available.</p>
-{% endif %}
-
 {% endblock %}
