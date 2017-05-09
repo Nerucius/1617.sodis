@@ -3,11 +3,29 @@
 
 {% block content %}
 
-{% for reservation in reservations%}
+	{% for res in reservations %}
 
-<li>{{ reservation.pk }} ({{ reservation.flight.pk }})</li>
+		<div class="panel panel-success">
+			<div class="panel-heading">
+				<span class="h2">{{ res.flight.flight_number }}</span>
+				<span class="h4 pull-right"> {{ res.flight.location_departure }} to {{ res.flight.location_arrival }}</span>
+			</div>
+			<div class="panel-body">
 
-{% endfor %}
+
+
+				<ul>
+					<li><strong>Flight:</strong> {{ res.flight }}</li>
+					<li><strong>Class:</strong> {{ res.type }}</li>
+					<li><strong>Price:</strong> {{ res.price }}&euro;</li>
+				</ul>
+			</div>
+		</div>
+
+	{% endfor %}
+
+
+	<button class="btn btn-success pull-right">Proceed to Checkout</button>
 
 
 

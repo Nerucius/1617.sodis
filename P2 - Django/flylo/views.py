@@ -9,25 +9,22 @@ from django.contrib import auth
 from .forms import *
 import random as rand
 
+class IndexView(TemplateView):
+	template_name = 'index.html'
 
-# Index view with a request, and a render response to index.html
-def index(request):
-	context = {}
-	# In case the form has been completed, redirect to the filtered by departure flights page
-	if request.method == 'POST':
+	def get(self, request):
+		context = {'form': SelectDepartureForm()}
+		return render(request, 'index.html', context)
+
+	def post(self, request):
 		form = SelectDepartureForm(request.POST)
 		if form.is_valid():
 			id_departure = form.cleaned_data.get('departure')
 			departure = form.get_departure(id_departure)
 			return HttpResponseRedirect('flights/' + departure)
 
-	# If not, send the empty form
-	else:
-		context['form'] = SelectDepartureForm()
-	return render(request, 'index.html', context)
 
 class LoginView(TemplateView):
-
 	template_name = 'login.html'
 
 	def post(self, request):
@@ -41,9 +38,11 @@ class LoginView(TemplateView):
 		else:
 			return render(request, self.template_name, {'error': True})
 
+
 def logout(request):
 	auth.logout(request)
 	return HttpResponseRedirect(reverse('index'))
+
 
 def flights(request, departure=None):
 	context = {}
@@ -67,7 +66,7 @@ def shoppingcart(request):
 	""" Backend view to add Selected flights to Cart. """
 	reservations = []
 	return_flights_ids = []
-	#request.session['reservations'] = []
+	# request.session['reservations'] = []
 
 	try:
 		if request.session['reservations']:

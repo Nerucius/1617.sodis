@@ -2,15 +2,20 @@
 
 {% block content %}
 
+	<div class="row">
+		<div class="col-sm-8 col-sm-offset-2">
+			<p>
+			<h3>Select a Depature City to get Started</h3>
+			<hr>
+			<form class="form text-center" method="post">
+				{% csrf_token %}
+				{{ form }}
+				<br>
+				<input type="submit" class="btn btn-lg btn-success" value="Look up Flights">
+			</form>
+			</p>
+		</div>
+	</div>
 
-
-	<p>
-	<h3>Select a Depature City</h3>
-	<form class="form" method="post">
-		{% csrf_token %}
-		{{ form }}
-		<input type="submit" value="Submit">
-	</form>
-	</p>
 
 {% endblock %}

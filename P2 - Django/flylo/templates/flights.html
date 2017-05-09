@@ -23,6 +23,15 @@
         	border-right: 2px solid gray;
         }
 
+		input[type=checkbox] {
+			/* Double-sized Checkboxes */
+			-ms-transform: scale(1.5); /* IE */
+			-moz-transform: scale(1.5); /* FF */
+			-webkit-transform: scale(1.5); /* Safari and Chrome */
+			-o-transform: scale(1.5); /* Opera */
+			padding: 10px;
+		}
+
 </style>
 {% endblock %}
 
@@ -32,11 +41,12 @@
 {% if flights %}
 
 {% if departure %}
-<h3>You are looking at flights departing from {{ departure }}:</h3>
+<h3>Showing Flights departing from {{ departure }}:</h3>
 {% else %}
-<h3>These are all available flights:</h3>
+<h3>Avaliable Flights:</h3>
 {% endif %}
 
+<hr>
 
 <form action="{% url 'flylo:shoppingcart' %}" method="post">
 	{% csrf_token %}
@@ -55,28 +65,27 @@
 		</tr>
 		</thead>
 
-
 		{% for flight in flights %}
 		<tr>
 
 			<td>
-				<label for="selected_going{{ flight.id }}">
-					<input type="checkbox"
-						   name="selected_going{{ flight.id }}"
-						   id="selected_going{{ flight.id }}"
-						   value="{{ flight.id }}">
-				</label>
+
+				<div class="">
+					<input type="checkbox" id="selected_going{{ flight.id }}"
+						   name="selected_going{{ flight.id }}" value="{{ flight.id }}"
+						   class="">
+				</div>
 			</td>
 
 			<td>
-				<label for ="return_flight{{ flight.id }}">
+				<label for="return_flight{{ flight.id }}">
 					<input type="checkbox"
 						   name="return_flight{{ flight.id }}"
 						   id="return_flight{{ flight.id }}"
 						   value="{{ flight.id }}"
 						   data-toggle="toggle" data-size="mini"
 						   data-on="Yes" data-off="No">
-					</label>
+				</label>
 			</td>
 
 			<td><a href="{% url 'flylo:flights' pk %}{{ flight.id }}">
@@ -85,11 +94,10 @@
 			<td>{{ flight.location_arrival }}</td>
 			<td>{{ flight.status }}</td>
 
-
-			<td class="center"><input type="number" min="1" max="5" value="1" name="seats{{flight.id}}"></td>
+			<td class="center"><input class="form-control input-sm" type="number" min="1" max="5" value="1" name="seats{{flight.id}}"></td>
 
 			<td class="center">
-				<select name="type{{flight.id}}">
+				<select name="type{{ flight.id }}" class="form-control input-sm">
 					<option value='e'>Economy</option>
 					<option value='b'>Business</option>
 					<option value='f'>First Class</option>
