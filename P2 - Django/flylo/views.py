@@ -2,6 +2,10 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
+from django.views.generic import TemplateView
+
+from django.contrib import auth
+
 from .forms import *
 import random as rand
 
@@ -22,6 +26,24 @@ def index(request):
 		context['form'] = SelectDepartureForm()
 	return render(request, 'index.html', context)
 
+class LoginView(TemplateView):
+
+	template_name = 'login.html'
+
+	def post(self, request):
+		username = request.POST['username']
+		password = request.POST['password']
+
+		user = auth.authenticate(username=username, password=password)
+		if user is not None and user.is_active:
+			auth.login(request, user)
+			return HttpResponseRedirect(reverse('flylo:account'))
+		else:
+			return render(request, self.template_name, {'error': True})
+
+def logout(request):
+	auth.logout(request)
+	return HttpResponseRedirect(reverse('index'))
 
 def flights(request, departure=None):
 	context = {}
@@ -45,14 +67,14 @@ def shoppingcart(request):
 	""" Backend view to add Selected flights to Cart. """
 	reservations = []
 	return_flights_ids = []
-	request.session['reservations'] = []
+	#request.session['reservations'] = []
 
-	"""try:
+	try:
 		if request.session['reservations']:
 			for pk in request.session['reservations']:
 				reservations.append(pk)
 	except Exception:  # not reservations in session
-		pass"""
+		pass
 
 	for key in request.POST:
 
@@ -63,7 +85,7 @@ def shoppingcart(request):
 
 			# Return flight can be selected or not
 			try:
-				return_flight = int(request.POST['return_flight' + fid])
+				return_flight = str(request.POST['return_flight' + fid])
 				return_flights_ids.append(return_flight)
 			except Exception:
 				pass
@@ -90,7 +112,7 @@ def shoppingcart(request):
 			# For all checked flights, get the form values
 			fid = request.POST[key]
 
-			n_seats = request.POST['seats' + fid]
+			n_seats = int(request.POST['seats' + fid])
 			type = request.POST['type' + fid]
 
 			flight = Flight.objects.get(pk=fid)
@@ -112,9 +134,7 @@ def shoppingcart(request):
 	if len(return_flights_ids) == 0:
 		return HttpResponseRedirect(reverse('flylo:buy'))
 	else:
-		url_parameters = ""
-		for fid in return_flights_ids:
-			url_parameters += str(fid) + "/"
+		url_parameters = "/".join(return_flights_ids)
 		return HttpResponseRedirect('../return/' + url_parameters)
 
 

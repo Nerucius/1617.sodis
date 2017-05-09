@@ -3,6 +3,8 @@ body {
     background-color: #fff;
     margin: 0px;
     padding: 0px;
+
+    background-image: url('http://toastytech.com/guis/win98logo.png');
 }
 
 .container {
