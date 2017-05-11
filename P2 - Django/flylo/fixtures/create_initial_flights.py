@@ -28,8 +28,11 @@ def main():
 	for i in range(num_flights):
 
 		# Departure and arrival times
-		time_departure = randint(now, now + 4 * 3600)
-		time_arrival = time_departure + randint(3, 5) * 3600
+		#starting 30 days in the future, up to 60
+		spd = 24 * 60 * 60
+		spm = 30 * spd
+		time_departure = randint(now + 30*spm, now + 60*spm)
+		time_arrival = time_departure + randint(3, 6) * 3600
 
 		time_departure = datetime.fromtimestamp(time_departure)
 		time_arrival = datetime.fromtimestamp(time_arrival)
@@ -44,13 +47,15 @@ def main():
 		location_arrival = choice(other_locations)
 
 		# Airline
-		airline = airlines_data[randint(0, num_airlines-1)]
+		airlines = []
+		for i in range(randint(1, num_airlines)):
+			airlines.append(choice(airlines_data[i]))
 
 		# Airplane
 		airplane = airplanes_data[randint(0, num_airplanes-1)]
 
 		# Flight number
-		fn = "{}{}".format(airline["fields"]["code"], randint(1001, 9999))
+		fn = "{}{}".format(airlines[0]["fields"]["code"], randint(1001, 9999))
 
 		flight = {}
 		flight["model"] = "flylo.Flight"
@@ -61,7 +66,7 @@ def main():
 		flight["fields"]["estimated_time_arrival"] = time_arrival
 		flight["fields"]["location_departure"] = location_departure
 		flight["fields"]["location_arrival"] = location_arrival
-		flight["fields"]["airline"] = airline["pk"]			# assign an airline through the foreign key
+		flight["fields"]["airline"] = [a['pk'] for a in airlines]			# assign an airline through the foreign key
 		flight["fields"]["airplane"] = airplane["pk"]		# assign an airplane through the foreign key
 		flight["fields"]["status"] = choice(status)
 

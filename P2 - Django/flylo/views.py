@@ -43,6 +43,9 @@ class LoginView(TemplateView):
 class AccountView(TemplateView):
 	template_name = 'account.html'
 
+	def get(self, request, **kwargs):
+		return super(AccountView, self).get(request, kwargs)
+
 
 def logout(request):
 	auth.logout(request)
@@ -67,14 +70,28 @@ def detailed_flight(request, pk=None):
 	return render(request, 'detailed_flight.html', context)
 
 
+class DetailedFlightView(TemplateView):
+	template_name = 'detailed_flight.html'
+
+	def get_context_data(self, **kwargs):
+		pk = kwargs.get('pk')
+		return {'flight': Flight.objests.get(pk=pk)}
+
+
 class ShoppingCartView(View):
-	def get(self):
-		raise Http404
+	def get(self, request):
+		""" Used only for deleting reservations"""
+		remove_res = int(request.GET.get('remove', None))
+		Reservation.objects.filter(pk=remove_res).delete()
+		request.session['reservations'] = [r for r in request.session['reservations'] if r is not remove_res]
+
+		return HttpResponseRedirect(reverse('flylo:buy'))
 
 	def post(self, request):
+		user = request.user
+
 		reservations = []
 		return_flights_ids = []
-		response = ""
 
 		for key in request.POST:
 
@@ -97,13 +114,7 @@ class ShoppingCartView(View):
 				airline = rand.choice(flight.airlines.all())
 
 				for i in range(n_seats):
-					# TODO with backend information
-					# Create one reservation for each seat
-					res = Reservation()
-					res.airline = airline
-					res.price = 49.99
-					res.flight = flight
-					res.type = type
+					res = self.create_reservation(flight, airline, 49.95, type)
 					res.save()
 					reservations.append(res.pk)
 
@@ -119,11 +130,13 @@ class ShoppingCartView(View):
 				airline = rand.choice(flight.airlines.all())
 
 				for i in range(n_seats):
-					res = self.create_reservation(flight, None, airline, 49.95, type)
+					res = self.create_reservation(flight, airline, 49.95, type)
 					res.save()
 					reservations.append(res.pk)
 
-		request.session['reservations'] = reservations
+		request.session['reservations'] = request.session.get('reservations', [])
+		for res in reservations:
+			request.session['reservations'].append(res)
 
 		if len(return_flights_ids) == 0:
 			return HttpResponseRedirect(reverse('flylo:buy'))
@@ -131,93 +144,15 @@ class ShoppingCartView(View):
 			url_parameters = "/".join(return_flights_ids)
 			return HttpResponseRedirect('../return/' + url_parameters)
 
-		return HttpResponse(response)
-
 	@staticmethod
-	def create_reservation(flight, user, airline, price, type):
-		# type: (Flight, User, Airline, float, str) -> Reservation
+	def create_reservation(flight, airline, price, type):
+		# type: (Flight, Airline, float, str) -> Reservation
 		res = Reservation()
 		res.airline = airline
-		# res.client = user
 		res.price = price
 		res.flight = flight
 		res.type = type
 		return res
-
-
-def shoppingcart(request):
-	""" Backend view to add Selected flights to Cart. """
-	reservations = []
-	return_flights_ids = []
-	# request.session['reservations'] = []
-
-	try:
-		if request.session['reservations']:
-			for pk in request.session['reservations']:
-				reservations.append(pk)
-	except Exception:  # not reservations in session
-		pass
-
-	for key in request.POST:
-
-		# When selecting going flight
-		if key.startswith('selected_going'):
-			# For all checked flights, get the form values
-			fid = request.POST[key]
-
-			# Return flight can be selected or not
-			try:
-				return_flight = str(request.POST['return_flight' + fid])
-				return_flights_ids.append(return_flight)
-			except Exception:
-				pass
-
-			n_seats = int(request.POST['seats' + fid])
-			type = request.POST['type' + fid]
-
-			flight = Flight.objects.get(pk=fid)
-			airline = rand.choice(flight.airlines.all())
-
-			for i in range(n_seats):
-				# TODO with backend information
-				# Create one reservation for each seat
-				res = Reservation()
-				res.airline = airline
-				res.price = 49.99
-				res.flight = flight
-				res.type = type
-				res.save()
-				reservations.append(res.pk)
-
-		# When selecting return flight
-		if key.startswith('selected_return'):
-			# For all checked flights, get the form values
-			fid = request.POST[key]
-
-			n_seats = int(request.POST['seats' + fid])
-			type = request.POST['type' + fid]
-
-			flight = Flight.objects.get(pk=fid)
-			airline = rand.choice(flight.airlines.all())
-
-			for i in range(n_seats):
-				# TODO with backend information
-				# Create one reservation for each seat
-				res = Reservation()
-				res.airline = airline
-				res.price = 49.99
-				res.flight = flight
-				res.type = type
-				res.save()
-				reservations.append(res.pk)
-
-	request.session['reservations'] = reservations
-
-	if len(return_flights_ids) == 0:
-		return HttpResponseRedirect(reverse('flylo:buy'))
-	else:
-		url_parameters = "/".join(return_flights_ids)
-		return HttpResponseRedirect('../return/' + url_parameters)
 
 
 def return_flights(request, flight_list):
@@ -252,9 +187,25 @@ def return_flights(request, flight_list):
 
 def buy(request):
 	context = {'reservations': []}
-	context['session'] = request.session
 
-	for pk in request.session['reservations']:
-		context['reservations'].append(Reservation.objects.get(pk=pk))
+	for pk in request.session.get('reservations', []):
+		try:
+			context['reservations'].append(Reservation.objects.get(pk=pk))
+		except Exception:
+			request.session['reservations'].remove(pk)
+			request.session.modified = True
+
 
 	return render(request, 'buy.html', context)
+
+
+class CheckoutView(TemplateView):
+	template_name = "shop/checkout.html"
+
+	def get(self, request):
+		context = {'reservations': []}
+		for pk in request.session['reservations']:
+			context['reservations'].append(Reservation.objects.get(pk=pk))
+		context['total'] = sum([res.price for res in context['reservations']])
+
+		return render(request, self.template_name, context)
