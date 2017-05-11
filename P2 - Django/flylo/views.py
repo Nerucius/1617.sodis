@@ -52,22 +52,18 @@ def logout(request):
 	return HttpResponseRedirect(reverse('flylo:index'))
 
 
-def flights(request, departure=None):
-	context = {}
+class FlightsView(TemplateView):
+	template_name = 'flights.html'
 
-	if departure:
-		context['departure'] = departure
-		context['flights'] = Flight.objects.filter(location_departure=departure)
-	else:
-		context['flights'] = Flight.objects.all()
-
-	return render(request, 'flights.html', context)
-
-
-def detailed_flight(request, pk=None):
-	context = {}
-	context['flight'] = Flight.objects.get(pk=pk)
-	return render(request, 'detailed_flight.html', context)
+	def get_context_data(self, **kwargs):
+		context = super(FlightsView, self).get_context_data()
+		departure = kwargs.get('departure')
+		if departure:
+			context['departure'] = departure
+			context['flights'] = Flight.objects.filter(location_departure=departure)
+		else:
+			context['flights'] = Flight.objects.all()
+		return context
 
 
 class DetailedFlightView(TemplateView):
@@ -75,7 +71,7 @@ class DetailedFlightView(TemplateView):
 
 	def get_context_data(self, **kwargs):
 		pk = kwargs.get('pk')
-		return {'flight': Flight.objests.get(pk=pk)}
+		return {'flight': Flight.objects.get(pk=pk)}
 
 
 class ShoppingCartView(View):
@@ -195,7 +191,6 @@ def buy(request):
 			request.session['reservations'].remove(pk)
 			request.session.modified = True
 
-
 	return render(request, 'buy.html', context)
 
 
@@ -209,3 +204,24 @@ class CheckoutView(TemplateView):
 		context['total'] = sum([res.price for res in context['reservations']])
 
 		return render(request, self.template_name, context)
+
+
+def api_price(request, flight, airline, nseats, type):
+	""" Calculate the price of the given number of seats for a flight with a given airline.
+		The price will vary in realtion to a series of factors:
+		- base: base price of the flight
+		- c: class ( 1 for E, 1.5 for B, 2.5 for F )
+		- d: days remaining for departure ( -0.01 per day remaining, caps at -0.25)
+		- f: how full the plane is for the given class (0.75 empty to 1.5 full)
+		Final price = base * (c + d + f)
+	"""
+	import random
+	class_mult = 1
+	if type == 'b':
+		class_mult = 1.5
+	elif type == 'f':
+		class_mult = 2.5
+
+	price = round(class_mult * int(nseats) * (35 + random.random() * 10), 2)
+
+	return HttpResponse(price)

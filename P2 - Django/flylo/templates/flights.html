@@ -54,11 +54,12 @@
 			<th>Airline</th>
 			<th>No. Seats</th>
 			<th>Class</th>
+			<th>Price</th>
 		</tr>
 		</thead>
 
 		{% for flight in flights %}
-		<tr>
+		<tr id="flight{{ flight.id }}">
 
 			<td>
 
@@ -112,6 +113,10 @@
 				</select>
 			</td>
 
+            <td class="h4">
+                <span class="label label-warning" id="price">00.00€</span>
+            </td>
+
 		</tr>
 		{% endfor %}
 
@@ -125,5 +130,55 @@
 {% else %}
 <p>No flights are available.</p>
 {% endif %}
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script type="text/javascript">
+
+        var csrf = '{{ csrf_token }}';
+
+        $(document).ready(function () {
+
+
+            $("[id^=flight]").each(function (i, e) {
+
+                e = $(e);
+                getPrice(1, 1, 1, 'e', function (data) {
+                    e.find("#price").text(data + "€")
+                });
+
+            });
+
+            $("[name^=seats]").change(function (e) {
+                var row = $(e.target).parent().parent()
+                var nseats = row.find("[name^=seats]").val()
+                var type = row.find("[name^=type]").val()
+                //row.find("#price").text(nseats * 50 + ".00€")
+
+                getPrice(1,1,nseats, type, function(data){
+                    row.find("#price").text(data+"€")
+                });
+
+            });
+
+        });
+
+        getPrice = function(fid, aid, nseats, type, callback){
+            $.ajax({
+                url: 'http://localhost:8080/flylo/api/price/' + fid + '/' + aid + '/' + nseats + '/' + type,
+                type: 'GET',
+                data: {
+                    'csrfmiddlewaretoken': csrf
+                },
+                success: function (data) {
+                    callback(data)
+                }
+            })
+        }
+
+    </script>
 
 {% endblock %}
