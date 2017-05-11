@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+	<h2>Profile</h2>
+	<hr>
+	<li><strong>Username:</strong> {{ user.username | capfirst }}</li>
+	<li><strong>Email:</strong> {{ user.email }}</li>
+
+{% endblock %}

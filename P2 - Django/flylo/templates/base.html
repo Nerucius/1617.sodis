@@ -48,8 +48,20 @@
 				<li class="active"><a href="{% url 'flylo:index' %}">Home</a></li>
 				<li><a href="{% url 'flylo:flights' '' %}">Flights</a></li>
 			</ul>
-			<div class="pull-right" style="margin-top: 8px;">
-				<a href="{% url 'flylo:buy' %}" class="btn btn-warning">Shopping Cart ({{ session.reservations | length}})</a>
+			<div class="pull-right" style="margin-top: 12px;">
+				{% if user.username %}
+					<a href="{% url 'flylo:account' %}" class="btn btn-sm ">{{ user.username | capfirst }} | View
+						Profile</a>
+					<a href="{% url 'flylo:logout' %}" class="btn btn-sm btn-danger">Log Out</a>
+				{% else %}
+					<a href="{% url 'flylo:login' %}" class="btn btn-sm btn-success">Log In</a>
+					&nbsp;
+					<a href="{% url 'flylo:login' %}" class="btn btn-sm btn-success">Register</a>
+				{% endif %}
+				&nbsp;
+				<a href="{% url 'flylo:buy' %}" class="btn btn-sm btn-warning">Shopping Cart
+					({{ session.reservations | length }})</a>
+
 			</div>
 		</div><!--/.nav-collapse -->
 	</div>
@@ -57,6 +69,8 @@
 
 
 <div class="container main-container">
+	{{ session.user }}
+
 	{% block content %}
 	{% endblock %}
 </div>

@@ -1,17 +1,36 @@
 from __future__ import unicode_literals
 from django.db import models
 
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-# Create your models here.
-
+# Choices for Reservation type
 FLIGHT_CLASS = (
-    ('e', 'Economy'),
-    ('b', 'Business'),
-    ('f', 'First Class'),
+	('e', 'Economy'),
+	('b', 'Business'),
+	('f', 'First Class'),
 )
 
+
+class Client(models.Model):
+	""" Client model attached to an Auth User model. """
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	money = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+
+@receiver(post_save, sender=User)
+def create_client(sender, instance, created, **kwargs):
+	if created:
+		Client.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+	instance.client.save()
+
+
 class Airline(models.Model):
-	# fields
 	code = models.CharField(max_length=3)
 
 	def __str__(self):
@@ -19,7 +38,6 @@ class Airline(models.Model):
 
 
 class Airplane(models.Model):
-	# fields
 	aircraft = models.CharField(max_length=4)
 	seats_first_class = models.IntegerField()
 	seats_business = models.IntegerField()
@@ -45,6 +63,7 @@ class Flight(models.Model):
 	class Meta:
 		# ordering by logical departure order
 		ordering = ['estimated_time_departure', 'location_arrival']
+
 	# ordering by logical arrival order
 	# ordering = ['estimated_time_arrival', 'location_departure']
 
@@ -60,12 +79,12 @@ class Client(models.Model):
 	password = models.EmailField()
 """
 
+
 class Reservation(models.Model):
 	# foreign Keys
 	flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
 	airline = models.ForeignKey(Airline, on_delete=models.CASCADE)
-	# TODO Link to auth middleware model
-	# client = models.ForeignKey(Client, on_delete=models.CASCADE)
+	client = models.ForeignKey(Client, on_delete=models.CASCADE, blank=True, default=None, null=True)
 
 	# fields
 	type = models.CharField(max_length=1, choices=FLIGHT_CLASS)
@@ -77,17 +96,3 @@ class Reservation(models.Model):
 
 	def __str__(self):
 		return self.flight.flight_number + ": " + self.airline.code + ", " + str(self.price)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
