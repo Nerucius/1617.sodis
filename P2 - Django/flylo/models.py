@@ -111,5 +111,4 @@ class Reservation(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		#return self.flight.flight_number + ": " + self.airline.code + ", " + str(self.price)
-		return self.flight.flight_number
+		return self.flight.flight_number + ": " + self.airline.code + ", " + str(self.price)

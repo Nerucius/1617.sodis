@@ -85,7 +85,7 @@
 							</label>
 						</td>
 
-						<td><a href="{% url 'flylo:flights' pk %}{{ flight.id }}">
+						<td><a href="{% url 'flylo:flights' pk %}{{ flight.pk }}">
 							{{ flight.flight_number }} ({{ flight.pk }})</a></td>
 						<td>
 							<select name="airline{{ flight.id }}" class="form-control input-sm">
