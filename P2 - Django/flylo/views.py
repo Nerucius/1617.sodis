@@ -239,6 +239,7 @@ class FlightViewSet(viewsets.ModelViewSet):
 	def get_queryset(self):
 		from datetime import datetime
 		queryset = Flight.objects.all()
+
 		dep = self.request.query_params.get('departure', None)
 		arr = self.request.query_params.get('arrival', None)
 		dept = self.request.query_params.get('departure_time', None)

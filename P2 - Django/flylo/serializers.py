@@ -21,7 +21,7 @@ class FlightSerializer(serializers.HyperlinkedModelSerializer):
 
 	class Meta:
 		model = Flight
-		fields = ('flight_number', 'estimated_time_departure',
+		fields = ('pk', 'flight_number', 'estimated_time_departure',
 				  'estimated_time_arrival', 'location_departure',
 				  'location_arrival', 'status', 'price',
 				  'airplane', 'airlines')
