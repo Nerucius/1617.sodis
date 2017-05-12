@@ -17,7 +17,7 @@
 		"pk": 3,
 		"model": "flylo.Airline",
 		"fields": {
-			"code": "SWR"
+			"code": "DAL"
 		}
 	},
 	{

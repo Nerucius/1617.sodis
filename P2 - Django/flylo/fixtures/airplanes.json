@@ -3,7 +3,7 @@
 		"pk": 1,
 		"model": "flylo.Airplane",
 		"fields": {
-			"aircraft": "A125",
+			"aircraft": "B764",
 			"seats_first_class": 10,
 			"seats_business": 20,
 			"seats_economy": 50
@@ -13,7 +13,7 @@
 		"pk": 2,
 		"model": "flylo.Airplane",
 		"fields": {
-			"aircraft": "A518",
+			"aircraft": "A320",
 			"seats_first_class": 5,
 			"seats_business": 10,
 			"seats_economy": 80
