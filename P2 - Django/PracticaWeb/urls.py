@@ -16,7 +16,16 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from rest_framework import routers
+from flylo.views import FlightViewSet
+
+router = routers.DefaultRouter()
+router.register(r'flights', FlightViewSet)
+
+
 urlpatterns = [
+	url(r'^api/', include(router.urls)),
 	url(r'^admin/', admin.site.urls),
-	url(r'^flylo/', include('flylo.urls', namespace='flylo'))
+	url(r'^flylo/', include('flylo.urls', namespace='flylo')),
+	url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

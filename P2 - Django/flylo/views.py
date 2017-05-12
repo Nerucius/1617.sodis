@@ -225,3 +225,36 @@ def api_price(request, flight, airline, nseats, type):
 	price = round(class_mult * int(nseats) * (35 + random.random() * 10), 2)
 
 	return HttpResponse(price)
+
+
+# REST Api
+from rest_framework import viewsets
+from serializers import FlightSerializer, AirlineSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+
+
+# ViewSets define the view behavior.
+class FlightViewSet(viewsets.ModelViewSet):
+	serializer_class = FlightSerializer
+	queryset = Flight.objects.all()
+
+	def get_queryset(self):
+		from datetime import datetime
+		queryset = Flight.objects.all()
+		dep = self.request.query_params.get('departure', None)
+		arr = self.request.query_params.get('arrival', None)
+		dept = self.request.query_params.get('departure_time', None)
+		arrt = self.request.query_params.get('arrival_time', None)
+
+		if dep:
+			queryset = queryset.filter(location_departure=dep)
+		if arr:
+			queryset = queryset.filter(location_arrival=arr)
+		if dept:
+			dept = datetime.strptime(dept, "%Y-%m-%dT%H:%M:%SZ")
+			queryset = queryset.filter(estimated_time_departure__ge=dept)
+		if arrt:
+			arrt = datetime.strptime(dept, "%Y-%m-%dT%H:%M:%SZ")
+			queryset = queryset.filter(estimated_time_arrival__ge=arrt)
+
+		return queryset
