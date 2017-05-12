@@ -22,7 +22,6 @@ from flylo.views import FlightViewSet
 router = routers.DefaultRouter()
 router.register(r'flights', FlightViewSet)
 
-
 urlpatterns = [
 	url(r'^api/', include(router.urls)),
 	url(r'^admin/', admin.site.urls),

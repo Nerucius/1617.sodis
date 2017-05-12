@@ -179,6 +179,15 @@
             })
         }
 
+        vue = new Vue({
+			delimiters : ['${','}'],
+			el : '#app',
+			data : {
+			    flights: []
+			}
+
+		});
+
     </script>
 
 {% endblock %}

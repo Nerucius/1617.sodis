@@ -1,6 +1,7 @@
 from rest_framework import routers, serializers, viewsets
 from flylo.models import *
 
+
 class AirlineSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = Airline
@@ -13,7 +14,6 @@ class AirplaneSerializer(serializers.HyperlinkedModelSerializer):
 		fields = ('aircraft', 'seats_economy', 'seats_business', 'seats_first_class')
 
 
-# Serializers define the API representation.
 class FlightSerializer(serializers.HyperlinkedModelSerializer):
 	airplane = AirplaneSerializer(read_only=True)
 	airlines = AirlineSerializer(many=True, read_only=True)

@@ -230,10 +230,8 @@ def api_price(request, flight, airline, nseats, type):
 # REST Api
 from rest_framework import viewsets
 from serializers import FlightSerializer, AirlineSerializer
-from django_filters.rest_framework import DjangoFilterBackend
 
 
-# ViewSets define the view behavior.
 class FlightViewSet(viewsets.ModelViewSet):
 	serializer_class = FlightSerializer
 	queryset = Flight.objects.all()
