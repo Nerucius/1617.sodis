@@ -23,6 +23,7 @@
 						<label for="password">Password</label>
 						<input type="password" class="form-control" id="password" name="password" required>
 					</div>
+                    <input type="hidden" name="next" value="{{ next|escape }}">
 					<button type="submit" class="btn btn-primary pull-right">Submit</button>
 				</form>
 

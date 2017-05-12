@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+
+{% block style %}
+	<style>
+		.table td:first-child {
+			border-right: 2px solid gray;
+		}
+
+		input[type=checkbox] {
+			/* Double-sized Checkboxes */
+			-ms-transform: scale(1.5); /* IE */
+			-moz-transform: scale(1.5); /* FF */
+			-webkit-transform: scale(1.5); /* Safari and Chrome */
+			-o-transform: scale(1.5); /* Opera */
+			padding: 10px;
+		}
+
+		.table td {
+			text-align: center;
+		}
+
+		.table th {
+			text-align: center;
+		}
+
+	</style>
+{% endblock %}
+
+{% block content %}
+
+    {% if my_flights %}
+        {% for reservation in my_flights %}
+            <li>{{ reservation.flight }}</li>
+        {% endfor %}
+    {% else %}
+        You haven't bought any flight yet.
+    {% endif %}
+
+{% endblock %}

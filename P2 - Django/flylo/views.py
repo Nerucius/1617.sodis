@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
@@ -15,7 +16,7 @@ class IndexView(TemplateView):
 
 	def get(self, request):
 		context = {'form': SelectDepartureForm()}
-		return render(request, 'index.html', context)
+		return render(request, self.template_name, context)
 
 	def post(self, request):
 		form = SelectDepartureForm(request.POST)
@@ -31,11 +32,16 @@ class LoginView(TemplateView):
 	def post(self, request):
 		username = request.POST['username']
 		password = request.POST['password']
+		try:
+			next = request.GET['next']
+		except Exception:
+			next = reverse('flylo:account')
 
 		user = auth.authenticate(username=username, password=password)
 		if user is not None and user.is_active:
 			auth.login(request, user)
-			return HttpResponseRedirect(reverse('flylo:account'))
+			return HttpResponseRedirect(next)
+
 		else:
 			return render(request, self.template_name, {'error': True})
 
@@ -63,6 +69,21 @@ class FlightsView(TemplateView):
 			context['flights'] = Flight.objects.filter(location_departure=departure)
 		else:
 			context['flights'] = Flight.objects.all()
+		return context
+
+
+class MyFlightsView(TemplateView):
+	template_name = 'my_flights.html'
+
+	def get_context_data(self, **kwargs):
+		return self.get_my_flights()
+
+	def get_my_flights(self):
+		user = auth.get_user(self.request)
+		client = Client.objects.get(user=user).pk
+
+		context = {}
+		context['my_flights'] = Reservation.objects.all().exclude(seat='').filter(client_id=client)
 		return context
 
 

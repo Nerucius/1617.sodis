@@ -52,7 +52,7 @@ class Airplane(models.Model):
 
 class Flight(models.Model):
 	# foreign keys
-	airlines = models.ManyToManyField(Airline);
+	airlines = models.ManyToManyField(Airline)
 	airplane = models.ForeignKey(Airplane, on_delete=models.CASCADE)
 
 	# fields
@@ -111,4 +111,5 @@ class Reservation(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return self.flight.flight_number + ": " + self.airline.code + ", " + str(self.price)
+		#return self.flight.flight_number + ": " + self.airline.code + ", " + str(self.price)
+		return self.flight.flight_number
