@@ -55,17 +55,18 @@
             <div class="pull-right" style="margin-top: 12px;">
 
                 {% if user.username %}
-                    <a href="{% url 'flylo:account' %}" class="btn btn-sm ">{{ user.username | capfirst }} | View
-                        Profile</a>
-                    <a href="{% url 'flylo:logout' %}" class="btn btn-sm btn-danger">Log Out</a>
-                {% else %}
-                    <a href="{% url 'flylo:login' %}" class="btn btn-sm btn-success">Log In</a>
-                    &nbsp;
-                    <a href="{% url 'flylo:login' %}" class="btn btn-sm btn-success">Sign Up</a>
-                {% endif %}
+					<a href="{% url 'flylo:account' %}" class="btn btn-sm ">
+						<span class="glyphicon glyphicon-user"></span>&nbsp; {{ user.username | capfirst }} </a>
+					<a href="{% url 'flylo:logout' %}" class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-log-out"></span>&nbsp; Log Out</a>
+				{% else %}
+					<a href="{% url 'flylo:login' %}" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-log-in"></span>&nbsp; Log In</a>
+					&nbsp;
+					<a href="{% url 'flylo:login' %}" class="btn btn-sm btn-success">Sign Up</a>
+				{% endif %}
                 &nbsp;
-                <a href="{% url 'flylo:buy' %}" class="btn btn-sm btn-warning">Shopping Cart
+                <a href="{% url 'flylo:buy' %}" class="btn btn-sm btn-warning"><span class="glyphicon glyphicon-shopping-cart"></span>&nbsp; Shopping Cart
                     ({{ request.session.reservations | length }})</a>
+
 
             </div>
         </div><!--/.nav-collapse -->
