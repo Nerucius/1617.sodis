@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+	<h3>Shopping Cart</h3>
+	<hr>
+
+	{% if reservations|length|get_digit:'-1' > 0 %}
+
+
+			{% for res in reservations %}
+
+
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<span class="h4"><strong>{{ res.flight.flight_number }}</strong> |
+								{{ res.flight.location_departure }} to
+								{{ res.flight.location_arrival }}
+
+							</span>
+							<span class="pull-right">
+								<a href="{% url 'flylo:shoppingcart' %}?remove={{ res.pk }}"
+								   class="btn btn-sm btn-danger" style="margin-top: -7px">Remove</a>
+							</span>
+						</div>
+						<div class="panel-body">
+
+							<strong>Departure:</strong> {{ res.flight.estimated_time_departure }}<br>
+							<strong>Arrival:</strong> {{ res.flight.estimated_time_arrival }}<br>
+							<strong>Class:</strong>
+								{% if res.type == 'e' %}Economy{% endif %}
+								{% if res.type == 'b' %}Business{% endif %}
+								{% if res.type == 'f' %}First Class{% endif %}
+							<div class="h4 pull-right"><strong class="label label-primary">Price: {{ res.price }}&euro;</strong></div>
+						</div>
+					</div>
+
+
+			{% endfor %}
+
+
+
+		<a href="{% url 'flylo:checkout' %}" class="btn btn-warning pull-right">Proceed to Checkout</a>
+
+	{% else %}
+
+		<p>No items in cart</p>
+
+	{% endif %}
+
+
+{% endblock %}
+
+

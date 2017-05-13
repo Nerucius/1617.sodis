@@ -12,6 +12,12 @@ FLIGHT_CLASS = (
 	('f', 'First Class'),
 )
 
+TYPE_MULT = {
+	'e': 1,
+	'b': 1.5,
+	'f': 2.5
+}
+
 
 class Client(models.Model):
 	""" Client model attached to an Auth User model. """

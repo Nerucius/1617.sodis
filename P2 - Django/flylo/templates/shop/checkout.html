@@ -5,29 +5,58 @@
 	<h3>Checkout</h3>
 	<hr>
 
-	<table class="table table-striped table-hover table-responsive table-condensed">
-		<thead>
-		<tr>
-			<th>Flight</th>
-			<th>Class</th>
-			<th>Price</th>
-		</tr>
-		</thead>
+	<div class="row">
 
-		{% for res in reservations %}
-			<tr>
-				<td>{{ res.flight.flight_number }}</td>
-				<td>{{ res.type }}</td>
-				<td>{{ res.price }}</td>
-			</tr>
-		{% endfor %}
+		<!-- Payment Information -->
+		<div class="col-sm-8">
+			<div class="panel panel-primary">
+				<div class="panel-heading">Payment Information</div>
+				<div class="panel-body">
+					<dl class="dl-horizontal">
+						<dt>Card Number</dt>
+						<dd>MasterCard ending in 1651</dd>
+						<dt>Billing Adress</dt>
+						<dd>
+							{{ user.username }}<br>
+							{{ user.email }}<br>
+							Passeig de Gracia,<br>
+							Barcelona, Barcelona 08024<br>
+						</dd>
+						<dt>Card Number</dt>
+						<dd>MasterCard ending in 1651</dd>
+					</dl>
 
-	</table>
+				</div>
+			</div>
+		</div>
 
-	<h3><span class="text-center label label-success pull-right">Total: {{ total }}</span></h3>
+		<!-- Order Summary -->
+		<div class="col-sm-4">
+			<div class="panel panel-primary">
+				<div class="panel-heading">Order Summary</div>
+				<div class="panel-body">
+					<ul class="list-unstyled">
+						{% for res in reservations %}
+							<li>{{ res.flight.flight_number }} | <small>{{ res.flight.location_departure }} to {{ res.flight.location_arrival }}</small>
+								<span class="pull-right">{{ res.price }}&euro;</span>
+							</li>
+						{% endfor %}
+						<li>&nbsp;</li>
+						<li><strong class="pull-right">Total: {{ total }}&euro;</strong></li>
+					</ul>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<ul class="pull-right list-inline h3">
+		<li class="h4"><a href="?pay" class="btn btn-warning">Place Order</a></li>
+	</ul>
+
 	<div class="clearfix"></div>
-	<hr>
-	<a class="btn btn-warning pull-right">Pay with PayPal</a>
+
 
 
 {% endblock %}
