@@ -80,9 +80,9 @@ class Flight(models.Model):
 
 		now = datetime.now(tz=pytz.utc)
 		departure = self.estimated_time_departure
-		days = min(60, max(0, (departure - now).days))
+		days = min(120, max(0, (departure - now).days))
 
-		return self.base_price * Decimal(1 - days * 0.01) * Decimal(fillmulti)
+		return self.base_price * Decimal(1 - days * 0.003) * Decimal(fillmulti)
 
 	class Meta:
 		# ordering by logical departure order

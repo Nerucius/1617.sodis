@@ -118,17 +118,16 @@ class ShoppingCartView(View):
 				fid = request.POST[key]
 
 				# Return flight can be selected or not
-				try:
-					return_flight = str(request.POST['return_flight' + fid])
+				return_flight = request.POST.get('return_flight'+fid, None)
+				if return_flight:
 					return_flights_ids.append(return_flight)
-				except Exception:
-					pass
 
-				n_seats = int(request.POST['seats' + fid])
-				type = request.POST['type' + fid]
+				n_seats = int(request.POST.get('seats' + fid))
+				type = request.POST.get('type' + fid)
+				airline = request.POST.get('airline' + fid)
 
 				flight = Flight.objects.get(pk=fid)
-				airline = rand.choice(flight.airlines.all())
+				airline = Airline.objects.get(code=airline)
 
 				for i in range(n_seats):
 					res = self.create_reservation(flight, airline, 49.95, type)
