@@ -7,10 +7,22 @@
 			<p>
 			<h3>Select a Depature City to get Started</h3>
 			<hr>
-			<form class="form text-center" method="post">
+
+
+			<form class="text-center" method="post">
 				{% csrf_token %}
-				{{ form }}
-				<br>
+
+				<div class="form-group">
+					<label for="id_departure" class="control-label" style="font-size: 1.2em">Departure City</label>
+					<div class="row">
+						<div class="col-sm-4 col-sm-offset-4">
+							{{ form.departure }}
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+
+
 				<input type="submit" class="btn btn-lg btn-success" value="Look up Flights">
 			</form>
 			</p>

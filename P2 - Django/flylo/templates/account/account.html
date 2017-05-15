@@ -1,10 +1,112 @@
 {% extends 'base.html' %}
 
+{% block style %}
+
+	<style type="text/css">
+		h4 {
+			border-bottom: 1px solid lightgray;
+			padding-bottom: 0.25em;
+			margin-bottom: 1em;
+		}
+	</style>
+{% endblock %}
+
 {% block content %}
 
-	<h2>Profile</h2>
+	<h3>My Account</h3>
 	<hr>
-	<li><strong>Username:</strong> {{ user.username | capfirst }}</li>
-	<li><strong>Email:</strong> {{ user.email }}</li>
+	<div class="row">
+
+		<div class="col-sm-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading" style="font-size: 1.2em;">Account Details</div>
+				<div class="panel-body">
+					<dl class="dl-horizontal">
+						<dt>Username</dt>
+						<dd>{{ request.user.username }}</dd>
+						<dt>First Name</dt>
+						<dd>{{ request.user.first_name }}</dd>
+						<dt>Last Name</dt>
+						<dd>{{ request.user.last_name }}</dd>
+						<dt>Email</dt>
+						<dd>{{ request.user.email }}</dd>
+
+					</dl>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-sm-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading" style="font-size: 1.2em;">Spending and Avalailable Funds</div>
+				<div class="panel-body">
+
+					<br>
+					<p class="text-center" id="app">
+						<span class="btn btn-warning" id="funds" style="font-size: 1.8em">
+							  ${ getFunds }&euro;</span>
+						&nbsp;
+						<button class="btn btn-success" @click="addFunds()" style="font-size: 1.8em">Add Funds</button>
+					</p>
+
+					<br>
+					<h4>Flight History</h4>
+					<dl class="dl-horizontal">
+						{% for res in request.user.client.reservations %}
+							<dt>{{ res.flight.flight_number }}
+								| {{ res.flight.estimated_time_departure |date:'Y-m-d' }}</dt>
+							<dd>{{ res.price }}&euro;</dd>
+						{% endfor %}
+						<dt>Total Spending</dt>
+						<dd>{{ request.user.client.total_spent }}&euro;</dd>
+					</dl>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+	</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+	<script type="text/javascript">
+
+        vue = new Vue({
+            delimiters: ['${', '}'],
+            el: '#app',
+            data: {
+                funds: {{ request.user.client.money }}
+            },
+
+            computed: {
+                getFunds: function () {
+                    return this.funds.toFixed(2);
+                }
+            },
+
+            methods: {
+                addFunds: function () {
+                    if (this.funds >= 100)
+                        this.funds += 100;
+                    else
+                        this.funds += 10;
+
+                    data = {
+                        user_id: {{ user.id }},
+                        money: this.funds.toFixed(2)
+                    }
+
+
+                    $.post('{% url 'flylo:set_money' %}', data);
+                }
+            }
+        });
+
+	</script>
 
 {% endblock %}

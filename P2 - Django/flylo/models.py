@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from decimal import Decimal
+
 # Choices for Reservation type
 FLIGHT_CLASS = (
 	('e', 'Economy'),
@@ -23,6 +25,18 @@ class Client(models.Model):
 	""" Client model attached to an Auth User model. """
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	money = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+	@property
+	def reservations(self):
+		return Reservation.objects.filter(client=self)
+
+	@property
+	def total_spent(self):
+		total = Decimal('0.00')
+		paid_res = Reservation.objects.filter(client=self)
+		for res in paid_res:
+			total += res.price
+		return total
 
 	def __unicode__(self):
 		return self.user.username
@@ -74,7 +88,6 @@ class Flight(models.Model):
 	def price(self):
 		""" Price of the flight. The further in time the flight is, the cheaper it is.
 			Conversely, the fuller the plane is, the more expensive the flight. """
-		from decimal import Decimal
 		from datetime import datetime
 		import pytz
 

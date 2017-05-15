@@ -16,17 +16,17 @@ urlpatterns = [
 	# User URLs
 	url(r'^login/$', views.LoginView.as_view(), name='login'),
 	url(r'^logout/$', views.logout, name='logout'),
+	url(r'^signup/$', views.SignupView.as_view(), name='signup'),
 	url(r'^account/$', login_required(views.AccountView.as_view(), login_url='/flylo/login/'), name='account'),
 	url(r'^account/flights/$', login_required(views.MyFlightsView.as_view(), login_url='/flylo/login/'), name='my_flights'),
 	url(r'^account/checkin/(?P<rpk>\d+)$', login_required(views.CheckinView.as_view(), login_url='/flylo/login/'), name='checkin'),
 
-
-
 	# Shop URLs
-	url(r'^shoppingcart/$', views.ShoppingCartView.as_view(), name='shoppingcart'),
+	url(r'^shoppingcart/$', views.ModifyCartView.as_view(), name='shoppingcart'),
 	url(r'^cart/$', views.CartView.as_view(), name='buy'),
 	url(r'^checkout/$', login_required(views.CheckoutView.as_view(), login_url='/flylo/login/'), name='checkout'),
 
 	# API URLs
 	url(r'^api/price/(?P<flight>\d+)/(?P<airline>\d+)/(?P<nseats>\d+)/(?P<type>\w)/$', views.api_price),
+	url(r'^api/set_money/$', login_required(views.api_set_money), name='set_money'),
 ]

@@ -26,10 +26,10 @@ class IndexView(TemplateView):
 
 
 class LoginView(TemplateView):
-	template_name = 'login.html'
+	template_name = 'account/login.html'
 
 	def post(self, request):
-		username = request.POST['username']
+		username = str(request.POST['username']).lower()
 		password = request.POST['password']
 		try:
 			next = request.GET['next']
@@ -43,6 +43,27 @@ class LoginView(TemplateView):
 
 		else:
 			return render(request, self.template_name, {'error': True})
+
+
+class SignupView(TemplateView):
+	template_name = "account/signup.html"
+
+	def post(self, request):
+		from decimal import Decimal
+		from django.contrib.auth.models import User
+		username = str(request.POST.get('username')).lower()
+		password = request.POST.get('password')
+		email = request.POST.get('email')
+
+		user = User.objects.create_user(username=username,
+										first_name=username.title(),
+										email=email,
+										password=password)
+		user.client.money = Decimal(5000.00)
+
+		# Autologin and redirect
+		auth.login(request, user)
+		return HttpResponseRedirect(reverse('flylo:account'))
 
 
 class AccountView(TemplateView):
@@ -97,12 +118,13 @@ class DetailedFlightView(TemplateView):
 		return {'flight': Flight.objects.get(pk=kwargs['pk'])}
 
 
-class ShoppingCartView(View):
+class ModifyCartView(View):
 	def get(self, request):
 		""" Used only for deleting reservations"""
 		remove_res = int(request.GET.get('remove', None))
-		Reservation.objects.filter(pk=remove_res).delete()
-		request.session['reservations'] = [r for r in request.session['reservations'] if r is not remove_res]
+		if remove_res:
+			Reservation.objects.filter(pk=remove_res).delete()
+			request.session['reservations'] = [r for r in request.session['reservations'] if r is not remove_res]
 
 		return HttpResponseRedirect(reverse('flylo:buy'))
 
@@ -264,6 +286,15 @@ def api_price(request, fpk, apk, nseats, type):
 
 	return HttpResponse(price)
 
+
+def api_set_money(request):
+	money = request.POST.get('money')
+
+	user = User.objects.get(pk=request.user.id)
+	user.client.money = Decimal(money)
+	user.save()
+
+	return HttpResponse(user)
 
 # REST Api
 from rest_framework import viewsets

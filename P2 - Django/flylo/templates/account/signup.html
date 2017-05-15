@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+	<div class="row">
+		<div class="col-sm-6 col-sm-offset-3">
+
+
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<span class="text-large panel-title">Sign Up</span>
+				</div>
+				<div class="panel-body">
+
+					<form class="form" method="POST" id="reg-form">
+						{% csrf_token %}
+						<div class="form-group">
+							<label for="username">Username</label>
+							<input type="text" class="form-control" name="username" required>
+						</div>
+						<div class="form-group">
+							<label for="email">Email</label>
+							<input type="email" class="form-control" name="email" required>
+						</div>
+						<div class="form-group">
+							<label for="password">Password</label>
+							<input type="password" class="form-control" id="password" name="password" required>
+						</div>
+						<div class="form-group">
+							<label for="password">Repeat password</label>
+							<input type="password" class="form-control" id="password2" required>
+						</div>
+						<button type="submit" class="btn btn-primary pull-right">Sign Up</button>
+					</form>
+
+				</div>
+			</div>
+
+
+		</div>
+	</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+	<script type="text/javascript">
+        $('document').ready(function () {
+
+            // Check matching passwords
+            $('#reg-form').submit(function(e){
+
+                var pwd1 = $('#password').val();
+                var pwd2 = $('#password2').val();
+                if (pwd1 !== pwd2){
+                	e.preventDefault();
+					alert('Passwords do not match!');
+				}
+			});
+
+        });
+
+	</script>
+
+{% endblock %}
