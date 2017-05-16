@@ -205,21 +205,18 @@ def return_flights(request, flight_list):
 	except Exception:
 		pass
 
-	context = {}
-
-	context["flights"] = []
+	context = {'returns': []}
 
 	for pk in flight_list:
 		f = Flight.objects.get(pk=pk)
-		flight_number = f.flight_number
 		arr = f.location_departure
 		dep = f.location_arrival
 
 		ret_flights = Flight.objects.filter(location_departure=dep, location_arrival=arr)
 
-		context['flights'].append(
+		context['returns'].append(
 			{
-				'flight_number': flight_number,
+				'flight': f,
 				'return_flights': ret_flights
 			}
 		)
@@ -295,6 +292,7 @@ def api_set_money(request):
 	user.save()
 
 	return HttpResponse(user)
+
 
 # REST Api
 from rest_framework import viewsets
