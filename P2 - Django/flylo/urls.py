@@ -27,6 +27,5 @@ urlpatterns = [
 	url(r'^checkout/$', login_required(views.CheckoutView.as_view(), login_url='/flylo/login/'), name='checkout'),
 
 	# API URLs
-	url(r'^api/price/(?P<flight>\d+)/(?P<airline>\d+)/(?P<nseats>\d+)/(?P<type>\w)/$', views.api_price),
 	url(r'^api/set_money/$', login_required(views.api_set_money), name='set_money'),
 ]

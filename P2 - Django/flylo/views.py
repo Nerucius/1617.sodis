@@ -130,8 +130,6 @@ class ModifyCartView(View):
 
 	def post(self, request):
 		from models import TYPE_MULT
-		user = request.user
-
 		reservations = []
 		return_flights_ids = []
 
@@ -145,7 +143,7 @@ class ModifyCartView(View):
 				# Return flight can be selected or not
 				return_flight = request.POST.get('return_flight' + fid, None)
 				if return_flight:
-					return_flights_ids.append(return_flight)
+					return_flights_ids.append(fid)
 
 				n_seats = int(request.POST.get('seats' + fid))
 				type = request.POST.get('type' + fid)
@@ -155,31 +153,20 @@ class ModifyCartView(View):
 				airline = Airline.objects.get(code=airline)
 				price = flight.price * TYPE_MULT[type]
 
+				# TODO Before creating reservations, check if flight has enough free seats, otherwise redirect to error page
+
+				# Create one reservation for every seat
 				for i in range(n_seats):
 					res = self.create_reservation(flight, airline, price, type)
 					res.save()
 					reservations.append(res.pk)
 
-			# When selecting return flight
-			if key.startswith('selected_return'):
-				# For all checked flights, get the form values
-				fid = request.POST[key]
-
-				n_seats = int(request.POST['seats' + fid])
-				type = request.POST['type' + fid]
-
-				flight = Flight.objects.get(pk=fid)
-				airline = rand.choice(flight.airlines.all())
-
-				for i in range(n_seats):
-					res = self.create_reservation(flight, airline, flight.price, type)
-					res.save()
-					reservations.append(res.pk)
-
+		# Append Reservations to existing ones
 		request.session['reservations'] = request.session.get('reservations', [])
 		for res in reservations:
 			request.session['reservations'].append(res)
 
+		# Finally, redirect to return flights if at least one return preference was set
 		if len(return_flights_ids) == 0:
 			return HttpResponseRedirect(reverse('flylo:buy'))
 		else:
@@ -243,18 +230,32 @@ class CartView(TemplateView):
 class CheckoutView(TemplateView):
 	template_name = "shop/checkout.html"
 
-	def get(self, request):
-		if 'pay' in request.GET:
-			for rpk in request.session['reservations']:
-				res = Reservation.objects.get(pk=rpk)
-				res.client = User.objects.get(username=request.user.username).client
-				if not res.paid:
-					res.paid = True
-					res.save()
-			del request.session['reservations']
-			return HttpResponseRedirect(reverse('flylo:my_flights'))
-
+	def get(self, request, *args, **kwargs):
 		context = {'reservations': []}
+
+		# A pay "attempt" is registered
+		if 'pay' in request.GET:
+			client = User.objects.get(pk=request.user.pk).client
+
+			reservations = []
+			for rpk in request.session['reservations']:
+				reservations.append(Reservation.objects.get(pk=rpk))
+
+			total = sum([res.price for res in reservations])
+
+			# IF the Client has enougb money
+			if total < client.money:
+				for res in reservations:
+					res.paid = True
+					res.client = client;
+					res.save()
+				client.money -= total
+				client.save()
+				del request.session['reservations']
+				return HttpResponseRedirect(reverse('flylo:my_flights'))
+			else:
+				context['error'] = "Not enough funds in your account."
+
 		reservations = request.session.get('reservations', False)
 		if not reservations:
 			return HttpResponseRedirect(reverse('flylo:index'))
@@ -263,25 +264,6 @@ class CheckoutView(TemplateView):
 		context['total'] = sum([res.price for res in context['reservations']])
 
 		return render(request, self.template_name, context)
-
-
-def api_price(request, fpk, apk, nseats, type):
-	""" Calculate the price of the given number of seats for a flight with a given airline.
-		The price will vary in realtion to a series of factors:
-		- base: base price of the flight
-		- c: class ( 1 for E, 1.5 for B, 2.5 for F )
-		- d: days remaining for departure ( -0.01 per day remaining, caps at -0.25)
-		- f: how full the plane is for the given class (0.75 empty to 1.5 full)
-		Final price = base * (c + d + f)
-	"""
-	from models import TYPE_MULT
-	class_mult = TYPE_MULT[type]
-	flight = Flight.objects.get(pk=fpk)
-	# airline = Airline.objects.get(pk=apk)
-
-	price = round(flight.price * class_mult, 2)
-
-	return HttpResponse(price)
 
 
 def api_set_money(request):

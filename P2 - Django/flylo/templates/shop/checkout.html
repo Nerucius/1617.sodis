@@ -10,20 +10,20 @@
 		<!-- Payment Information -->
 		<div class="col-sm-8">
 			<div class="panel panel-primary">
-				<div class="panel-heading">Payment Information</div>
+				<div class="panel-heading" style="font-size: 1.2em">Payment Information</div>
 				<div class="panel-body">
 					<dl class="dl-horizontal">
+						<dt>Funds in Account</dt>
+						<dd>{{ request.user.client.money }}&euro;</dd>
 						<dt>Card Number</dt>
-						<dd>MasterCard ending in 1651</dd>
+						<dd>MasterCard ending in 1234</dd>
 						<dt>Billing Adress</dt>
 						<dd>
-							{{ user.username }}<br>
+							{{ user.first_name | capfirst }}<br>
 							{{ user.email }}<br>
 							Passeig de Gracia,<br>
 							Barcelona, Barcelona 08024<br>
 						</dd>
-						<dt>Card Number</dt>
-						<dd>MasterCard ending in 1651</dd>
 					</dl>
 
 				</div>
@@ -33,7 +33,7 @@
 		<!-- Order Summary -->
 		<div class="col-sm-4">
 			<div class="panel panel-primary">
-				<div class="panel-heading">Order Summary</div>
+				<div class="panel-heading" style="font-size: 1.2em">Order Summary</div>
 				<div class="panel-body">
 					<ul class="list-unstyled">
 						{% for res in reservations %}
@@ -41,8 +41,7 @@
 								<span class="pull-right">{{ res.price }}&euro;</span>
 							</li>
 						{% endfor %}
-						<li>&nbsp;</li>
-						<li><strong class="pull-right">Total: {{ total }}&euro;</strong></li>
+						<li><strong class="pull-right h3">Total: {{ total }}&euro;</strong></li>
 					</ul>
 
 				</div>
@@ -50,6 +49,10 @@
 			</div>
 		</div>
 	</div>
+
+	{% if error %}
+		<div class="alert alert-danger h5">{{ error }}</div>
+	{% endif %}
 
 	<ul class="pull-right list-inline h3">
 		<li class="h4"><a href="?pay" class="btn btn-warning">Place Order</a></li>

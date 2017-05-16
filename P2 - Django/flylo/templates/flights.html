@@ -54,15 +54,17 @@
 
 	<!-- Vue Powered Form -->
 	<div id="app">
+
 		<form action="{% url 'flylo:shoppingcart' %}" method="post">
 			{% csrf_token %}
+
+			<input type="hidden" name="can_return" value="true">
 
 			<flight-table {% if departure %} departure="{{ departure }}" {% endif %}></flight-table>
 
 			<input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
 
 		</form>
-
 
 	</div>
 
