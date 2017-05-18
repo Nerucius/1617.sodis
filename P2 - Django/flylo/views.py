@@ -107,8 +107,52 @@ class MyFlightsView(TemplateView):
 class CheckinView(TemplateView):
 	template_name = 'account/checkin.html'
 
+	@staticmethod
+	def generate_seats_grid(reservation):
+		context = {}
+		context['reservation'] = reservation
+
+		seats_economy = reservation.flight.airplane.seats_economy
+		seats_business = reservation.flight.airplane.seats_business
+		seats_first_class = reservation.flight.airplane.seats_first_class
+
+		columns = 8
+		# Grid economy
+		rows_economy = seats_economy / columns
+		lr_economy = seats_economy % columns
+		if lr_economy > 0:
+			context['lr_economy'] = lr_economy
+
+		# Grid business
+		rows_business = seats_business / columns
+		lr_business = seats_business % columns
+		if lr_business > 0:
+			context['lr_business'] = lr_business
+
+		# Grid first class
+		rows_first_class = seats_first_class / columns
+		lr_first_class = seats_first_class % columns
+		if lr_first_class > 0:
+			context['lr_first_class'] = lr_first_class
+
+		# Needed data to build grids
+		context['columns'] = columns
+		context['rows_economy'] = rows_economy
+		context['rows_business'] = rows_business
+		context['rows_first_class'] = rows_first_class
+		context[reservation.type] = reservation.type
+
+		# For debug
+		context['seats_economy'] = seats_economy
+		context['seats_business'] = seats_business
+		context['seats_first_class'] = seats_first_class
+
+		return context
+
 	def get_context_data(self, **kwargs):
-		return {'reservation': Reservation.objects.get(pk=kwargs['rpk'])}
+		reservation = Reservation.objects.get(pk=kwargs['rpk'])
+		context = self.generate_seats_grid(reservation)
+		return context
 
 
 class DetailedFlightView(TemplateView):
@@ -119,6 +163,14 @@ class DetailedFlightView(TemplateView):
 
 
 class ModifyCartView(View):
+
+	def checkFreeSeats(self, flight, airline, type):
+		# TODO
+
+		Reservation.objects.filter(flight__pk=1, airline__code='IBE')
+
+		return True
+
 	def get(self, request):
 		""" Used only for deleting reservations"""
 		remove_res = int(request.GET.get('remove', None))

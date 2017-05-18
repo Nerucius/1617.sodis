@@ -115,6 +115,15 @@ class Flight(models.Model):
 			self.estimated_time_departure) + " / " + str(self.estimated_time_arrival) + " [" + self.status + "]"
 
 
+# TODO maybe : l'eloi ha dit que el model ha de ser consistent, i que a un vol nomes s'han
+# de poder assignar les aerolinies que li toquen. Si ho controlem desde reserva, encara que
+# el nostre frontend no permeti seleccionar una aerolinia que no opera el vol, des del backend
+# es podria assignar i no es consistent
+'''class Airlineflight(models.Model):
+	flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
+	airline = models.ForeignKey(Airline, on_delete=models.CASCADE)'''
+
+
 class Reservation(models.Model):
 	# foreign Keys
 	flight = models.ForeignKey(Flight, on_delete=models.CASCADE)
@@ -128,6 +137,8 @@ class Reservation(models.Model):
 	paid = models.BooleanField(default=False)
 	checkin = models.BooleanField(default=False)
 	created = models.DateTimeField(auto_now_add=True)
+	forename = models.CharField(max_length=50, blank=True, null=True)
+	surname = models.CharField(max_length=50, blank=True, null=True)
 
 	def __str__(self):
 		return self.flight.flight_number + ": " + self.airline.code + ", " + str(self.price)
