@@ -3,10 +3,17 @@
 {% block style %}
 
     <style>
-        #seats {
-            border-collapse: collapse;
-        }
+
+    input[type=checkbox] {
+			/* Double-sized Checkboxes */
+			-ms-transform: scale(1.5); /* IE */
+			-moz-transform: scale(1.5); /* FF */
+			-webkit-transform: scale(1.5); /* Safari and Chrome */
+			-o-transform: scale(1.5); /* Opera */
+			padding: 10px;
+		}
     </style>
+
 
 {% endblock %}
 
@@ -60,65 +67,14 @@
                 <div class="panel panel-primary">
                     <div class="panel-heading text-large panel-title">Choose a seat</div>
                     <div class="panel-body">
-                        <div class="col-sm-12">
+                        <div class="row">
 
-                            <table class="table">
 
-                                {% if e %}
-                                    <h4>Economy class seats:</h4>
-                                    {% for i in "x"|rjust:rows_economy %}
-                                        <tr>
-                                            {% for i in "x"|rjust:columns %}
-                                                <td>E11</td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
-                                    {% if lr_economy %}
-                                        <tr>
-                                            {% for i in "x"|rjust:lr_economy %}
-                                                <td>X67</td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endif %}
-                                {% endif %}
-
-                                {% if b %}
-                                    <h4>Business class seats:</h4>
-                                    {% for i in "x"|rjust:rows_business %}
-                                        <tr>
-                                            {% for i in "x"|rjust:columns %}
-                                                <td>A11</td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
-                                    {% if lr_business %}
-                                        <tr>
-                                            {% for i in "x"|rjust:lr_business %}
-                                                <td>X67</td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endif %}
-                                {% endif %}
-
-                                {% if f %}
-                                    <h4>First class seats:</h4>
-                                    {% for i in "x"|rjust:rows_first_class %}
-                                        <tr>
-                                            {% for i in "x"|rjust:columns %}
-                                                <td>A11</td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endfor %}
-                                    {% if lr_first_class %}
-                                        <tr>
-                                            {% for i in "x"|rjust:lr_first_class %}
-                                                <td>X67</td>
-                                            {% endfor %}
-                                        </tr>
-                                    {% endif %}
-                                {% endif %}
-
-                            </table>
+                                {% for seat, dis in seats %}
+                                    <div class="col-sm-2 col-md-1" style="margin-bottom:12px ">
+                                        <input type="radio" name="seat" {{ dis }} value="{{ seat }}"> {{ seat }}
+                                    </div>
+                                {% endfor %}
 
 
                         </div>

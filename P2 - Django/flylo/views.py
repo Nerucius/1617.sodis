@@ -112,40 +112,24 @@ class CheckinView(TemplateView):
 		context = {}
 		context['reservation'] = reservation
 
-		seats_economy = reservation.flight.airplane.seats_economy
-		seats_business = reservation.flight.airplane.seats_business
-		seats_first_class = reservation.flight.airplane.seats_first_class
+		num_seats = reservation.flight.airplane.seats_economy
+		if reservation.type == 'b':
+			num_seats = reservation.flight.airplane.seats_business
+		elif reservation.type == 'f':
+			num_seats = reservation.flight.airplane.seats_first_class
 
-		columns = 8
-		# Grid economy
-		rows_economy = seats_economy / columns
-		lr_economy = seats_economy % columns
-		if lr_economy > 0:
-			context['lr_economy'] = lr_economy
+		# Economy
+		seats = {}
+		for i in range(num_seats):
+			name = reservation.type.upper() + "%02d"%(i+1)
+			seats[name] = "disabled"
 
-		# Grid business
-		rows_business = seats_business / columns
-		lr_business = seats_business % columns
-		if lr_business > 0:
-			context['lr_business'] = lr_business
+		context["seats"] = sorted(seats.iteritems())
 
-		# Grid first class
-		rows_first_class = seats_first_class / columns
-		lr_first_class = seats_first_class % columns
-		if lr_first_class > 0:
-			context['lr_first_class'] = lr_first_class
-
-		# Needed data to build grids
-		context['columns'] = columns
-		context['rows_economy'] = rows_economy
-		context['rows_business'] = rows_business
-		context['rows_first_class'] = rows_first_class
-		context[reservation.type] = reservation.type
-
-		# For debug
-		context['seats_economy'] = seats_economy
-		context['seats_business'] = seats_business
-		context['seats_first_class'] = seats_first_class
+		# context[reservation.type] = reservation.type
+		# context['seats_economy'] = seats_economy
+		# context['seats_business'] = seats_business
+		# context['seats_first_class'] = seats_first_class
 
 		return context
 
