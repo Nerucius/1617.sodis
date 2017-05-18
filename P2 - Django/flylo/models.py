@@ -55,6 +55,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 class Airline(models.Model):
 	code = models.CharField(max_length=3)
+	price = models.DecimalField(decimal_places=2, max_digits=12, default=0)
 
 	def __str__(self):
 		return self.code
@@ -85,7 +86,7 @@ class Flight(models.Model):
 	base_price = models.DecimalField(decimal_places=2, max_digits=12, default=0)
 
 	@property
-	def price(self):
+	def computed_price(self):
 		""" Price of the flight. The further in time the flight is, the cheaper it is.
 			Conversely, the fuller the plane is, the more expensive the flight. """
 		from datetime import datetime
@@ -102,6 +103,17 @@ class Flight(models.Model):
 		days = min(120, max(0, (departure - now).days))
 
 		return self.base_price * Decimal(1 - days * 0.003) * Decimal(fillmulti)
+
+	@property
+	def price(self):
+		""" Price of the flight. The further in time the flight is, the cheaper it is.
+			Conversely, the fuller the plane is, the more expensive the flight. """
+
+		cheap = self.airlines.all()[0].price
+		for airline in self.airlines.all():
+			cheap = min(cheap, airline.price)
+
+		return self.computed_price + cheap
 
 	class Meta:
 		# ordering by logical departure order

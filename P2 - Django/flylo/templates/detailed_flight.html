@@ -1,18 +1,45 @@
 {% extends 'base.html' %}
 
+
+{% block style %}
+
+	<style>
+		.gray {
+			background-color: lightblue;
+			border: 1px solid black;
+			padding: 12px;
+		}
+	</style>
+{% endblock %}
+
+
 {% block content %}
 
-    <b>Flight number:</b> {{ flight.flight_number }} <br>
-    <b>Departure:</b> {{ flight.location_departure }}, {{ flight.estimated_time_departure }} <br>
-    <b>Arrival:</b> {{ flight.location_arrival }}, {{ flight.estimated_time_arrival }} <br>
-    <b>Airline:</b>
-    {% for a in flight.airlines.all %}
-    {{a}}
-    {% endfor %} <br>
-    <b>Airplane:</b> {{ flight.airplane.aircraft }} <br>
-    <b>Number of seats:</b> {{ flight.airplane.seats_first_class }} (first class),
-    {{ flight.airplane.seats_business }} (business),
-                                {{ flight.airplane.seats_economy }} (economy) <br>
-    <b>Status:</b> {{ flight.status }}
+
+	<div class="row">
+
+		<div class="col-lg-6">
+			<div class="panel panel-primary">
+				<div class="panel-heading"><span class="h4">Hola</span></div>
+				<div class="panel-body">
+
+					<b>Flight number:</b> {{ flight.flight_number }} <br>
+					<b>Departure:</b> {{ flight.location_departure }}, {{ flight.estimated_time_departure }} <br>
+					<b>Arrival:</b> {{ flight.location_arrival }}, {{ flight.estimated_time_arrival }} <br>
+					<b>Airline:</b>
+					{% for a in flight.airlines.all %}
+						{{ a }}
+					{% endfor %} <br>
+					<b>Airplane:</b> {{ flight.airplane.aircraft }} <br>
+					<b>Number of seats:</b> {{ flight.airplane.seats_first_class }} (first class),
+					{{ flight.airplane.seats_business }} (business),
+					{{ flight.airplane.seats_economy }} (economy) <br>
+					<b>Status:</b> {{ flight.status }}
+				</div>
+			</div>
+
+		</div>
+
+	</div>
 
 {% endblock %}

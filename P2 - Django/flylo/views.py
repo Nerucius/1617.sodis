@@ -187,7 +187,8 @@ class ModifyCartView(View):
 
 				flight = Flight.objects.get(pk=fid)
 				airline = Airline.objects.get(code=airline)
-				price = float(flight.price) * TYPE_MULT[type]  # TODO Note: sonia cast
+				price = Decimal(flight.price * TYPE_MULT[type])
+				price += airline.price
 
 				# TODO Before creating reservations, check if flight has enough free seats, otherwise redirect to error page
 

@@ -21,8 +21,23 @@ Vue.component('flight', {
 
     computed: {
         price: function () {
+            console.log("compute price for " + this.airline);
+
+            var acode = this.airline;
             var type = this.type === 'e' ? 1 : this.type === 'b' ? 1.5 : 2.5;
-            return (this.flight.price * this.seats * type).toFixed(2);
+            var aprice = 0;
+            var nseats = this.seats;
+
+            this.flight.airlines.forEach(function(a){
+
+                if (a.code == acode) {
+                    console.log("found airline: "+a.code);
+                    aprice = parseFloat(a.price) * nseats;
+                }
+
+            });
+
+            return ( this.flight.price * this.seats * type + aprice).toFixed(2);
         }
     },
 
