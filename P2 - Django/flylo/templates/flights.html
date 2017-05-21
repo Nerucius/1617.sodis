@@ -48,7 +48,11 @@
 		<hr>
 
 	{% else %}
-		<p>No flights are available.</p>
+        {% if error %}
+            <div class="alert alert-danger">Not enough available seats for the selected flight</div>
+        {% else %}
+            <p>No flights are available.</p>
+        {% endif %}
 	{% endif %}
 
 

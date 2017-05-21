@@ -104,20 +104,28 @@ class MyFlightsView(TemplateView):
 		return context
 
 
-# methods related to the seats that are used in the view classes below (CheckinView, ModifyCartView)
-def get_total_number_of_seats(flight, type):
-	num_seats = flight.airplane.seats_economy
+# Methods related to the seats that are used in the view classes below (CheckinView, ModifyCartView)
+def get_total_n_of_seats(flight, type):
+	n_seats = flight.airplane.seats_economy
 	if type == 'b':
-		num_seats = flight.airplane.seats_business
+		n_seats = flight.airplane.seats_business
 	elif type == 'f':
-		num_seats = flight.airplane.seats_first_class
-	return num_seats
+		n_seats = flight.airplane.seats_first_class
+	return n_seats
 
 
 def get_disabled_seats(flight, type):
-	disabled_seats = Reservation.objects.filter(flight__pk=flight.pk, type=type).values_list('seat').exclude(seat__exact=None)
+	disabled_seats = Reservation.objects.filter(flight__pk=flight.pk, type=type).values_list('seat').exclude(
+		seat__exact=None)
 	disabled_seats = [x[0] for x in disabled_seats]
 	return disabled_seats
+
+
+def get_n_free_seats(flight, type, airline=None):
+	"""Returns the number of all the available flight seats (the reserved and the checked out)"""
+	n_seats = get_total_n_of_seats(flight, type)
+	n_reservations = len(Reservation.objects.filter(flight__pk=flight.pk, type=type).values_list('seat'))
+	return n_seats - n_reservations
 
 
 class CheckinView(TemplateView):
@@ -129,13 +137,13 @@ class CheckinView(TemplateView):
 		context['reservation'] = reservation
 
 		# Seats grid size depending on reservation class
-		num_seats = get_total_number_of_seats(reservation.flight, reservation.type)
+		n_seats = get_total_n_of_seats(reservation.flight, reservation.type)
 
 		# Dictionary with the form (k,v) = (seat_code, disabled/" " )
 		seats = {}
-		for i in range(num_seats):
+		for i in range(n_seats):
 			# Generate seat code (ex: E34, B02, F03)
-			seat_code = reservation.type.upper() + "%02d"%(i+1)
+			seat_code = reservation.type.upper() + "%02d" % (i + 1)
 
 			# List of disabled seats of the flight of a specific class
 			disabled_seats = get_disabled_seats(reservation.flight, reservation.type)
@@ -155,19 +163,21 @@ class CheckinView(TemplateView):
 		return context
 
 	def post(self, request, **kwargs):
-		"""Used for saving selected seat and name from checkin"""
+		"""Used for saving selected seat and name for checkin"""
 		reservation = Reservation.objects.get(pk=kwargs['rpk'])
 
 		# Check if the selected seat is really a free seat
 		selected_seat = request.POST['seat']
 		disabled_seats = get_disabled_seats(reservation.flight, reservation.type)
 
-		# TODO test and put it into html
 		if selected_seat in disabled_seats:
 			# Return the same view with a msg: The selected seat is no more available. Please, choose another seat.
 			context = self.generate_seats_grid(reservation)
-			context['already_assigned'] = ''
-			return context
+			context['already_assigned'] = True
+			context['forename'] = request.POST['forename']
+			context['surname'] = request.POST['surname']
+			return render(request, self.template_name, context)
+
 		else:
 			# Save the checkin information
 			reservation.forename = request.POST['forename']
@@ -177,29 +187,8 @@ class CheckinView(TemplateView):
 			reservation.save()
 			return HttpResponseRedirect('../flights/')
 
+
 class ModifyCartView(View):
-
-# TODO wirking on this method
-	def checkFreeSeats(self, flight, airline, type):
-		# Number of seats of the aiplane depending on the class
-		num_seats = flight.airplane.seats_economy
-		if type == 'b':
-			num_seats = flight.airplane.seats_business
-		elif type == 'f':
-			num_seats = flight.airplane.seats_first_class
-
-		# List of disabled seats of the flight of the selected class
-		disabled_seats = Reservation.objects.filter(flight__pk=flight.pk, type=type).values_list('seat').exclude(seat__exact=None)
-		disabled_seats = [x[0] for x in disabled_seats]
-
-
-
-		#TODO
-
-		Reservation.objects.filter(flight__pk=1, airline__code='IBE')
-
-		return True
-
 	def get(self, request):
 		""" Used only for deleting reservations"""
 		remove_res = int(request.GET.get('remove', None))
@@ -226,7 +215,7 @@ class ModifyCartView(View):
 				if return_flight:
 					return_flights_ids.append(fid)
 
-				n_seats = int(request.POST.get('seats' + fid))
+				selected_n_seats = int(request.POST.get('seats' + fid))
 				type = request.POST.get('type' + fid)
 				airline = request.POST.get('airline' + fid)
 
@@ -236,9 +225,12 @@ class ModifyCartView(View):
 				price += airline.price
 
 				# TODO Before creating reservations, check if flight has enough free seats, otherwise redirect to error page
+				n_free_seats = get_n_free_seats(flight, type)
+				if selected_n_seats > n_free_seats:
+					return render(request, 'flights.html', {'error': True, 'departure': flight.location_departure})
 
 				# Create one reservation for every seat
-				for i in range(n_seats):
+				for i in range(selected_n_seats):
 					res = self.create_reservation(flight, airline, price, type)
 					res.save()
 					reservations.append(res.pk)
@@ -284,10 +276,10 @@ def return_flights(request, flight_list):
 		ret_flights = Flight.objects.filter(location_departure=dep, location_arrival=arr)
 
 		context['returns'].append(
-			{
-				'flight': f,
-				'return_flights': ret_flights
-			}
+				{
+					'flight': f,
+					'return_flights': ret_flights
+				}
 		)
 
 	return render(request, 'return_flights.html', context)
