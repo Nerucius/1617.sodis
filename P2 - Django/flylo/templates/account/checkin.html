@@ -1,20 +1,19 @@
 {% extends 'base.html' %}
 
 {% block style %}
-
     <style>
+        #free_seat_bg_ {
+            border-radius: 10px;
+            border: 2px solid #73AD21;
+            background-color: rgba(115, 173, 33, 0.31);
+        }
 
-    input[type=checkbox] {
-			/* Double-sized Checkboxes */
-			-ms-transform: scale(1.5); /* IE */
-			-moz-transform: scale(1.5); /* FF */
-			-webkit-transform: scale(1.5); /* Safari and Chrome */
-			-o-transform: scale(1.5); /* Opera */
-			padding: 10px;
-		}
+        #free_seat_bg_disabled {
+            border-radius: 10px;
+            border: 2px solid #a94442;
+            background-color: rgba(169, 68, 66, 0.31);
+        }
     </style>
-
-
 {% endblock %}
 
 {% block content %}
@@ -70,9 +69,9 @@
                         <div class="row">
 
 
-                                {% for seat, dis in seats %}
-                                    <div class="col-sm-2 col-md-1" style="margin-bottom:12px ">
-                                        <input type="radio" name="seat" {{ dis }} value="{{ seat }}"> {{ seat }}
+                                {% for seat_code, disabled in seats %}
+                                    <div class="col-sm-2 col-md-1" style="margin-bottom:12px; margin-left: 12px" id="free_seat_bg_{{ disabled }}">
+                                        <input type="radio" name="seat" {{ disabled }} value="{{ seat_code }}"> {{ seat_code }}
                                     </div>
                                 {% endfor %}
 

@@ -112,31 +112,46 @@ class CheckinView(TemplateView):
 		context = {}
 		context['reservation'] = reservation
 
+		# Seats grid size depending on reservation class
 		num_seats = reservation.flight.airplane.seats_economy
 		if reservation.type == 'b':
 			num_seats = reservation.flight.airplane.seats_business
 		elif reservation.type == 'f':
 			num_seats = reservation.flight.airplane.seats_first_class
 
-		# Economy
+		# Dictionary with the form (k,v) = (seat_code, disabled/" " )
 		seats = {}
 		for i in range(num_seats):
-			name = reservation.type.upper() + "%02d"%(i+1)
-			seats[name] = "disabled"
+			# Generate seat code (ex: E34, B02, F03)
+			seat_code = reservation.type.upper() + "%02d"%(i+1)
+
+			# List of disabled seats of the flight
+			disabled_seats = Reservation.objects.filter(flight__pk=reservation.flight_id).values_list('seat').exclude(seat__exact=None)
+			disabled_seats = [x[0] for x in disabled_seats]
+
+			# Set free seats
+			if seat_code in disabled_seats:
+				seats[seat_code] = "disabled"
+			else:
+				seats[seat_code] = ""
 
 		context["seats"] = sorted(seats.iteritems())
-
-		# context[reservation.type] = reservation.type
-		# context['seats_economy'] = seats_economy
-		# context['seats_business'] = seats_business
-		# context['seats_first_class'] = seats_first_class
-
 		return context
 
 	def get_context_data(self, **kwargs):
 		reservation = Reservation.objects.get(pk=kwargs['rpk'])
 		context = self.generate_seats_grid(reservation)
 		return context
+
+	def post(self, request, **kwargs):
+		"""Used for saving selected seat and name from checkin"""
+		reservation = Reservation.objects.get(pk=kwargs['rpk'])
+		reservation.forename = request.POST['forename']
+		reservation.surname = request.POST['surname']
+		reservation.seat = request.POST['seat']
+		reservation.checkin = True
+		reservation.save()
+		return HttpResponseRedirect('../flights/')
 
 
 class DetailedFlightView(TemplateView):
@@ -148,8 +163,22 @@ class DetailedFlightView(TemplateView):
 
 class ModifyCartView(View):
 
+# TODO wirking on this method
 	def checkFreeSeats(self, flight, airline, type):
-		# TODO
+		# Number of seats of the aiplane depending on the class
+		num_seats = flight.airplane.seats_economy
+		if type == 'b':
+			num_seats = flight.airplane.seats_business
+		elif type == 'f':
+			num_seats = flight.airplane.seats_first_class
+
+		# List of disabled seats of the flight of the selected class
+		disabled_seats = Reservation.objects.filter(flight__pk=flight.pk, type=type).values_list('seat').exclude(seat__exact=None)
+		disabled_seats = [x[0] for x in disabled_seats]
+
+		
+
+		#TODO
 
 		Reservation.objects.filter(flight__pk=1, airline__code='IBE')
 
@@ -187,7 +216,7 @@ class ModifyCartView(View):
 
 				flight = Flight.objects.get(pk=fid)
 				airline = Airline.objects.get(code=airline)
-				price = Decimal(flight.price * TYPE_MULT[type])
+				price = flight.price * Decimal(TYPE_MULT[type])
 				price += airline.price
 
 				# TODO Before creating reservations, check if flight has enough free seats, otherwise redirect to error page
