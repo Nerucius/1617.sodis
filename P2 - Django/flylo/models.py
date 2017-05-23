@@ -127,6 +127,30 @@ class Flight(models.Model):
 			self.estimated_time_departure) + " / " + str(self.estimated_time_arrival) + " [" + self.status + "]"
 
 
+class FlightOwner(models.Model):
+	flight = models.ForeignKey(Flight, blank=True, null=True)
+	owner = models.ForeignKey(User, blank=True, null=True)
+
+
+# @receiver(post_save, sender=Flight)
+# def set_flight_creator(sender, instance, created, **kwargs):
+# 	if created:
+# 		# FlightOwner.objects.create(flight=instance)
+# 		import inspect
+#
+# 		# Look for user in the stack
+# 		user = None
+# 		for entry in reversed(inspect.stack()):
+# 			try:
+# 				user = entry[0].f_locals['request'].user
+# 			except Exception:
+# 				user = None
+# 		if user:
+# 			FlightOwner.objects.create(flight=instance, owner=user)
+# 		else:
+# 			FlightOwner.objects.create(flight=instance)
+
+
 class Reservation(models.Model):
 	# foreign Keys
 	flight = models.ForeignKey(Flight, on_delete=models.CASCADE)

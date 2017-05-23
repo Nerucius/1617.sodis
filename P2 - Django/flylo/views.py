@@ -276,10 +276,10 @@ def return_flights(request, flight_list):
 		ret_flights = Flight.objects.filter(location_departure=dep, location_arrival=arr)
 
 		context['returns'].append(
-				{
-					'flight': f,
-					'return_flights': ret_flights
-				}
+			{
+				'flight': f,
+				'return_flights': ret_flights
+			}
 		)
 
 	return render(request, 'return_flights.html', context)
@@ -357,14 +357,37 @@ def api_set_money(request):
 	return HttpResponse(user)
 
 
-# REST Api
-from rest_framework import viewsets
-from serializers import FlightSerializer, AirlineSerializer
+# REST Framework
+from rest_framework import viewsets, permissions
+from rest_framework.response import Response
+from serializers import FlightSerializer
+
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+
+	def has_permission(self, request, view):
+		""" Global query permissions """
+		return True
+
+	def has_object_permission(self, request, view, obj):
+		# Read permissions are allowed to any request,
+		# so we'll always allow GET, HEAD or OPTIONS requests.
+		#if request.method in permissions.SAFE_METHODS:
+		#	return True
+
+		# Instance must have an attribute named `owner`.
+		for owner in FlightOwner.objects.all():
+			if owner.flight == obj and owner.owner == request.user:
+				return True
+
+		return False
 
 
 class FlightViewSet(viewsets.ModelViewSet):
 	serializer_class = FlightSerializer
 	queryset = Flight.objects.all()
+
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
 	def get_queryset(self):
 		from datetime import datetime

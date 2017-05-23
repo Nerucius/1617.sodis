@@ -59,12 +59,14 @@
 						<span class="glyphicon glyphicon-user"></span>&nbsp; {{ user.first_name | capfirst }} </a>
 					<a href="{% url 'flylo:logout' %}" class="btn btn-sm btn-danger"><span
 							class="glyphicon glyphicon-log-out"></span>&nbsp; Log Out</a>
+
 				{% else %}
 					<a href="{% url 'flylo:login' %}" class="btn btn-sm btn-success"><span
 							class="glyphicon glyphicon-log-in"></span>&nbsp; Log In</a>
 					&nbsp;
 					<a href="{% url 'flylo:signup' %}" class="btn btn-sm btn-success"><span
 							class="glyphicon glyphicon-plus"></span> Sign Up</a>
+
 				{% endif %}
 				&nbsp;
 				<a href="{% url 'flylo:buy' %}" class="btn btn-sm btn-warning"><span
@@ -74,6 +76,12 @@
 						&nbsp;<span class="label label-danger"> {{ request.session.reservations | length }}</span>
 					{% endif %}
 				</a>
+
+				{% if request.user.is_staff %}
+					&nbsp;
+					<a href="{% url 'admin:index' %}" class="btn btn-sm btn-success"><span
+							class="glyphicon glyphicon-cloud-upload"></span> Admin Panel</a>
+				{% endif %}
 
 
 			</div>
@@ -87,6 +95,7 @@
 	{% endblock %}
 </div>
 </body>
+
 
 <script>
     // Automatically enable POST CSRF token sending, to disable, set window.crossdomain to true
