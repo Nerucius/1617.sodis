@@ -224,7 +224,6 @@ class ModifyCartView(View):
 				price = flight.price * Decimal(TYPE_MULT[type])
 				price += airline.price
 
-				# TODO Before creating reservations, check if flight has enough free seats, otherwise redirect to error page
 				n_free_seats = get_n_free_seats(flight, type)
 				if selected_n_seats > n_free_seats:
 					return render(request, 'flights.html', {'error': True, 'departure': flight.location_departure})
@@ -364,15 +363,19 @@ from serializers import FlightSerializer
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
-
 	def has_permission(self, request, view):
 		""" Global query permissions """
+		if request.method in permissions.SAFE_METHODS:
+			return True
+		if request.method == 'POST':
+			return request.user.is_staff
+
 		return True
 
 	def has_object_permission(self, request, view, obj):
 		# Read permissions are allowed to any request,
 		# so we'll always allow GET, HEAD or OPTIONS requests.
-		#if request.method in permissions.SAFE_METHODS:
+		# if request.method in permissions.SAFE_METHODS:
 		#	return True
 
 		# Instance must have an attribute named `owner`.
@@ -387,7 +390,12 @@ class FlightViewSet(viewsets.ModelViewSet):
 	serializer_class = FlightSerializer
 	queryset = Flight.objects.all()
 
-	permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+	permission_classes = (IsOwnerOrReadOnly, )
+
+	# TODO Link Flight Creation on FlightOwner table
+
+	def post(self, request, *args, **kwargs):
+		return self.create(request, *args, **kwargs)
 
 	def get_queryset(self):
 		from datetime import datetime
