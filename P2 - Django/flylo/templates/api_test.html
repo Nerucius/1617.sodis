@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+<body>
+
+<script
+		src="https://code.jquery.com/jquery-3.2.1.min.js"
+		integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+		crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+
+    $('document').ready(function () {
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            }
+        });
+
+        $.get("http://localhost:8080/api/flights", function (data) {
+            console.log(data)
+        });
+
+        var flight = {
+            'flight_number': 'TST999',
+            'estimated_time_arrival': "2020-01-01T12:00",
+            'estimated_time_departure': "2020-01-01T14:00",
+            'location_departure': 'TST',
+            'location_arrival': 'TST',
+            'status': 'TESTING',
+            'airplane': 1,
+            'airlines': [1, 2]
+        };
+
+        $.post("http://localhost:8080/api/flights/", flight, function (data) {
+            console.log(data)
+        });
+
+    });
+
+
+</script>
+
+</body>
+</html>

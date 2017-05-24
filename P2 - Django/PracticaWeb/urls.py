@@ -17,7 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from rest_framework import routers
-from flylo.views import FlightViewSet
+from flylo.rest import FlightViewSet
 
 router = routers.DefaultRouter()
 router.register(r'flights', FlightViewSet)

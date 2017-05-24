@@ -28,4 +28,7 @@ urlpatterns = [
 
 	# API URLs
 	url(r'^api/set_money/$', login_required(views.api_set_money), name='set_money'),
+
+	# TODO DELETE TESTING VIEW
+	url(r'^test/$', views.api_test)
 ]

@@ -26,6 +26,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+FIXTURE_DIRS = [
+	os.path.join(BASE_DIR, 'flylo/fixtures'),
+]
+
 # Application definition
 
 INSTALLED_APPS = [
