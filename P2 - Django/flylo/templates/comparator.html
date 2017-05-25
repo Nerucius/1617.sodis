@@ -18,6 +18,11 @@
 
 		.label {
 			font-size: 1em;
+			display: inline-block;
+		}
+
+		.panel-heading a {
+			color: inherit;
 		}
 	</style>
 
@@ -30,12 +35,29 @@
 	<div class="row" id="app">
 
 
+		<div class="col-sm-10 col-sm-offset-1">
+
+			<form class="form-inline">
+				<div class="form-group ">
+					<label for="url">URL to API:</label>
+					<input type="text" class="form-control" id="url" placeholder="http://...">
+				</div>
+				<span @click="addUrl" class="btn btn-primary">Add to Comparison</span>
+			</form>
+			<br>
+			<div class="well well-sm">
+				<span v-for="url in urls" class="label label-success" style="margin:0 4px 4px 0">${ url }</span>
+			</div>
+
+		</div>
+
+
 		<div class="col-sm-4 col-sm-offset-1">
 			<h4>Selected Flight</h4>
 			<flight-panel :flight="flight_to_compare" :is_cheapest="ftc_cheapest"></flight-panel>
 		</div>
 
-		<div class="col-sm-4 col-sm-offset-1">
+		<div class="col-sm-5 col-sm-offset-1">
 			<h4>Comparator Results</h4>
 			<flight-panel v-for="f in flights" :key="f.pk" :flight="f"
 						  compare_price="{{ flight.price }}"></flight-panel>
@@ -60,6 +82,8 @@
 
         let vue = new Vue({
             el: '#app',
+            delimiters: ['${', '}'],
+
             data: {
                 flight_to_compare: {},
                 ftc_cheapest: false,
@@ -71,6 +95,15 @@
             },
 
             methods: {
+                addUrl : function (e) {
+                    e.preventDefault
+					let url = $('#url').val();
+                    $('#url').val("");
+					this.urls.push(url);
+
+					this.refreshComparators();
+                },
+
                 getComparedFlight: function () {
                     // Get the requested flight from our local database
                     $.get(`http://localhost:8080/api/flights/{{ flight_pk }}`, function (response) {
@@ -87,7 +120,7 @@
                         $.get(`${url}?departure=${this.dep}&arrival=${this.arr}`, function (response) {
 
                             response.forEach(function (f) {
-								f.url = url;
+                                f.url = url;
                             });
                             this.flights = this.flights.concat(response);
                             // Sort by price
