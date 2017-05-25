@@ -92,7 +92,7 @@
                             this.flights = this.flights.concat(response);
                             // Sort by price
                             this.flights.sort(function (a, b) {
-                                return a.price - b.price;
+                                return parseFloat(a.price) - parseFloat(b.price);
                             });
 
                             let self_price = parseFloat("{{ flight.price }}");
