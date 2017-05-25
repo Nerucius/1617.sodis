@@ -221,7 +221,7 @@ class ModifyCartView(View):
 
 				flight = Flight.objects.get(pk=fid)
 				airline = Airline.objects.get(code=airline)
-				price = flight.price * Decimal(TYPE_MULT[type])
+				price = Decimal(flight.price) * Decimal(TYPE_MULT[type])
 				price += airline.price
 
 				n_free_seats = get_n_free_seats(flight, type)
@@ -346,6 +346,29 @@ class CheckoutView(TemplateView):
 		return render(request, self.template_name, context)
 
 
+class ComparatorView(TemplateView):
+	template_name = "comparator.html"
+
+	def get_context_data(self, flight, **kwargs):
+		from PracticaWeb.settings import BASE_DIR
+		""" Look up Flight to be Compared. """
+		context = super(ComparatorView, self).get_context_data()
+		context['flight'] = Flight.objects.get(pk=flight)
+		context['flight_pk'] = flight
+
+		urls = []
+		with open(BASE_DIR+'/flylo/urls.txt', 'r') as f:
+			for line in f:
+				if len(line) <= 0 or line.startswith('#'):
+					continue
+				urls.append("'"+line.strip()+"'")
+			f.close()
+
+		context['urls'] = '['+', '.join(urls)+']'
+
+		return context
+
+
 def api_set_money(request):
 	money = request.POST.get('money')
 
@@ -354,6 +377,7 @@ def api_set_money(request):
 	user.save()
 
 	return HttpResponse(user)
+
 
 def api_test(request):
 	return render(request, "api_test.html")

@@ -39,15 +39,15 @@ class FlightViewSet(viewsets.ModelViewSet):
 
 		# Airplane lookup
 		apk = request.POST['airplane']
-		request.data['airplane'] = AirplaneSerializer(Airplane.objects.get(pk=apk))
+		request.data['airplane'] = Airplane.objects.get(pk=apk)
 
 		# Airline Lookup
 		alpks = [p for p in request.POST.get('airlines[]')]
 		airlines = Airline.objects.filter(pk__in=alpks)
 		als = AirlineSerializer(airlines, many=True)
-		request.data['airlines'] = als
+		request.data['airlines'] = airlines
 
-		raise Exception(request.data)
+		#raise Exception(request.data)
 
 		super(FlightViewSet, self).create(request, args, kwargs)
 

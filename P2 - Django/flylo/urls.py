@@ -13,13 +13,18 @@ urlpatterns = [
 	url(r'^flights/(?P<departure>\w+)/$', views.FlightsView.as_view(), name='flights'),
 	url(r'^return/(?P<flight_list>[\d+/]+)/*$', views.return_flights, name='return_flights'),
 
+	# Comparator URL
+	url(r'^comparator/(?P<flight>\d+)$', views.ComparatorView.as_view(), name='comparator'),
+
 	# User URLs
 	url(r'^login/$', views.LoginView.as_view(), name='login'),
 	url(r'^logout/$', views.logout, name='logout'),
 	url(r'^signup/$', views.SignupView.as_view(), name='signup'),
 	url(r'^account/$', login_required(views.AccountView.as_view(), login_url='/flylo/login/'), name='account'),
-	url(r'^account/flights/$', login_required(views.MyFlightsView.as_view(), login_url='/flylo/login/'), name='my_flights'),
-	url(r'^account/checkin/(?P<rpk>\d+)$', login_required(views.CheckinView.as_view(), login_url='/flylo/login/'), name='checkin'),
+	url(r'^account/flights/$', login_required(views.MyFlightsView.as_view(), login_url='/flylo/login/'),
+		name='my_flights'),
+	url(r'^account/checkin/(?P<rpk>\d+)$', login_required(views.CheckinView.as_view(), login_url='/flylo/login/'),
+		name='checkin'),
 
 	# Shop URLs
 	url(r'^shoppingcart/$', views.ModifyCartView.as_view(), name='shoppingcart'),

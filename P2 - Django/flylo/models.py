@@ -102,7 +102,7 @@ class Flight(models.Model):
 		departure = self.estimated_time_departure
 		days = min(120, max(0, (departure - now).days))
 
-		return self.base_price * Decimal(1 - days * 0.003) * Decimal(fillmulti)
+		return self.base_price * Decimal((1 - (days * 0.003)) * fillmulti)
 
 	@property
 	def price(self):
@@ -113,7 +113,7 @@ class Flight(models.Model):
 		for airline in self.airlines.all():
 			cheap = min(cheap, airline.price)
 
-		return self.computed_price + cheap
+		return round(self.computed_price + cheap, 2)
 
 	class Meta:
 		# ordering by logical departure order

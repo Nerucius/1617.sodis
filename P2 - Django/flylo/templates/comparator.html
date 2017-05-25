@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block style %}
+
+	<style type="text/css">
+		.table th {
+			text-align: center;
+			font-weight: bold;
+		}
+
+		.table thead {
+			color: black;
+			background-color: inherit;
+			border-bottom: 1px solid black;
+		}
+
+		.label {
+			font-size: 1em;
+		}
+	</style>
+
+{% endblock %}
+
+{% block content %}
+
+	<h3>Online Flight Comparator</h3>
+	<hr>
+	<div class="row" id="app">
+
+
+		<div class="col-sm-4 col-sm-offset-1">
+			<h4>Selected Flight</h4>
+			<flight-panel :flight="flight_to_compare" :is_cheapest="ftc_cheapest"></flight-panel>
+		</div>
+
+		<div class="col-sm-4 col-sm-offset-1">
+			<h4>Comparator Results</h4>
+			<flight-panel v-for="f in flights" :key="f.pk" :flight="f"
+						  compare_price="{{ flight.price }}"></flight-panel>
+		</div>
+
+	</div>
+
+
+	</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+	<script src="{% static 'js/moment.min.js' %}"></script>
+	<script src="{% static 'js/comparator.vue.js' %}"></script>
+
+	<script type="text/javascript">
+
+        "use strict";
+
+        let vue = new Vue({
+            el: '#app',
+            data: {
+                flight_to_compare: {},
+                ftc_cheapest: false,
+                flights: [],
+                urls: {{ urls|safe }},
+                dep: "{{ flight.location_departure }}",
+                arr: "{{ flight.location_arrival }}",
+
+            },
+
+            methods: {
+                getComparedFlight: function () {
+                    // Get the requested flight from our local database
+                    $.get(`http://localhost:8080/api/flights/{{ flight_pk }}`, function (response) {
+                        this.flight_to_compare = response;
+                        //this.flight_to_compare.price = parseFloat(response.price);
+                    }.bind(this));
+                },
+
+                refreshComparators: function () {
+                    this.flights = [];
+
+                    this.urls.forEach(function (url) {
+
+                        $.get(`${url}?departure=${this.dep}&arrival=${this.arr}`, function (response) {
+
+                            response.forEach(function (f) {
+								f.url = url;
+                            });
+                            this.flights = this.flights.concat(response);
+                            // Sort by price
+                            this.flights.sort(function (a, b) {
+                                return a.price - b.price;
+                            });
+
+                            let self_price = parseFloat("{{ flight.price }}");
+
+                            // Set the cheapest flight
+                            if (self_price > parseFloat(this.flights[0].price))
+                                this.flights[0].cheapest = true;
+                            else
+                                this.ftc_cheapest = true;
+
+
+                        }.bind(this));
+
+                    }.bind(this));
+
+
+                }
+            },
+
+            mounted: function () {
+                this.getComparedFlight();
+                this.refreshComparators();
+            }
+
+
+        });
+
+	</script>
+
+{% endblock %}

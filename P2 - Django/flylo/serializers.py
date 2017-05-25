@@ -19,7 +19,8 @@ class FlightSerializer(serializers.ModelSerializer):
 	# NOTE: removed read_only=True from airplane, airlines
 	airplane = AirplaneSerializer()
 	airlines = AirlineSerializer(many=True, )
-	price = serializers.DecimalField(12, 2, read_only=True)
+	# price = serializers.DecimalField(12, 2, read_only=True)
+	price = serializers.FloatField(read_only=True)
 	computed_price = serializers.DecimalField(12, 2, read_only=True)
 
 	class Meta:
