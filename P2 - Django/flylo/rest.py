@@ -65,6 +65,8 @@ class FlightViewSet(viewsets.ModelViewSet):
 	def get_queryset(self):
 		""" Override Get Queryset method to implement custom filtering. """
 		from datetime import datetime
+		from dateutil.parser import parse
+		
 		queryset = Flight.objects.all()
 
 		dep = self.request.query_params.get('departure', None)
@@ -77,10 +79,10 @@ class FlightViewSet(viewsets.ModelViewSet):
 		if arr:
 			queryset = queryset.filter(location_arrival=arr)
 		if dept:
-			dept = datetime.strptime(dept, "%Y-%m-%dT%H:%M:%SZ")
+			dept = parse(dept)
 			queryset = queryset.filter(estimated_time_departure__ge=dept)
 		if arrt:
-			arrt = datetime.strptime(dept, "%Y-%m-%dT%H:%M:%SZ")
+			dept = parse(dept)
 			queryset = queryset.filter(estimated_time_arrival__ge=arrt)
 
 		return queryset

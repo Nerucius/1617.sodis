@@ -112,7 +112,7 @@ Vue.component('flight-table', {
     methods: {
         updateFligths: function () {
             console.log(this)
-            var url = 'http://localhost:8080/api/flights';
+            var url = '/api/flights';
             // Dep and Arr filters
             if (this.departure)
                 url += '?departure=' + this.departure;
