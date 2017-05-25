@@ -69,7 +69,7 @@ Vue.component('flight-panel', {
         domain_url: function () {
             let pat = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/i;
             let arr = pat.exec(this.flight.url);
-            console.log(arr);
+            // console.log(arr);
             if (this.flight.url === undefined)
                 return "Flylo";
             return arr[1]
