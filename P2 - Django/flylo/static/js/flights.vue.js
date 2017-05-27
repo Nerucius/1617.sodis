@@ -21,21 +21,21 @@ Vue.component('flight', {
 
     computed: {
         price: function () {
-            console.log("compute price for " + this.airline);
+            /*
+            let acode = this.airline;
+            let aprice = 0;
+            let nseats = this.seats;
+            */
+            let aprice = 0;
+            let type = this.type === 'e' ? 1 : this.type === 'b' ? 1.5 : 2.5;
 
-            var acode = this.airline;
-            var type = this.type === 'e' ? 1 : this.type === 'b' ? 1.5 : 2.5;
-            var aprice = 0;
-            var nseats = this.seats;
-
+            // Find matching airline with the code selected
             this.flight.airlines.forEach(function(a){
-
-                if (a.code == acode) {
-                    console.log("found airline: "+a.code);
-                    aprice = parseFloat(a.price) * nseats;
+                if (a.code == this.airline) {
+                    aprice = parseFloat(a.price) * this.seats;
                 }
 
-            });
+            }.bind(this));
 
             return ( this.flight.price * this.seats * type + aprice).toFixed(2);
         }
@@ -111,16 +111,15 @@ Vue.component('flight-table', {
 
     methods: {
         updateFligths: function () {
-            console.log(this)
-            var url = 'http://localhost:8080/api/flights';
-            // Dep and Arr filters
+            let url = '/api/flights';
+
             if (this.departure)
                 url += '?departure=' + this.departure;
             if (this.arrival)
                 url += '&arrival=' + this.arrival;
 
-            $.get(url, function (data) {
-                this.flights = data;
+            $.get(url, function (response) {
+                this.flights = response.results;
             }.bind(this));
         }
     }

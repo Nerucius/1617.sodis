@@ -62,20 +62,25 @@ Vue.component('flight-panel', {
             }
         },
 
-        object_url: function(){
-            return this.flight.url+this.flight.pk;
+        object_url: function () {
+            return this.flight.url + this.flight.pk;
         },
 
         domain_url: function () {
-            let pat = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/i;
-            let arr = pat.exec(this.flight.url);
-            // console.log(arr);
             if (this.flight.url === undefined)
                 return "Flylo";
-            return arr[1]
+
+            try {
+                let pat = /^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/i;
+                let arr = pat.exec(this.flight.url);
+                return arr[1];
+            } catch  (err){
+                // Regex failed to recognize
+                return "Unknown site";
+            }
+
+
         }
-
-
 
 
     }

@@ -106,7 +106,7 @@
 
                 getComparedFlight: function () {
                     // Get the requested flight from our local database
-                    $.get(`http://localhost:8080/api/flights/{{ flight_pk }}`, function (response) {
+                    $.getJSON(`http://localhost:8080/api/flights/{{ flight_pk }}`, function (response) {
                         this.flight_to_compare = response;
                         //this.flight_to_compare.price = parseFloat(response.price);
                     }.bind(this));
@@ -117,12 +117,14 @@
 
                     this.urls.forEach(function (url) {
 
-                        $.get(`${url}?departure=${this.dep}&arrival=${this.arr}`, function (response) {
+                        $.getJSON(`${url}?departure=${this.dep}&arrival=${this.arr}`, function (response) {
 
-                            response.forEach(function (f) {
+                            let data = response.results;
+
+                            data.forEach(function (f) {
                                 f.url = url;
                             });
-                            this.flights = this.flights.concat(response);
+                            this.flights.push(...data);
                             // Sort by price
                             this.flights.sort(function (a, b) {
                                 return parseFloat(a.price) - parseFloat(b.price);

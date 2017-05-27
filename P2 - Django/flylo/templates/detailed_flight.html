@@ -35,6 +35,9 @@
 					{{ flight.airplane.seats_business }} (business),
 					{{ flight.airplane.seats_economy }} (economy) <br>
 					<b>Status:</b> {{ flight.status }}
+
+					<br>
+					<a href="{% url 'flylo:comparator' flight.pk %}" class="btn btn-primary pull-right">Compare Flight</a>
 				</div>
 			</div>
 
