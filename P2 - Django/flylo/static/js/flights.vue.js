@@ -10,7 +10,7 @@ Vue.component('flight', {
             seats: 1,
             type: 'e',
             airline: this.flight.airlines[0].code,
-            url: this.departure ? '../' + this.flight.pk : './' + this.flight.pk,
+            url: '/flights/' + this.flight.pk,
             classes: [
                 {name: 'Economy', code: 'e'},
                 {name: 'Business', code: 'b'},

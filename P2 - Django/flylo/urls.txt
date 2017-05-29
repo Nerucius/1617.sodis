@@ -1,3 +1,5 @@
 # Servers to use for the comparator
 # Put the absolute route to the api endpoint with the trailing /
-http://localhost:8080/api/flights/
+# http://localhost:8080/api/flights/
+# http://192.168.1.64:8080/api/flights/
+http://alexbcn.dynu.net:8080/api/flights/
