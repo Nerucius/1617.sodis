@@ -101,7 +101,7 @@
                 addURL: function (e) {
                     let url = $('#url').val();
                     $('#url').val("");
-                    this.urls.push(url);
+                    this.urls.push(url.trim());
 
                     this.refreshComparators();
                 },
