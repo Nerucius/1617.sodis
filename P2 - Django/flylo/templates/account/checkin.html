@@ -18,85 +18,100 @@
 
 {% block content %}
 
-    <h3>Check In for Reservation: {{ reservation.flight.flight_number }}</h3>
-    <hr>
-
-    <div class="col-sm-8 col-sm-offset-2">
-
-        <div class="row">
-
-            <div class="panel panel-primary">
-                <div class="panel-body" style="text-align: center">
-                    <div class="col-sm-4">
-                        <div class="row">{{ reservation.flight.location_departure }}</div>
-                        <div class="row">{{ reservation.flight.estimated_time_departure }}</div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="row"><span class="glyphicon glyphicon-arrow-right"></span></div>
-                        <div class="row">{{ reservation.airline }}</div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="row">{{ reservation.flight.location_arrival }}</div>
-                        <div class="row">{{ reservation.flight.estimated_time_arrival }}</div>
-                    </div>
-                </div>
-            </div>
+    {% if error %}
+        <div class="alert alert-danger">
+            <p><b>Invalid action. You are not allowed to checkin this reservation.</b></p>
+            <p>Possible reasons:</p>
+            <p>
+            <li>This reservation does not exists</li>
+            <li>You are not the user who did this reservation</li>
+            <li>The flight is already checked in</li>
+            </p>
         </div>
+    {% else %}
 
-        <form class="form" method="POST">
-            {% csrf_token %}
+        <h3>Check In for Reservation: {{ reservation.flight.flight_number }}</h3>
+        <hr>
+
+        <div class="col-sm-8 col-sm-offset-2">
 
             <div class="row">
+
                 <div class="panel panel-primary">
-                    <div class="panel-heading text-large panel-title">Personal Data</div>
-                    <div class="panel-body">
-                        <div class="col-sm-6 form-group">
-                            <label for="forename">Forename</label>
-                            <input type="text" class="form-control" id="forename" name="forename" required value="{{ forename }}">
+                    <div class="panel-body" style="text-align: center">
+                        <div class="col-sm-4">
+                            <div class="row">{{ reservation.flight.location_departure }}</div>
+                            <div class="row">{{ reservation.flight.estimated_time_departure }}</div>
                         </div>
-                        <div class="col-sm-6 form-group">
-                            <label for="surname">Surname</label>
-                            <input type="text" class="form-control" id="surname" name="surname" required value="{{ surname }}">
+                        <div class="col-sm-4">
+                            <div class="row"><span class="glyphicon glyphicon-arrow-right"></span></div>
+                            <div class="row">{{ reservation.airline }}</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="row">{{ reservation.flight.location_arrival }}</div>
+                            <div class="row">{{ reservation.flight.estimated_time_arrival }}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="panel panel-primary">
-                    <div class="panel-heading text-large panel-title">Choose a seat</div>
-                    <div class="panel-body">
+            <form class="form" method="POST">
+                {% csrf_token %}
 
-                        <div class="row">
-                            <div class="col-sm-10 col-sm-offset-1 " style="text-align: center">
-                                {% if already_assigned %}
-                                    <div class="alert alert-danger">
-                                        <b>The selected seat is no more available. Please, choose another seat.</b>
+                <div class="row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading text-large panel-title">Personal Data</div>
+                        <div class="panel-body">
+                            <div class="col-sm-6 form-group">
+                                <label for="forename">Forename</label>
+                                <input type="text" class="form-control" id="forename" name="forename" required
+                                       value="{{ forename }}">
+                            </div>
+                            <div class="col-sm-6 form-group">
+                                <label for="surname">Surname</label>
+                                <input type="text" class="form-control" id="surname" name="surname" required
+                                       value="{{ surname }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading text-large panel-title">Choose a seat</div>
+                        <div class="panel-body">
+
+                            <div class="row">
+                                <div class="col-sm-10 col-sm-offset-1 " style="text-align: center">
+                                    {% if already_assigned %}
+                                        <div class="alert alert-danger">
+                                            <b>The selected seat is no more available. Please, choose another seat.</b>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                {% for seat_code, disabled in seats %}
+                                    <div class="col-sm-2 col-md-1" style="margin-bottom:12px; margin-left: 12px"
+                                         id="free_seat_bg_{{ disabled }}">
+                                        <input type="radio" name="seat" {{ disabled }}
+                                               value="{{ seat_code }}"> {{ seat_code }}
                                     </div>
-                                {% endif %}
+                                {% endfor %}
+
                             </div>
                         </div>
 
-                        <div class="row">
-
-                            {% for seat_code, disabled in seats %}
-                                <div class="col-sm-2 col-md-1" style="margin-bottom:12px; margin-left: 12px"
-                                     id="free_seat_bg_{{ disabled }}">
-                                    <input type="radio" name="seat" {{ disabled }}
-                                           value="{{ seat_code }}"> {{ seat_code }}
-                                </div>
-                            {% endfor %}
-
-                        </div>
                     </div>
 
+                    <input type="hidden" name="next" value="{{ next|escape }}">
+                    <button type="submit" class="btn btn-primary pull-right">Submit</button>
                 </div>
 
-                <input type="hidden" name="next" value="{{ next|escape }}">
-                <button type="submit" class="btn btn-primary pull-right">Submit</button>
-            </div>
-
-        </form>
-    </div>
+            </form>
+        </div>
+    {% endif %}
 
 {% endblock %}

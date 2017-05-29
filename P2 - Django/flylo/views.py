@@ -158,8 +158,24 @@ class CheckinView(TemplateView):
 		return context
 
 	def get_context_data(self, **kwargs):
-		reservation = Reservation.objects.get(pk=kwargs['rpk'])
-		context = self.generate_seats_grid(reservation)
+		try:
+			reservation = Reservation.objects.get(pk=kwargs['rpk'])
+		except Exception:
+			reservation = None
+
+		# Check if the reservation of the url exists
+		if not reservation:
+			context = {'error': True}
+
+		else:
+			# Check if the reservation is of the logged user
+			# Check if the reservation is not already checked in
+			user = auth.get_user(self.request)
+			client = Client.objects.get(user=user).pk
+			if client != reservation.client_id or reservation.checkin:
+				context = {'error': True}
+			else:
+				context = self.generate_seats_grid(reservation)
 		return context
 
 	def post(self, request, **kwargs):
