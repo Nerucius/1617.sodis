@@ -19,12 +19,14 @@
 	<hr>
 	{% if my_flights %}
 
-			<table class="table table-striped table-hover table-responsive">
+		<div class="table-responsive">
+
+			<table class="table table-striped table-hover">
 				<thead>
 				<tr>
-                    <th></th>
+					<th></th>
 					<th>Departure</th>
-                    <th></th>
+					<th></th>
 					<th>Arrival</th>
 					<th>Flight No.</th>
 					<th>Seat</th>
@@ -35,10 +37,12 @@
 
 				{% for reservation in my_flights %}
 					<tr>
-					<td><span class="h4"><b class="label label-primary">{{ reservation.flight.location_departure }}</b></span></td>
-                    <td>{{ reservation.flight.estimated_time_departure }}</td>
-					<td><span class="h4"><b class="label label-primary">{{ reservation.flight.location_arrival }}</b></span></td>
-                    <td>{{ reservation.flight.estimated_time_arrival }}</td>
+					<td><span class="h4"><b class="label label-primary">{{ reservation.flight.location_departure }}</b></span>
+					</td>
+					<td>{{ reservation.flight.estimated_time_departure }}</td>
+					<td><span class="h4"><b
+							class="label label-primary">{{ reservation.flight.location_arrival }}</b></span></td>
+					<td>{{ reservation.flight.estimated_time_arrival }}</td>
 					<td>{{ reservation.flight.flight_number }}</td>
 
 					{% if reservation.checkin %}
@@ -53,7 +57,8 @@
 						<td class="h4"><b class="label label-primary">Checkin done</b></td>
 
 					{% else %}
-						<td><a href="{% url 'flylo:checkin' reservation.pk %}" class="btn btn-sm btn-danger">Checkin Flight</a></td>
+						<td><a href="{% url 'flylo:checkin' reservation.pk %}" class="btn btn-sm btn-danger">Checkin
+							Flight</a></td>
 
 					{% endif %}
 
@@ -62,8 +67,18 @@
 
 			</table>
 
+		</div>
+
 	{% else %}
 		You haven't bought any flight yet.
 	{% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+	<script type="text/javascript">
+		$('document').ready(function () {
+			$('#nav_myflights').addClass("active")
+        });
+	</script>
 {% endblock %}

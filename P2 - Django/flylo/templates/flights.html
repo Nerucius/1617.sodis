@@ -48,11 +48,11 @@
 		<hr>
 
 	{% else %}
-        {% if error %}
-            <div class="alert alert-danger">Not enough available seats for the selected flight</div>
-        {% else %}
-            <p>No flights are available.</p>
-        {% endif %}
+		{% if error %}
+			<div class="alert alert-danger">Not enough available seats for the selected flight</div>
+		{% else %}
+			<p>No flights are available.</p>
+		{% endif %}
 	{% endif %}
 
 
@@ -64,7 +64,10 @@
 
 			<input type="hidden" name="can_return" value="true">
 
-			<flight-table {% if departure %} departure="{{ departure }}" {% endif %}></flight-table>
+
+			<div class="table-responsive">
+				<flight-table {% if departure %} departure="{{ departure }}" {% endif %}></flight-table>
+			</div>
 
 			<input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
 
@@ -83,6 +86,11 @@
 	<script type="text/javascript" src="{% static 'js/flights.vue.js' %}"></script>
 
 	<script type="text/javascript">
+
+        $('document').ready(function () {
+            $('#nav_flights').addClass("active")
+        });
+
 
         vue = new Vue({
             el: '#app',
