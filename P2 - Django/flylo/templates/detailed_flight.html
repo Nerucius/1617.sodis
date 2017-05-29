@@ -45,32 +45,44 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-primary col-sm-10 col-sm-offset-1">
+                    <div class="panel panel-primary col-sm-6 col-sm-offset-3">
                         <div class="panel-body">
-                            <div class="col-sm-6">
-                                <b>Number of seats on aircraft {{ flight.airplane }}:</b>
-                                <li style="margin-left: 10%">First class: {{ flight.airplane.seats_first_class }}</li>
-                                <li style="margin-left: 10%">Business: {{ flight.airplane.seats_business }}</li>
-                                <li style="margin-left: 10%">Economy: {{ flight.airplane.seats_economy }}</li>
-                            </div>
-
-                            <div class="col-sm-6">
-                                <b>Flight airlines:</b>
-
-                                {% for airline in flight.airlines.all %}
-                                    <li style="margin-left: 10%">{{ airline }}</li>
-                                {% endfor %}
-                            </div>
+                            <b>Number of <span style="color: green">FREE</span> seats on aircraft {{ flight.airplane }}:</b>
+                            <li style="margin-left: 10%">First class:
+                                <span style="color: green"><b>{{ free_first_class }}</b></span>
+                                / {{ flight.airplane.seats_first_class }}
+                            </li>
+                            <li style="margin-left: 10%">Business:
+                                <span style="color: green"><b>{{ free_business }}</b></span>
+                                / {{ flight.airplane.seats_business }}
+                            </li>
+                            <li style="margin-left: 10%">Economy:
+                                <span style="color: green"><b>{{ free_economy }}</b></span>
+                                / {{ flight.airplane.seats_economy }}
+                            </li>
                         </div>
                     </div>
 
-                    <div class="row" style="text-align: center">
-                        <a href="{% url 'flylo:comparator' flight.pk %}" class="btn btn-primary">Compare Flight</a>
+                    <div class="panel panel-primary col-sm-6 col-sm-offset-3">
+                        <div class="panel-body">
+                            <b>Flight airlines:</b>
+                            {% for airline in flight.airlines.all %}
+                                <li style="margin-left: 10%">{{ airline }}</li>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
+
+    <div class="row" style="margin-bottom: 2%">
+            <a href="{% url 'flylo:comparator' flight.pk %}" class="btn btn-primary pull-right">Compare Flight</a>
+            <a href="{% url 'flylo:flights' flight.location_departure %}" class="btn btn-success pull-left">
+                Show other flights departing from {{ flight.location_departure }}</a>
+    </div>
+
+
 
     </div>
 

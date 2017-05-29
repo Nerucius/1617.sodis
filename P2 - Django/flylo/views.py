@@ -304,7 +304,15 @@ class DetailedFlightView(TemplateView):
 	template_name = 'detailed_flight.html'
 
 	def get_context_data(self, **kwargs):
-		return {'flight': Flight.objects.get(pk=kwargs['pk'])}
+		context = {}
+		flight = Flight.objects.get(pk=kwargs['pk'])
+
+		context['flight'] = flight
+		context['free_first_class'] = get_n_free_seats(flight, 'f')
+		context['free_business'] = get_n_free_seats(flight, 'b')
+		context['free_economy'] = get_n_free_seats(flight, 'e')
+
+		return context
 
 
 class CartView(TemplateView):
