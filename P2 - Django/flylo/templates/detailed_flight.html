@@ -3,47 +3,75 @@
 
 {% block style %}
 
-	<style>
-		.gray {
-			background-color: lightblue;
-			border: 1px solid black;
-			padding: 12px;
-		}
-	</style>
+    <style>
+        .gray {
+            background-color: lightblue;
+            border: 1px solid black;
+            padding: 12px;
+        }
+    </style>
 {% endblock %}
-
 
 {% block content %}
 
+    <h3>Flight Details:</h3>
+    <hr>
 
-	<div class="row">
+    <div class="col-sm-8 col-sm-offset-2">
 
-		<div class="col-lg-6">
-			<div class="panel panel-primary">
-				<div class="panel-heading"><span class="h4">Hola</span></div>
-				<div class="panel-body">
+        <div class="row">
 
-					<b>Flight number:</b> {{ flight.flight_number }} <br>
-					<b>Departure:</b> {{ flight.location_departure }}, {{ flight.estimated_time_departure }} <br>
-					<b>Arrival:</b> {{ flight.location_arrival }}, {{ flight.estimated_time_arrival }} <br>
-					<b>Airline:</b>
-					{% for a in flight.airlines.all %}
-						{{ a }}
-					{% endfor %} <br>
-					<b>Airplane:</b> {{ flight.airplane.aircraft }} <br>
-					<b>Number of seats:</b> {{ flight.airplane.seats_first_class }} (first class),
-					{{ flight.airplane.seats_business }} (business),
-					{{ flight.airplane.seats_economy }} (economy) <br>
-					<b>Status:</b> {{ flight.status }}
+            <div class="panel panel-primary">
+                <div class="panel-heading"><span class="h4">{{ flight.flight_number }}</span></div>
+                <div class="panel-body">
 
-					<br>
-					<a href="{% url 'flylo:comparator' flight.pk %}" class="btn btn-primary pull-right">Compare Flight</a>
+                    <div class="panel panel-primary">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-4" style="text-align: center">
+                                    <div class="row"><b>{{ flight.location_departure }}</b></div>
+                                    <div class="row">{{ flight.estimated_time_departure }}</div>
+                                </div>
+                                <div class="col-sm-4" style="text-align: center">
+                                    <div class="row"><span class="glyphicon glyphicon-arrow-right"></span></div>
+                                    <div class="row">{{ flight.airplane }}</div>
+                                    <div class="row">[{{ flight.status }}]</div>
+                                </div>
+                                <div class="col-sm-4" style="text-align: center">
+                                    <div class="row"><b>{{ flight.location_arrival }}</b></div>
+                                    <div class="row">{{ flight.estimated_time_arrival }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-				</div>
-			</div>
+                    <div class="panel panel-primary col-sm-10 col-sm-offset-1">
+                        <div class="panel-body">
+                            <div class="col-sm-6">
+                                <b>Number of seats on aircraft {{ flight.airplane }}:</b>
+                                <li style="margin-left: 10%">First class: {{ flight.airplane.seats_first_class }}</li>
+                                <li style="margin-left: 10%">Business: {{ flight.airplane.seats_business }}</li>
+                                <li style="margin-left: 10%">Economy: {{ flight.airplane.seats_economy }}</li>
+                            </div>
 
-		</div>
+                            <div class="col-sm-6">
+                                <b>Flight airlines:</b>
 
-	</div>
+                                {% for airline in flight.airlines.all %}
+                                    <li style="margin-left: 10%">{{ airline }}</li>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="text-align: center">
+                        <a href="{% url 'flylo:comparator' flight.pk %}" class="btn btn-primary">Compare Flight</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
 
 {% endblock %}
