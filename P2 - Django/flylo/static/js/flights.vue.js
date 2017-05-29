@@ -21,11 +21,6 @@ Vue.component('flight', {
 
     computed: {
         price: function () {
-            /*
-            let acode = this.airline;
-            let aprice = 0;
-            let nseats = this.seats;
-            */
             let aprice = 0;
             let type = this.type === 'e' ? 1 : this.type === 'b' ? 1.5 : 2.5;
 
