@@ -372,7 +372,7 @@ class CheckoutView(TemplateView):
 
 
 class ComparatorView(TemplateView):
-	template_name = "comparator.html"
+	template_name = 'comparator.html'
 
 	def get_context_data(self, flight, **kwargs):
 		from PracticaWeb.settings import BASE_DIR
@@ -391,7 +391,7 @@ class ComparatorView(TemplateView):
 
 		context['urls'] = '['+', '.join(urls)+']'
 
-		return contextgit
+		return context
 
 
 def api_set_money(request):
