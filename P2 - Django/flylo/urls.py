@@ -11,7 +11,7 @@ urlpatterns = [
 	url(r'^flights/()$', views.FlightsView.as_view(), name='flights'),
 	url(r'^flights/(?P<pk>\d+)/$', views.DetailedFlightView.as_view(), name='detailed_flight'),
 	url(r'^flights/(?P<departure>\w+)/$', views.FlightsView.as_view(), name='flights'),
-	url(r'^return/(?P<flight_list>[\d+/]+)/*$', views.return_flights, name='return_flights'),
+	url(r'^return/(?P<flight_list>[\d+/]+)/*$', views.ReturnFlights.as_view(), name='return_flights'),
 
 	# Comparator URL
 	url(r'^comparator/(?P<flight>\d+)$', views.ComparatorView.as_view(), name='comparator'),

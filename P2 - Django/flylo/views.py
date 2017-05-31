@@ -46,7 +46,7 @@ class LoginView(TemplateView):
 
 
 class SignupView(TemplateView):
-	template_name = "account/signup.html"
+	template_name = 'account/signup.html'
 
 	def post(self, request):
 		from decimal import Decimal
@@ -100,7 +100,7 @@ class MyFlightsView(TemplateView):
 		client = Client.objects.get(user=user).pk
 
 		context = {}
-		context['my_flights'] = Reservation.objects.all().exclude(seat='').filter(client_id=client)
+		context['my_flights'] = Reservation.objects.all().exclude(paid=False).filter(client_id=client)
 		return context
 
 
@@ -272,32 +272,33 @@ class ModifyCartView(View):
 		res.type = type
 		return res
 
+class ReturnFlights(TemplateView):
+	template_name = 'return_flights.html'
 
-def return_flights(request, flight_list):
-	flight_list = set(flight_list.split('/'))
+	def get_context_data(self, **kwargs):
+		flight_list = kwargs['flight_list']
 
-	try:
-		flight_list.remove('')
-	except Exception:
-		pass
+		try:
+			flight_list.remove('')
+		except Exception:
+			pass
 
-	context = {'returns': []}
+		context = {'returns': []}
 
-	for pk in flight_list:
-		f = Flight.objects.get(pk=pk)
-		arr = f.location_departure
-		dep = f.location_arrival
+		for pk in flight_list:
+			f = Flight.objects.get(pk=pk)
+			arr = f.location_departure
+			dep = f.location_arrival
 
-		ret_flights = Flight.objects.filter(location_departure=dep, location_arrival=arr)
+			ret_flights = Flight.objects.filter(location_departure=dep, location_arrival=arr)
 
-		context['returns'].append(
-			{
-				'flight': f,
-				'return_flights': ret_flights
-			}
-		)
-
-	return render(request, 'return_flights.html', context)
+			context['returns'].append(
+					{
+						'flight': f,
+						'return_flights': ret_flights
+					}
+			)
+			return context
 
 
 class DetailedFlightView(TemplateView):
@@ -332,7 +333,7 @@ class CartView(TemplateView):
 
 
 class CheckoutView(TemplateView):
-	template_name = "shop/checkout.html"
+	template_name = 'shop/checkout.html'
 
 	def get(self, request, *args, **kwargs):
 		context = {'reservations': []}
@@ -390,7 +391,7 @@ class ComparatorView(TemplateView):
 
 		context['urls'] = '['+', '.join(urls)+']'
 
-		return context
+		return contextgit
 
 
 def api_set_money(request):
