@@ -30,6 +30,8 @@ class FlightsAdmin(admin.ModelAdmin):
 	def save_model(self, request, obj, form, change):
 		""" Model Save Hook to record Flight Owner """
 		super(FlightsAdmin, self).save_model(request, obj, form, change)
+		if request.user.is_superuser:
+			return
 
 		own_flights = FlightOwner.objects.filter(owner=request.user, flight=obj)
 		if own_flights.count() < 1:

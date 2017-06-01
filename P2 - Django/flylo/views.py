@@ -291,8 +291,8 @@ class ModifyCartView(View):
 class ReturnFlights(TemplateView):
 	template_name = 'return_flights.html'
 
-	def get_context_data(self, **kwargs):
-		flight_list = kwargs['flight_list']
+	def get_context_data(self, flight_list, **kwargs):
+		flight_list = flight_list.split('/')
 
 		try:
 			flight_list.remove('')
@@ -301,7 +301,7 @@ class ReturnFlights(TemplateView):
 
 		context = {'returns': []}
 
-		for pk in flight_list:
+		for pk in [int(x) for x in flight_list]:
 			f = Flight.objects.get(pk=pk)
 			arr = f.location_departure
 			dep = f.location_arrival
@@ -314,7 +314,8 @@ class ReturnFlights(TemplateView):
 						'return_flights': ret_flights
 					}
 			)
-			return context
+
+		return context
 
 
 class DetailedFlightView(TemplateView):
