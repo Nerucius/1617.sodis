@@ -13,9 +13,9 @@ import random as rand
 class IndexView(TemplateView):
 	template_name = 'index.html'
 
-	def get(self, request):
+	def get_context_data(self, **kwargs):
 		context = {'form': SelectDepartureForm()}
-		return render(request, self.template_name, context)
+		return context
 
 	def post(self, request):
 		form = SelectDepartureForm(request.POST)
@@ -52,11 +52,14 @@ class SignupView(TemplateView):
 		from decimal import Decimal
 		from django.contrib.auth.models import User
 		username = str(request.POST.get('username')).lower()
+		forename = request.POST.get('forename')
+		surname = request.POST.get('surname')
 		password = request.POST.get('password')
 		email = request.POST.get('email')
 
 		user = User.objects.create_user(username=username,
-										first_name=username.title(),
+										first_name=forename,
+										last_name=surname,
 										email=email,
 										password=password)
 		user.client.money = Decimal(5000.00)
@@ -154,7 +157,7 @@ class CheckinView(TemplateView):
 			else:
 				seats[seat_code] = ""
 
-		context["seats"] = sorted(seats.iteritems())
+		context['seats'] = sorted(seats.iteritems())
 		return context
 
 	def get_context_data(self, **kwargs):
@@ -218,6 +221,7 @@ class ModifyCartView(View):
 		from models import TYPE_MULT
 		reservations = []
 		return_flights_ids = []
+		error_free_seats_template = 'flights.html'
 
 		for key in request.POST:
 
@@ -230,6 +234,7 @@ class ModifyCartView(View):
 				return_flight = request.POST.get('return_flight' + fid, None)
 				if return_flight:
 					return_flights_ids.append(fid)
+					error_free_seats_template = 'return_flights.html'
 
 				selected_n_seats = int(request.POST.get('seats' + fid))
 				type = request.POST.get('type' + fid)
@@ -242,7 +247,17 @@ class ModifyCartView(View):
 
 				n_free_seats = get_n_free_seats(flight, type)
 				if selected_n_seats > n_free_seats:
-					return render(request, 'flights.html', {'error': True, 'departure': flight.location_departure})
+					context = {}
+					context['error'] = True
+					context['flight'] = flight
+					context['departure'] = flight.location_departure
+					context['selected_n_seats'] = selected_n_seats
+					context['n_free_seats'] = n_free_seats
+					if type == 'f': type = 'First Class'
+					elif type == 'b': type = 'Business'
+					else: type = 'Economy'
+					context['type'] = type
+					return render(request, error_free_seats_template, context)
 
 				# Create one reservation for every seat
 				for i in range(selected_n_seats):
@@ -271,6 +286,7 @@ class ModifyCartView(View):
 		res.flight = flight
 		res.type = type
 		return res
+
 
 class ReturnFlights(TemplateView):
 	template_name = 'return_flights.html'
@@ -348,7 +364,7 @@ class CheckoutView(TemplateView):
 
 			total = sum([res.price for res in reservations])
 
-			# IF the Client has enougb money
+			# If the Client has enough money
 			if total < client.money:
 				for res in reservations:
 					res.paid = True

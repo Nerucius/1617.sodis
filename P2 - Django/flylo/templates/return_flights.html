@@ -3,74 +3,85 @@
 
 
 {% block style %}
-	<style>
-		input[type=checkbox] {
-			/* Double-sized Checkboxes */
-			-ms-transform: scale(1.5); /* IE */
-			-moz-transform: scale(1.5); /* FF */
-			-webkit-transform: scale(1.5); /* Safari and Chrome */
-			-o-transform: scale(1.5); /* Opera */
-			padding: 10px;
-		}
+    <style>
+        input[type=checkbox] {
+            /* Double-sized Checkboxes */
+            -ms-transform: scale(1.5); /* IE */
+            -moz-transform: scale(1.5); /* FF */
+            -webkit-transform: scale(1.5); /* Safari and Chrome */
+            -o-transform: scale(1.5); /* Opera */
+            padding: 10px;
+        }
 
-		.table td {
-			text-align: center;
-		}
+        .table td {
+            text-align: center;
+        }
 
-		.table th {
-			text-align: center;
-		}
+        .table th {
+            text-align: center;
+        }
 
-		.table .added td {
-			background-color: #f39c12;
-			color: white;
+        .table .added td {
+            background-color: #f39c12;
+            color: white;
 
-		}
+        }
 
-	</style>
+    </style>
 
-	<link rel="stylesheet" href="{% static 'css/transitions.vue.css' %}">
+    <link rel="stylesheet" href="{% static 'css/transitions.vue.css' %}">
 {% endblock %}
 
 
 {% block content %}
 
-	{% if returns %}
+    {% if returns %}
 
-		<div id="app">
-			<form action="{% url 'flylo:shoppingcart' %}" method="post">
-				{% csrf_token %}
+        {% if error %}
+            <div class="alert alert-danger">
+                <p><h4>There are not enough free seats for the flight {{ flight.flight_number }}:</h4>
+                <b>You selected {{ selected_n_seats }} seats for the {{ type }} category,
+                    but the number of remaining free seats in this category is actually {{ n_free_seats }}.</b></p>
+                <p>Your selections have not been saved.<br>
+                    Please try again considering the remitted information.<br>
+                    Sorry for the inconvenience.</p>
+            </div>
+        {% else %}
 
-				{% for item in returns %}
+            <div id="app">
+                <form action="{% url 'flylo:shoppingcart' %}" method="post">
+                    {% csrf_token %}
 
-					<h3> Return trips for Flight {{ item.flight.flight_number }}:</h3>
-					<br>
-					<div class="table-responsive">
-						<flight-table departure="{{ item.flight.location_arrival }}"
-									  arrival="{{ item.flight.location_departure }}"
-									  show_return="false">
-						</flight-table>
-					</div>
-					<hr>
+                    {% for item in returns %}
 
-				{% endfor %}
+                        <h3> Return trips for Flight {{ item.flight.flight_number }}:</h3>
+                        <br>
+                        <div class="table-responsive">
+                            <flight-table departure="{{ item.flight.location_arrival }}"
+                                          arrival="{{ item.flight.location_departure }}"
+                                          show_return="false">
+                            </flight-table>
+                        </div>
+                        <hr>
 
-				<input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
-			</form>
-		</div>
+                    {% endfor %}
 
-	{% else %}
-		<p>No flights are available.</p>
-	{% endif %}
+                    <input type="submit" class="btn btn-primary pull-right" value="Go to Shopping Cart">
+                </form>
+            </div>
+        {% endif %}
+    {% else %}
+        <p>No flights are available.</p>
+    {% endif %}
 
 {% endblock %}
 
 
 {% block scripts %}
 
-	<script type="text/javascript" src="{% static 'js/flights.vue.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/flights.vue.js' %}"></script>
 
-	<script type="text/javascript">
+    <script type="text/javascript">
 
         $('document').ready(function () {
             $('#nav_flights').addClass("active")
@@ -87,7 +98,7 @@
         })
 
 
-	</script>
+    </script>
 
 
 {% endblock %}

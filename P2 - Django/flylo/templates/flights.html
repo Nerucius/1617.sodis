@@ -49,7 +49,14 @@
 
 	{% else %}
 		{% if error %}
-			<div class="alert alert-danger">Not enough available seats for the selected flight</div>
+			<div class="alert alert-danger">
+                <p><h4>There are not enough free seats for the flight {{ flight.flight_number }}:</h4>
+                <b>You selected {{ selected_n_seats }} seats for the {{ type }} category,
+                    but the number of remaining free seats in this category is actually {{ n_free_seats }}.</b></p>
+                <p>Your selections have not been saved.<br>
+                Please try again considering the remitted information.<br>
+                Sorry for the inconvenience.</p>
+            </div>
 		{% else %}
 			<p>No flights are available.</p>
 		{% endif %}
