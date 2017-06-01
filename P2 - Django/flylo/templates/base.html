@@ -102,15 +102,15 @@
 <script>
     // Automatically enable POST CSRF token sending, to disable, set window.crossdomain to true
 	// TODO Disabled for now, maybe interferes with CORS
-{#    window.crossdomain = false;#}
-{#    $('document').ready(function () {#}
-{#        $.ajaxSetup({#}
-{#            beforeSend: function (xhr, settings) {#}
-{#                if (!window.crossdomain)#}
-{#                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");#}
-{#            }#}
-{#        });#}
-{#    });#}
+    window.crossdomain = false;
+    $('document').ready(function () {
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!window.crossdomain)
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            }
+        });
+    });
 
 </script>
 
