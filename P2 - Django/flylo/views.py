@@ -392,34 +392,36 @@ class ComparatorView(TemplateView):
 	template_name = 'comparator.html'
 
 	def get_context_data(self, flight, **kwargs):
-		from PracticaWeb.settings import BASE_DIR
 		""" Look up Flight to be Compared. """
+		from PracticaWeb.settings import BASE_DIR
+
 		context = super(ComparatorView, self).get_context_data()
 		context['flight'] = Flight.objects.get(pk=flight)
 		context['flight_pk'] = flight
 
+		# Read the URLs to use from a file
 		urls = []
 		with open(BASE_DIR+'/flylo/urls.txt', 'r') as f:
 			for line in f:
 				if len(line) <= 0 or line.startswith('#'):
 					continue
 				urls.append("'"+line.strip()+"'")
-			f.close()
 
+		# Construct syntactically correct JS array with the URLs from the file
 		context['urls'] = '['+', '.join(urls)+']'
 
 		return context
 
 
 def api_set_money(request):
-	money = request.POST.get('money')
+	""" API Post method to be called when changing a user's money. """
+	if request.method != 'POST':
+		return Http404
 
+	money = request.POST.get('money')
+	# Set and save new money
 	user = User.objects.get(pk=request.user.id)
 	user.client.money = Decimal(money)
 	user.save()
 
 	return HttpResponse(user)
-
-
-def api_test(request):
-	return render(request, "api_test.html")

@@ -33,6 +33,14 @@ Vue.component('flight', {
             }.bind(this));
 
             return ( this.flight.price * this.seats * type + aprice).toFixed(2);
+        },
+
+        dep_time : function(){
+            return moment(this.flight.estimated_time_departure).format("Y/M/D - hh:mm")
+        },
+
+        arr_time : function () {
+            return moment(this.flight.estimated_time_arrival).format("Y/M/D - hh:mm")
         }
     },
 
@@ -41,8 +49,8 @@ Vue.component('flight', {
             <td class="h4"><input type="hidden" :name="'selected_going'+flight.pk" :value="flight.pk" v-if="added">
                 <a class="label label-success" :href="url">{{ flight.flight_number }}</a>
             </td>
-            <td class="h4"><b class="label label-primary">{{ flight.location_departure }}</b></td>
-            <td class="h4"><b class="label label-primary">{{ flight.location_arrival }}</b></td>
+            <td class="h4"><b class="label label-primary" :title="dep_time">{{ flight.location_departure }}</b><br><small>{{dep_time}}</small></td>
+            <td class="h4"><b class="label label-primary" :title="arr_time">{{ flight.location_arrival }}</b><br><small>{{arr_time}}</small></td>
             <td>
                 <select :name="'airline'+flight.pk" class="form-control input-sm" v-model="airline" :readonly="added">
                     <option v-for="a in flight.airlines" :value="a.code">{{a.code}}</option>
@@ -63,7 +71,7 @@ Vue.component('flight', {
                 <input type="checkbox" :name="'return_flight'+flight.pk" :value="flight.pk">
             </td>
             <td>
-				<span @click="addCart(flight.pk)" class="btn btn-sm btn-warning" v-if="!added">Add to Cart</span>
+				<span @click="addCart(flight.pk)" class="btn btn-sm btn-warning" v-if="!added">Select Flight</span>
                 <span @click="removeCart(flight.pk)" class="btn btn-sm btn-danger" v-if="added">Remove</span>
 			</td>
         </tr>`,

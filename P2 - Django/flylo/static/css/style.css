@@ -3,7 +3,6 @@ body {
     background-color: #fff;
     margin: 0px;
     padding: 0px;
-
 }
 
 .main-container {
@@ -29,4 +28,8 @@ body {
 .table thead {
     background-color: black;
     color: white;
+}
+
+.table td{
+    vertical-align: middle !important
 }
